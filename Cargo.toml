@@ -2,6 +2,15 @@
 name = "castorix"
 version = "0.1.0"
 edition = "2021"
+license = "GPL-2.0"
+description = "A comprehensive Rust library for interacting with Farcaster protocol"
+repository = "https://github.com/your-org/castorix"
+homepage = "https://github.com/your-org/castorix"
+documentation = "https://docs.rs/castorix"
+readme = "README.md"
+keywords = ["farcaster", "ethereum", "blockchain", "social", "protocol"]
+categories = ["web-programming", "network-programming", "cryptography"]
+authors = ["Your Name <your.email@example.com>"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
