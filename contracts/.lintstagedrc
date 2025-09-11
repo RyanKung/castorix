@@ -1,5 +1,0 @@
-{
-  "*.sol": [
-    "forge fmt --check"
-  ]
-}
