@@ -1,0 +1,177 @@
+name: CI
+on:
+  # CI is run on main because new branches can only access caches from master, not previous branches.
+  # So building on master allows new PR's to get the cache from before.
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  FOUNDRY_PROFILE: ci
+  ETH_MAINNET_RPC_URL: ${{ secrets.L1_MAINNET_RPC_URL }}
+  OP_MAINNET_RPC_URL: ${{ secrets.L2_MAINNET_RPC_URL }}
+  BASE_MAINNET_RPC_URL: ${{ secrets.BASE_MAINNET_RPC_URL }}
+
+jobs:
+  build-image:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Install Docker buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Copy .env.local
+        run: cp .env.local .env
+        shell: bash
+
+      - name: Build Docker images defined in Docker Compose file
+        uses: docker/bake-action@v3
+        with:
+          load: true # Load images into local Docker engine after build
+
+      - name: Run containers defined in Docker Compose
+        shell: bash
+        run: docker compose up --detach
+
+      - name: Check that Anvil is running
+        uses: nick-fields/retry@v2
+        with:
+          timeout_seconds: 30
+          retry_wait_seconds: 10
+          max_attempts: 10
+          shell: bash
+          command: '[ "$(cast balance 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266)" != 0 ]' # Default address
+          on_retry_command: docker compose logs && docker compose ps && cast balance 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+
+      - name: Wait for contract to be deployed
+        uses: nick-fields/retry@v2
+        with:
+          timeout_seconds: 30
+          retry_wait_seconds: 10
+          max_attempts: 10
+          shell: bash
+          command: |
+            set -e -o pipefail
+            docker compose logs | grep Bundler | awk '{ print $5 }'
+          on_retry_command: docker compose logs
+
+      - name: Get contract addresses
+        run: |
+          echo "ID_CONTRACT_ADDRESS=$(docker compose logs | grep IdRegistry | awk '{ print $5 }')" >> $GITHUB_ENV
+          echo "KEY_CONTRACT_ADDRESS=$(docker compose logs | grep KeyRegistry | awk '{ print $5 }')" >> $GITHUB_ENV
+          echo "STORAGE_CONTRACT_ADDRESS=$(docker compose logs | grep StorageRegistry | awk '{ print $5 }')" >> $GITHUB_ENV
+          echo "BUNDLER_CONTRACT_ADDRESS=$(docker compose logs | grep Bundler | awk '{ print $5 }')" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Confirm ID Registry contract was deployed
+        shell: bash
+        run: '[ $(cast call $ID_CONTRACT_ADDRESS "owner()") = 0x000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266 ]'
+
+      - name: Confirm Key Registry contract was deployed
+        shell: bash
+        run: '[ $(cast call $KEY_CONTRACT_ADDRESS "owner()") = 0x000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266 ]'
+
+      - name: Confirm Storage Registry contract was deployed
+        shell: bash
+        run: '[ $(cast call $STORAGE_CONTRACT_ADDRESS "paused()") = 0x0000000000000000000000000000000000000000000000000000000000000000 ]'
+
+      - name: Confirm Bundler contract was deployed
+        shell: bash
+        run: '[ $(cast call $BUNDLER_CONTRACT_ADDRESS "VERSION()") = 0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000a323032332e31312e313500000000000000000000000000000000000000000000 ]'
+
+  test:
+    strategy:
+      fail-fast: true
+
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Run forge build
+        run: |
+          forge --version
+          forge build --sizes
+
+      - name: Run forge fmt
+        run: forge fmt --check
+
+      - name: Run forge tests
+        run: forge test -vvv
+
+      - name: Check forge snapshots
+        run: forge snapshot --check --match-contract Gas
+
+  halmos:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/a16z/halmos:latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Run halmos
+        run: halmos --test-parallel --solver-parallel --storage-layout=generic --solver-timeout-assertion 0
+
+  coverage:
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Check code coverage
+        run: forge coverage --report summary --report lcov
+
+      # Ignores coverage results for the test and script directories. Note that because this
+      # filtering applies to the lcov file, the summary table generated in the previous step will
+      # still include all files and directories.
+      # The `--rc lcov_branch_coverage=1` part keeps branch info in the filtered report, since lcov
+      # defaults to removing branch info.
+      - name: Filter directories
+        run: |
+          sudo apt update && sudo apt install -y lcov
+          lcov --remove lcov.info 'test/*' 'script/*' 'src/libraries/*' --output-file lcov.info --rc lcov_branch_coverage=1
+
+      # Post a detailed coverage report as a comment and deletes previous comments on each push.
+      - name: Post coverage report
+        if: github.event_name == 'pull_request' # This action fails when ran outside of a pull request.
+        uses: romeovs/lcov-reporter-action@v0.3.1
+        with:
+          delete-old-comments: true
+          lcov-file: ./lcov.info
+          github-token: ${{ secrets.GITHUB_TOKEN }} # Adds a coverage summary comment to the PR.
+
+      # Fail coverage if the specified coverage threshold is not met
+      - name: Verify minimum coverage
+        uses: zgosalvez/github-actions-report-lcov@v2
+        with:
+          coverage-files: ./lcov.info
+          minimum-coverage: 94

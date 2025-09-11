@@ -1,0 +1,49 @@
+[package]
+name = "castorix"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+blake3 = "1.5.0"
+ed25519-dalek = {version = "2.0.0", features = ["rand_core"]}
+rand = "0.8.5"
+hex = "0.4.3"
+protobuf = "2.25.2"
+reqwest = "0.11"
+tokio = { version = "1", features = ["full"] }
+ethers = { version = "2.0", features = ["rustls", "abigen"] }
+bip32 = "0.5"
+dotenv = "0.15"
+anyhow = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+clap = { version = "4.0", features = ["derive"] }
+aes-gcm = "0.10.3"
+argon2 = "0.5.2"
+rpassword = "7.3.1"
+base64 = "0.21.5"
+dirs = "5.0.1"
+tempfile = "3.8.1"
+shellexpand = "3.0.0"
+sha2 = "0.10.8"
+tiny-keccak = "2.0"
+bs58 = "0.5.0"
+bip39 = "2.0"
+lazy_static = "1.4.0"
+
+[dev-dependencies]
+ethers = { version = "2.0", features = ["rustls", "abigen", "ws", "dev-rpc"] }
+
+[build-dependencies]
+protobuf-codegen-pure = "2.25.2"
+ethers = { version = "2.0", features = ["abigen"] }
+
+# Test configuration
+[profile.test]
+# Enable debug info for tests
+debug = true
+# Optimize tests for faster execution
+opt-level = 0

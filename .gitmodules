@@ -1,0 +1,6 @@
+[submodule "snapchain"]
+	path = snapchain
+	url = https://github.com/farcasterxyz/snapchain.git
+[submodule "contracts"]
+	path = contracts
+	url = https://github.com/farcasterxyz/contracts.git

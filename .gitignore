@@ -1,0 +1,107 @@
+# Rust build artifacts
+/target/
+**/*.rs.bk
+*.pdb
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+*.tmp
+*.pid
+*.lock
+/tmp/
+/tmp/anvil.*
+
+# Foundry and Solidity
+foundry.lock
+cache/
+out/
+broadcast/
+artifacts/
+
+# Node.js (for snapchain site)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Build outputs
+dist/
+build/
+*.tar.gz
+*.zip
+
+# Test artifacts
+coverage/
+*.prof
+*.profraw
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Key files and sensitive data
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+keys/
+*.json.bak
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Runtime files
+*.pid
+*.sock
+
+# Documentation build
+docs/_build/
+site/build/
+
+# Docker
+.dockerignore
+
+# Rust specific
+Cargo.lock  # 如果这是库项目，通常不提交 Cargo.lock
+
+# Generated files (如果这些是自动生成的)
+generated_abis/*.json
+src/farcaster/contracts/generated/
+
+# Test results
+test_results/
+*.test.log
+
+# Anvil and 
+
+# proof
+proof*.json
