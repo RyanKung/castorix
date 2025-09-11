@@ -91,9 +91,9 @@ site/build/
 .dockerignore
 
 # Rust specific
-Cargo.lock  # 如果这是库项目，通常不提交 Cargo.lock
+Cargo.lock
 
-# Generated files (如果这些是自动生成的)
+# Generated files
 generated_abis/*.json
 src/farcaster/contracts/generated/
 
