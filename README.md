@@ -1,6 +1,6 @@
 # Castorix
 
-A comprehensive Rust library for interacting with Farcaster protocol, providing type-safe contract bindings, ENS resolution, and message handling capabilities.
+A comprehensive Rust library and CLI tool for interacting with the Farcaster protocol, providing type-safe contract bindings, ENS resolution, key management, and message handling capabilities.
 
 ## Overview
 
@@ -9,7 +9,8 @@ Castorix is a production-ready Rust SDK for the Farcaster protocol, featuring:
 - 🔒 **Type-safe Farcaster contract bindings** using official ABI definitions
 - 🌐 **ENS resolution** for Ethereum and Base domains
 - 📨 **Message handling** with protobuf serialization
-- 🔑 **Key management** with encryption and secure storage
+- 🔑 **Encrypted key management** with secure storage
+- 🖥️ **CLI interface** for easy interaction with Farcaster
 - ⚡ **High-performance** async/await support
 - 🛡️ **Memory safety** with Rust's ownership system
 
@@ -21,82 +22,115 @@ Castorix is a production-ready Rust SDK for the Farcaster protocol, featuring:
 - **All major contracts supported**: IdRegistry, KeyRegistry, StorageRegistry, IdGateway, KeyGateway, Bundler, RecoveryProxy, SignedKeyRequestValidator
 - **Type-safe contract calls** with automatic parameter encoding/decoding
 - **Comprehensive error handling** with detailed error messages
+- **Network verification** with automatic contract address validation
 
 ### ENS Resolution
 
 - **Multi-chain support**: Ethereum Mainnet and Base
 - **Subdomain resolution**: Handles complex ENS subdomain structures
-- **Caching**: Efficient caching for improved performance
+- **Username proof generation**: Create and verify Farcaster username proofs
 - **Fallback mechanisms**: Graceful handling of resolution failures
-
-### Message Handling
-
-- **Protobuf serialization**: Full support for Farcaster message types
-- **Username proofs**: Generation and verification of username proofs
-- **Message validation**: Built-in validation for all message types
 
 ### Key Management
 
-- **Encrypted storage**: Secure storage of private keys
-- **Multiple key types**: Support for Ed25519 and Ethereum keys
-- **Environment-based configuration**: Flexible configuration management
+- **Encrypted storage**: Secure storage of private keys using AES-GCM
+- **Multiple key types**: Support for Ed25519 and Ethereum ECDSA keys
 - **Password protection**: Optional password-based encryption
+- **Environment-based configuration**: Flexible configuration management
+- **Key derivation**: Support for BIP39 mnemonic phrases
+
+### CLI Interface
+
+- **Interactive commands**: Easy-to-use CLI for all major operations
+- **Key management**: Generate, import, export, and manage cryptographic keys
+- **Hub interaction**: Submit messages and interact with Farcaster Hub
+- **ENS operations**: Resolve names and generate proofs
+- **Contract queries**: Query Farcaster contracts directly
 
 ## Installation
 
-Add Castorix to your `Cargo.toml`:
+### From Source
 
-```toml
-[dependencies]
-castorix = "0.1.0"
+```bash
+# Clone the repository
+git clone https://github.com/your-org/castorix.git
+cd castorix
+
+# Initialize and update submodules
+git submodule update --init --recursive
+
+# Build the project
+cargo build --release
+
+# Install the CLI tool
+cargo install --path .
 ```
+
+### Dependencies
+
+- Rust 1.70+
+- Git (for submodule management)
+- Foundry (for contract compilation, optional)
 
 ## Quick Start
 
-### Basic Contract Interaction
+### CLI Usage
+
+```bash
+# Initialize configuration
+castorix init
+
+# Generate a new Ed25519 key pair
+castorix key generate --type ed25519
+
+# Resolve an ENS name
+castorix ens resolve vitalik.eth
+
+# Query Farcaster contract data
+castorix hub get-fid --address 0x...
+```
+
+### Library Usage
+
+#### Basic Contract Interaction
 
 ```rust
-use castorix::farcaster::contracts::{
-    id_registry_abi::IdRegistryAbi,
-    types::ContractAddresses,
-};
-use ethers::providers::{Provider, Http};
+use castorix::farcaster::contracts::FarcasterContractClient;
+use castorix::consts::get_config;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Initialize provider
-    let provider = Provider::<Http>::try_from("https://optimism-mainnet.g.alchemy.com/v2/your_api_key")?;
+    // Get configuration
+    let config = get_config();
     
-    // Get contract addresses
-    let addresses = ContractAddresses::default();
+    // Create contract client with default addresses
+    let client = FarcasterContractClient::new_with_default_addresses(
+        config.eth_op_rpc_url().to_string()
+    )?;
     
-    // Create ABI-based contract instance
-    let id_registry = IdRegistryAbi::new(provider, addresses.id_registry)?;
+    // Get network information
+    let network_info = client.get_network_info().await?;
+    println!("Chain ID: {}", network_info.chain_id);
+    println!("Block number: {}", network_info.block_number);
     
-    // Get current ID counter
-    match id_registry.id_counter().await? {
-        castorix::farcaster::contracts::types::ContractResult::Success(counter) => {
-            println!("Current ID counter: {}", counter);
-        },
-        castorix::farcaster::contracts::types::ContractResult::Error(e) => {
-            println!("Error: {}", e);
-        }
-    }
+    // Verify contracts are accessible
+    let verification = client.verify_contracts().await?;
+    println!("ID Registry verified: {}", verification.id_registry);
     
     Ok(())
 }
 ```
 
-### ENS Resolution
+#### ENS Resolution
 
 ```rust
 use castorix::ens_proof::EnsProof;
-use castorix::consts::Config;
+use castorix::consts::get_config;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Load configuration from environment
-    let config = Config::load()?;
+    // Get configuration
+    let config = get_config();
     
     // Create ENS proof resolver
     let ens_proof = EnsProof::new(&config)?;
@@ -105,27 +139,34 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let address = ens_proof.resolve_name("vitalik.eth").await?;
     println!("Resolved address: {:?}", address);
     
+    // Generate username proof
+    let proof = ens_proof.generate_username_proof("vitalik.eth").await?;
+    println!("Username proof: {:?}", proof);
+    
     Ok(())
 }
 ```
 
-### Key Management
+#### Key Management
 
 ```rust
 use castorix::key_manager::KeyManager;
-use castorix::consts::Config;
+use castorix::consts::get_config;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Load configuration
-    let config = Config::load()?;
+    // Get configuration
+    let config = get_config();
     
     // Create key manager
     let key_manager = KeyManager::from_env(&config)?;
     
-    // Generate new Ed25519 key
-    let (public_key, _private_key) = key_manager.generate_ed25519_keypair()?;
+    // Generate new Ed25519 key pair
+    let (public_key, private_key) = key_manager.generate_ed25519_keypair()?;
     println!("Generated public key: {:?}", public_key);
+    
+    // Store encrypted key
+    key_manager.store_encrypted_ed25519_key(&private_key, "my_key_id")?;
     
     Ok(())
 }
@@ -147,38 +188,10 @@ ETH_OP_RPC_URL=https://optimism-mainnet.g.alchemy.com/v2/your_api_key_here
 
 # Farcaster Hub URL for submitting messages and proofs
 FARCASTER_HUB_URL=https://hub-api.neynar.com
+
+# Optional: Custom key storage directory
+KEY_STORAGE_PATH=~/.castorix/keys
 ```
-
-## Dependencies
-
-### Core Dependencies
-
-- **ethers**: Ethereum library for contract interactions and blockchain communication
-- **tokio**: Async runtime for high-performance I/O operations
-- **anyhow**: Error handling with context-aware error messages
-- **serde**: Serialization/deserialization framework
-- **chrono**: Date and time handling
-- **reqwest**: HTTP client for API interactions
-
-### Cryptographic Dependencies
-
-- **ed25519-dalek**: Ed25519 signature scheme implementation
-- **k256**: Secp256k1 elliptic curve cryptography
-- **sha2**: SHA-256 hashing algorithm
-- **blake3**: BLAKE3 cryptographic hash function
-- **argon2**: Password hashing and key derivation
-
-### Protocol Dependencies
-
-- **protobuf**: Protocol Buffers for message serialization
-- **hex**: Hexadecimal encoding/decoding
-- **base64**: Base64 encoding/decoding
-- **bs58**: Base58 encoding for Bitcoin-style addresses
-
-### Development Dependencies
-
-- **foundry**: Solidity development framework for contract compilation
-- **forge**: Solidity compiler and testing framework
 
 ## Architecture
 
@@ -186,33 +199,41 @@ FARCASTER_HUB_URL=https://hub-api.neynar.com
 
 ```
 src/
-├── farcaster/
-│   ├── contracts/
-│   │   ├── generated/          # Auto-generated ABI bindings
-│   │   ├── id_registry_abi.rs  # Type-safe contract wrappers
-│   │   ├── types.rs            # Contract types and addresses
-│   │   └── client.rs           # Unified contract client
+├── cli/                      # Command-line interface
+│   ├── commands.rs          # CLI command definitions
+│   ├── handlers/            # Command handlers
+│   └── types.rs             # CLI types
+├── farcaster/               # Farcaster protocol integration
+│   ├── contracts/           # Contract bindings and clients
+│   │   ├── generated/       # Auto-generated ABI bindings
+│   │   ├── client.rs        # Unified contract client
+│   │   ├── types.rs         # Contract types and addresses
+│   │   └── *_tests.rs       # Contract tests
 │   └── mod.rs
-├── ens_proof/                  # ENS resolution and proof generation
-├── key_manager.rs             # Key management and encryption
-├── consts.rs                  # Configuration management
-└── lib.rs                     # Library root
+├── ens_proof/               # ENS resolution and proof generation
+├── message/                 # Message handling and protobuf
+├── key_manager.rs           # Key management
+├── encrypted_*_manager.rs   # Encrypted key storage
+├── farcaster_client.rs      # Farcaster Hub client
+├── consts.rs                # Configuration management
+└── lib.rs                   # Library root
 ```
 
 ### Contract Integration Flow
 
 1. **ABI Generation**: Solidity contracts are compiled using Foundry
 2. **Rust Binding Generation**: ethers-rs abigen generates type-safe bindings
-3. **Wrapper Creation**: High-level wrappers provide convenient APIs
-4. **Client Integration**: Unified client manages all contract interactions
+3. **Client Integration**: Unified client manages all contract interactions
+4. **Type Safety**: All contract calls are type-checked at compile time
 
 ## Examples
 
 ### Contract Examples
 
-- [`test_abi_implementation.rs`](examples/test_abi_implementation.rs): Demonstrates ABI-based contract calls
+- [`simple_contract_test.rs`](examples/simple_contract_test.rs): Basic contract connectivity test
 - [`contract_interface_test.rs`](examples/contract_interface_test.rs): Tests different contract interfaces
 - [`onchain_data_reader.rs`](examples/onchain_data_reader.rs): Reads on-chain contract data
+- [`farcaster_contracts_demo.rs`](examples/farcaster_contracts_demo.rs): Comprehensive contract demo
 
 ### Configuration Examples
 
@@ -223,8 +244,8 @@ src/
 ### Prerequisites
 
 - Rust 1.70+
-- Foundry (for Solidity compilation)
 - Git (for submodule management)
+- Foundry (for contract compilation)
 
 ### Building from Source
 
@@ -243,16 +264,17 @@ cargo build
 cargo test
 
 # Run examples
-cargo run --example test_abi_implementation
+cargo run --example simple_contract_test
 ```
 
 ### Contract Development
 
-The project includes the official Farcaster contracts as a git submodule. When contracts are updated:
+The project includes the official Farcaster contracts as git submodules:
 
 ```bash
-# Update the submodule
+# Update the submodules
 git submodule update --remote contracts
+git submodule update --remote snapchain
 
 # Rebuild to regenerate bindings
 cargo build
@@ -265,10 +287,41 @@ cargo build
 cargo test
 
 # Run contract tests
-cargo test --package castorix --lib farcaster::contracts::tests
+cargo test --lib farcaster::contracts
 
-# Run on-chain tests (requires RPC access)
-cargo test --package castorix --lib farcaster::contracts::onchain_tests
+# Run tests with Anvil (local blockchain)
+make test-anvil
+
+# Run mock tests (no blockchain required)
+make test-mock
+```
+
+### Testing Strategy
+
+- **Unit tests**: Test individual components in isolation
+- **Integration tests**: Test contract interactions with mock blockchain
+- **On-chain tests**: Test with real blockchain (requires RPC access)
+- **Hybrid testing**: Automatically fall back to mock when blockchain unavailable
+
+## CLI Commands
+
+```bash
+# Key management
+castorix key generate --type ed25519
+castorix key list
+castorix key export --id <key_id>
+
+# ENS operations
+castorix ens resolve <name>
+castorix ens generate-proof <name>
+
+# Hub operations
+castorix hub get-fid --address <address>
+castorix hub submit-message --file <message.json>
+
+# Contract operations
+castorix contract verify
+castorix contract get-network-info
 ```
 
 ## Error Handling
@@ -279,9 +332,9 @@ Castorix provides comprehensive error handling with detailed context:
 use anyhow::Result;
 
 async fn example() -> Result<()> {
-    match id_registry.owner_of(1).await? {
-        ContractResult::Success(owner) => println!("Owner: {:?}", owner),
-        ContractResult::Error(e) => println!("Contract error: {}", e),
+    match client.get_network_info().await {
+        Ok(info) => println!("Chain ID: {}", info.chain_id),
+        Err(e) => println!("Network error: {}", e),
     }
     Ok(())
 }
@@ -291,15 +344,16 @@ async fn example() -> Result<()> {
 
 - **Async/await**: Non-blocking I/O operations
 - **Connection pooling**: Efficient HTTP connection management
-- **Caching**: Built-in caching for ENS resolution and contract calls
+- **Hybrid testing**: Automatic fallback between real and mock environments
 - **Batch operations**: Support for batch contract calls
 
 ## Security
 
 - **Memory safety**: Rust's ownership system prevents memory leaks
-- **Encrypted storage**: Private keys are encrypted at rest
+- **Encrypted storage**: Private keys are encrypted using AES-GCM
 - **Secure defaults**: Safe configuration defaults
 - **Input validation**: Comprehensive input validation
+- **Password protection**: Optional password-based key encryption
 
 ## Contributing
 
@@ -316,6 +370,7 @@ async fn example() -> Result<()> {
 - Update documentation
 - Ensure all tests pass
 - Use `cargo fmt` and `cargo clippy`
+- Follow the existing code structure
 
 ## License
 
@@ -328,13 +383,13 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 - [Farcaster Protocol](https://farcaster.xyz/) for the amazing decentralized social protocol
 - [ethers-rs](https://github.com/gakonst/ethers-rs) for excellent Ethereum tooling
 - [OpenZeppelin](https://openzeppelin.com/) for secure smart contract libraries
+- [Foundry](https://book.getfoundry.sh/) for Solidity development tools
 
 ## Support
 
 - 📖 [Documentation](https://docs.rs/castorix)
 - 🐛 [Issue Tracker](https://github.com/your-org/castorix/issues)
 - 💬 [Discussions](https://github.com/your-org/castorix/discussions)
-- 📧 [Email Support](mailto:support@your-org.com)
 
 ## Changelog
 
@@ -342,11 +397,13 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 
 - ✅ Official Farcaster contract ABI bindings
 - ✅ ENS resolution for Ethereum and Base
-- ✅ Encrypted key management
+- ✅ Encrypted key management with AES-GCM
+- ✅ CLI interface for easy interaction
 - ✅ Message handling with protobuf
 - ✅ Comprehensive error handling
 - ✅ Async/await support
 - ✅ Configuration management
+- ✅ Hybrid testing (real + mock environments)
 - ✅ Extensive test coverage
 
 ---

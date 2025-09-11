@@ -242,40 +242,40 @@ Planned improvements to the testing suite:
 
 ## Test Results Summary
 
-现在运行 `cargo test` 时：
-- ✅ **26个单元测试通过** - 所有功能测试正常
-- ✅ **1个文档测试通过** - 只保留有用的文档测试
-- ✅ **0个被忽略的文档测试** - 自动生成的合约绑定文档测试被完全忽略
-- ✅ **混合测试环境** - 支持真实区块链和模拟环境
-- ✅ **没有警告输出** - 干净的测试输出
+Current test results when running `cargo test`:
+- ✅ **26 unit tests passing** - All functionality tests working correctly
+- ✅ **1 doc test passing** - Only useful documentation tests retained
+- ✅ **0 ignored doc tests** - Auto-generated contract binding doc tests completely ignored
+- ✅ **Hybrid test environment** - Supports both real blockchain and mock environments
+- ✅ **No warning output** - Clean test output
 
-### 测试类型总结
+### Test Type Summary
 
-1. **基础功能测试** (7个测试通过):
-   - 钱包创建和签名
-   - 消息签名和验证
-   - 测试环境创建
-   - 模拟合约地址
-   - 客户端创建
-   - 钱包资金和余额检查
+1. **Basic functionality tests** (7 tests passing):
+   - Wallet creation and signing
+   - Message signing and verification
+   - Test environment creation
+   - Mock contract addresses
+   - Client creation
+   - Wallet funding and balance checking
 
-2. **集成测试** (2个被忽略):
-   - 真实区块链连接测试
-   - Farcaster 工作流模拟测试
+2. **Integration tests** (2 ignored):
+   - Real blockchain connection tests
+   - Farcaster workflow simulation tests
 
-3. **现有测试** (19个测试通过):
-   - 配置和常量测试
-   - 密钥管理测试
-   - ENS 证明测试
-   - Farcaster 客户端测试
-   - 加密密钥管理测试
+3. **Existing tests** (19 tests passing):
+   - Configuration and constants tests
+   - Key management tests
+   - ENS proof tests
+   - Farcaster client tests
+   - Encrypted key management tests
 
-### 模拟网络环境特性
+### Mock Network Environment Features
 
-- **智能检测**: 自动检测是否有本地区块链连接
-- **优雅降级**: 没有连接时使用模拟行为
-- **真实交易**: 有连接时使用真实区块链
-- **完整日志**: 清晰的测试输出和状态信息
+- **Smart detection**: Automatically detects if local blockchain is connected
+- **Graceful degradation**: Uses mock behavior when no connection available
+- **Real transactions**: Uses real blockchain when connected
+- **Complete logging**: Clear test output and status information
 
 ## Contributing
 
