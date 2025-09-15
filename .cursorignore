@@ -1,0 +1,55 @@
+# Cursor AI Access Restrictions
+# Files and directories that should be excluded from AI access
+
+# Environment files with sensitive information
+.env
+.env.*
+.env.local
+.env.development
+.env.production
+.env.staging
+
+# Configuration files that may contain secrets
+config/secrets.yml
+config/database.yml
+config/credentials.json
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Private keys and certificates
+private_keys/
+certificates/
+secrets/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Log files that might contain sensitive data
+logs/
+*.log
+
+# Backup files
+*.backup
+*.bak
+*.tmp
+
+# IDE and editor specific files
+.vscode/settings.json
+.idea/
+
+# Package manager lock files (optional - uncomment if needed)
+# package-lock.json
+# yarn.lock
+# Cargo.lock
+
+# Build artifacts
+target/
+dist/
+build/
+
+# Node modules (optional - uncomment if needed)
+# node_modules/

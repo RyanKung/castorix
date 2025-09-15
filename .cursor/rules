@@ -1,0 +1,53 @@
+# Status Check and Validation Logic Rules
+
+When implementing status checks or validation logic:
+
+1. **Define the exact object** you're checking - avoid concept confusion
+2. **Complete the logic chain** - every step from observation to conclusion must be explicit
+3. **Verify before concluding** - all assumptions must be validated, not assumed
+4. **Think from user perspective** - ensure technical implementation matches user expectations
+
+Before implementing, ask:
+- What exactly am I checking?
+- Is my logic chain complete?
+- Have I verified my assumptions?
+- How will users interpret this result?
+
+Only proceed when all four points are satisfied.
+
+# Code Reuse and DRY Principles
+
+**Do Not Repeat Yourself (DRY)**:
+- If you find similar logic or implementation, always look for existing functions/modules to reuse
+- Import and refactor existing code instead of reimplementing
+- Check for existing patterns in the codebase before writing new code
+- Consolidate duplicate logic into shared utilities or common functions
+
+Before implementing new functionality:
+- Search the codebase for similar existing implementations
+- Identify reusable components or patterns
+- Refactor existing code if it can be generalized
+- Create shared utilities for common operations
+
+# Environment File Rules
+
+**Never read or modify .env files**:
+- Do not use read_file or write tools on .env files
+- Do not suggest creating or editing .env files
+- Use environment variables or configuration constants instead
+- Let users manage their own environment configuration
+
+# Rule Generation Principles
+
+When generating rules:
+- Keep them simple and concise
+- Use English
+- Focus on core principles, not specific details
+
+# Commit Message Rules
+
+**Use English for all commit messages**:
+- Follow conventional commit format: type(scope): description
+- Use clear, concise English descriptions
+- Include detailed body when necessary
+- Examples: "feat: add new feature", "fix: resolve issue", "docs: update documentation"

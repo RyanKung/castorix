@@ -1,0 +1,4 @@
+[alias]
+# Node management commands
+start-node = "run --bin start-anvil"
+stop-node = "run --bin stop-anvil"
