@@ -28,7 +28,7 @@ Castorix is a complete toolkit for Farcaster protocol interaction, consisting of
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/castorix.git
+git clone https://github.com/RyanKung/castorix.git
 cd castorix
 
 # Build the project
@@ -461,13 +461,13 @@ docker compose logs -f node1
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+We welcome contributions! Please see the [Contributing Guide](contracts/CONTRIBUTING.md) for details.
 
 ### Development Setup
 
 ```bash
 # Fork and clone the repository
-git clone https://github.com/your-username/castorix.git
+git clone https://github.com/RyanKung/castorix.git
 cd castorix
 
 # Install dependencies
@@ -482,7 +482,7 @@ cargo run --example complete_farcaster_test
 
 ## 📚 Documentation
 
-- [API Documentation](https://docs.rs/castorix)
+- [API Documentation](https://docs.rs/castorix) (when published)
 - [Farcaster Protocol](https://docs.farcaster.xyz)
 - [ENS Documentation](https://docs.ens.domains)
 - [Snapchain Whitepaper](https://github.com/farcasterxyz/protocol/discussions/207)
@@ -512,9 +512,8 @@ cargo run --example complete_farcaster_test
 
 ### Getting Help
 
-- Check the [Issues](https://github.com/your-org/castorix/issues) page
-- Join our [Discord](https://discord.gg/your-discord) community
-- Read the [FAQ](docs/FAQ.md)
+- Check the [Issues](https://github.com/RyanKung/castorix/issues) page
+- Check the documentation in the `docs/` directory
 
 ## 📄 License
 
