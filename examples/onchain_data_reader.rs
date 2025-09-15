@@ -1,7 +1,7 @@
-use castorix::farcaster::contracts::FarcasterContractClient;
-use castorix::consts::get_config;
-use ethers::types::Address;
 use anyhow::Result;
+use castorix::consts::get_config;
+use castorix::farcaster::contracts::FarcasterContractClient;
+use ethers::types::Address;
 
 /// Example demonstrating how to read data from Farcaster contracts on-chain
 #[tokio::main]
@@ -11,12 +11,14 @@ async fn main() -> Result<()> {
 
     // Initialize configuration
     let config = get_config();
-    println!("📡 Using Optimism RPC: {}", mask_url(config.eth_op_rpc_url()));
+    println!(
+        "📡 Using Optimism RPC: {}",
+        mask_url(config.eth_op_rpc_url())
+    );
 
     // Create Farcaster contract client
-    let client = FarcasterContractClient::new_with_default_addresses(
-        config.eth_op_rpc_url().to_string()
-    )?;
+    let client =
+        FarcasterContractClient::new_with_default_addresses(config.eth_op_rpc_url().to_string())?;
 
     println!("✅ Connected to Farcaster contracts on Optimism\n");
 
@@ -35,12 +37,31 @@ async fn main() -> Result<()> {
     match client.verify_contracts().await {
         Ok(result) => {
             println!("📊 Contract Status:");
-            println!("  ID Registry: {}", if result.id_registry { "✅" } else { "❌" });
-            println!("  Key Registry: {}", if result.key_registry { "✅" } else { "❌" });
-            println!("  Storage Registry: {}", if result.storage_registry { "✅" } else { "❌" });
-            println!("  ID Gateway: {}", if result.id_gateway { "✅" } else { "❌" });
-            println!("  Key Gateway: {}", if result.key_gateway { "✅" } else { "❌" });
-            
+            println!(
+                "  ID Registry: {}",
+                if result.id_registry { "✅" } else { "❌" }
+            );
+            println!(
+                "  Key Registry: {}",
+                if result.key_registry { "✅" } else { "❌" }
+            );
+            println!(
+                "  Storage Registry: {}",
+                if result.storage_registry {
+                    "✅"
+                } else {
+                    "❌"
+                }
+            );
+            println!(
+                "  ID Gateway: {}",
+                if result.id_gateway { "✅" } else { "❌" }
+            );
+            println!(
+                "  Key Gateway: {}",
+                if result.key_gateway { "✅" } else { "❌" }
+            );
+
             if !result.all_working {
                 println!("\n⚠️  Some contracts are not accessible:");
                 for error in result.errors {
@@ -76,23 +97,21 @@ async fn main() -> Result<()> {
 
     for fid in test_fids {
         println!("\n🔍 FID {}:", fid);
-        
+
         // Read owner
         match client.id_registry().owner_of(fid).await {
-            Ok(result) => {
-                match result {
-                    castorix::farcaster::contracts::types::ContractResult::Success(owner) => {
-                        if owner != Address::zero() {
-                            println!("  👤 Owner: {:?}", owner);
-                        } else {
-                            println!("  👤 Owner: Not registered");
-                        }
-                    }
-                    castorix::farcaster::contracts::types::ContractResult::Error(msg) => {
-                        println!("  ⚠️  Owner read failed: {}", msg);
+            Ok(result) => match result {
+                castorix::farcaster::contracts::types::ContractResult::Success(owner) => {
+                    if owner != Address::zero() {
+                        println!("  👤 Owner: {:?}", owner);
+                    } else {
+                        println!("  👤 Owner: Not registered");
                     }
                 }
-            }
+                castorix::farcaster::contracts::types::ContractResult::Error(msg) => {
+                    println!("  ⚠️  Owner read failed: {}", msg);
+                }
+            },
             Err(e) => {
                 println!("  ❌ Owner read error: {}", e);
             }
@@ -100,20 +119,18 @@ async fn main() -> Result<()> {
 
         // Read recovery address
         match client.id_registry().recovery_of(fid).await {
-            Ok(result) => {
-                match result {
-                    castorix::farcaster::contracts::types::ContractResult::Success(recovery) => {
-                        if recovery != Address::zero() {
-                            println!("  🔐 Recovery: {:?}", recovery);
-                        } else {
-                            println!("  🔐 Recovery: Not set");
-                        }
-                    }
-                    castorix::farcaster::contracts::types::ContractResult::Error(msg) => {
-                        println!("  ⚠️  Recovery read failed: {}", msg);
+            Ok(result) => match result {
+                castorix::farcaster::contracts::types::ContractResult::Success(recovery) => {
+                    if recovery != Address::zero() {
+                        println!("  🔐 Recovery: {:?}", recovery);
+                    } else {
+                        println!("  🔐 Recovery: Not set");
                     }
                 }
-            }
+                castorix::farcaster::contracts::types::ContractResult::Error(msg) => {
+                    println!("  ⚠️  Recovery read failed: {}", msg);
+                }
+            },
             Err(e) => {
                 println!("  ❌ Recovery read error: {}", e);
             }
@@ -125,7 +142,7 @@ async fn main() -> Result<()> {
                 match result {
                     castorix::farcaster::contracts::types::ContractResult::Success(count) => {
                         println!("  🔑 Keys: {} registered", count);
-                        
+
                         // If there are keys, try to read them
                         if count > 0 {
                             match client.key_registry().keys_of(fid).await {
@@ -165,7 +182,7 @@ async fn main() -> Result<()> {
     // Read storage registry data
     println!("\n💾 Storage Registry Data:");
     println!("========================");
-    
+
     match client.storage_registry().price_per_unit().await {
         Ok(result) => {
             match result {
@@ -174,11 +191,16 @@ async fn main() -> Result<()> {
                     // Handle potential overflow when converting to u128
                     match TryInto::<u128>::try_into(price) {
                         Ok(price_u128) => {
-                            println!("💰 Storage price per unit: {} ETH", 
-                                format!("{:.18}", price_u128 as f64 / 1e18));
+                            println!(
+                                "💰 Storage price per unit: {} ETH",
+                                format!("{:.18}", price_u128 as f64 / 1e18)
+                            );
                         }
                         Err(_) => {
-                            println!("💰 Storage price per unit: {} (too large to convert to ETH)", price);
+                            println!(
+                                "💰 Storage price per unit: {} (too large to convert to ETH)",
+                                price
+                            );
                         }
                     }
                 }
@@ -195,26 +217,26 @@ async fn main() -> Result<()> {
     // Read ID Gateway data
     println!("\n🚪 ID Gateway Data:");
     println!("==================");
-    
+
     match client.id_gateway().total_supply().await {
-        Ok(result) => {
-            match result {
-                castorix::farcaster::contracts::types::ContractResult::Success(supply) => {
-                    println!("📊 Total FIDs minted: {}", supply);
-                }
-                castorix::farcaster::contracts::types::ContractResult::Error(msg) => {
-                    println!("⚠️  Total supply read failed: {}", msg);
-                }
+        Ok(result) => match result {
+            castorix::farcaster::contracts::types::ContractResult::Success(supply) => {
+                println!("📊 Total FIDs minted: {}", supply);
             }
-        }
+            castorix::farcaster::contracts::types::ContractResult::Error(msg) => {
+                println!("⚠️  Total supply read failed: {}", msg);
+            }
+        },
         Err(e) => {
             println!("❌ Total supply read error: {}", e);
         }
     }
 
     println!("\n🎉 On-chain data reading completed successfully!");
-    println!("💡 This demonstrates the ability to read real data from Farcaster contracts on Optimism.");
-    
+    println!(
+        "💡 This demonstrates the ability to read real data from Farcaster contracts on Optimism."
+    );
+
     Ok(())
 }
 

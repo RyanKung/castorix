@@ -1,5 +1,5 @@
-use anyhow::Result;
 use crate::cli::types::EnsCommands;
+use anyhow::Result;
 
 /// Handle ENS commands
 pub async fn handle_ens_command(
@@ -57,7 +57,9 @@ pub async fn handle_ens_command(
         }
         EnsCommands::AllDomains { address } => {
             println!("🌐 Getting all ENS domains for address: {address}");
-            println!("⚠️  Note: Base subdomains (*.base.eth) reverse lookup is not currently supported.");
+            println!(
+                "⚠️  Note: Base subdomains (*.base.eth) reverse lookup is not currently supported."
+            );
             match ens_proof.get_all_ens_domains_by_address(&address).await {
                 Ok(domains) => {
                     if domains.is_empty() {
@@ -114,22 +116,30 @@ pub async fn handle_ens_command(
                 Err(e) => println!("❌ Failed to verify ownership: {e}"),
             }
         }
-        EnsCommands::Create { domain, fid, wallet_name } => {
+        EnsCommands::Create {
+            domain,
+            fid,
+            wallet_name,
+        } => {
             if let Some(wallet_name) = &wallet_name {
                 println!("📝 Creating username proof for domain: {domain} (FID: {fid}) using wallet: {wallet_name}");
             } else {
                 println!("📝 Creating username proof for domain: {domain} (FID: {fid})");
             }
-            match ens_proof.create_ens_proof_with_wallet(&domain, fid, wallet_name.as_deref()).await {
+            match ens_proof
+                .create_ens_proof_with_wallet(&domain, fid, wallet_name.as_deref())
+                .await
+            {
                 Ok(proof) => {
                     println!("✅ Username proof created successfully!");
                     match ens_proof.serialize_proof(&proof) {
                         Ok(json) => {
                             println!("📄 Proof JSON:");
                             println!("{json}");
-                            
+
                             // Save to file
-                            let filename = format!("proof_{}_{}.json", domain.replace(".", "_"), fid);
+                            let filename =
+                                format!("proof_{}_{}.json", domain.replace(".", "_"), fid);
                             std::fs::write(&filename, &json)?;
                             println!("💾 Proof saved to: {filename}");
                         }
@@ -143,15 +153,21 @@ pub async fn handle_ens_command(
             println!("🔍 Verifying proof from file: {proof_file}");
             let proof_content = std::fs::read_to_string(&proof_file)?;
             let proof_data: serde_json::Value = serde_json::from_str(&proof_content)?;
-            
+
             // Create UserNameProof from JSON
             let mut proof = crate::username_proof::UserNameProof::new();
             proof.set_timestamp(proof_data["timestamp"].as_u64().unwrap_or(0));
-            proof.set_name(proof_data["name"].as_str().unwrap_or("").as_bytes().to_vec());
+            proof.set_name(
+                proof_data["name"]
+                    .as_str()
+                    .unwrap_or("")
+                    .as_bytes()
+                    .to_vec(),
+            );
             proof.set_owner(hex::decode(proof_data["owner"].as_str().unwrap_or(""))?);
             proof.set_signature(hex::decode(proof_data["signature"].as_str().unwrap_or(""))?);
             proof.set_fid(proof_data["fid"].as_u64().unwrap_or(0));
-            
+
             match ens_proof.verify_proof(&proof).await {
                 Ok(valid) => {
                     if valid {

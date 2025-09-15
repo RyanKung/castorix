@@ -1,4 +1,4 @@
-use castorix::consts::{init_config, get_config};
+use castorix::consts::{get_config, init_config};
 
 /// Example showing how to use the configuration module
 #[tokio::main]
@@ -23,9 +23,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Example: Use configuration in your application
     println!("=== Using Configuration in Application ===");
-    
+
     // Example: Create a Farcaster client with the configured URLs
-    println!("📡 Ethereum RPC URL: {}", mask_sensitive_info(config.eth_rpc_url()));
+    println!(
+        "📡 Ethereum RPC URL: {}",
+        mask_sensitive_info(config.eth_rpc_url())
+    );
     println!("🔗 Base RPC URL: {}", config.eth_base_rpc_url());
     println!("⚡ Optimism RPC URL: {}", config.eth_op_rpc_url());
     println!("🌐 Farcaster Hub URL: {}", config.farcaster_hub_url());
@@ -33,7 +36,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Example: Initialize Farcaster contract client
     println!("\n=== Initializing Farcaster Contract Client ===");
     match castorix::farcaster::contracts::FarcasterContractClient::new_with_default_addresses(
-        config.eth_op_rpc_url().to_string()
+        config.eth_op_rpc_url().to_string(),
     ) {
         Ok(client) => {
             println!("✅ Farcaster contract client initialized successfully!");

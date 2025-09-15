@@ -10,6 +10,7 @@ pub struct ContractAddresses {
     pub id_gateway: Address,
     pub key_gateway: Address,
     pub bundler: Address,
+    pub signed_key_request_validator: Address,
 }
 
 impl Default for ContractAddresses {
@@ -22,6 +23,7 @@ impl Default for ContractAddresses {
             id_gateway: "0x00000000fc25870c6ed6b6c7e41fb078b7656f69".parse().unwrap(),
             key_gateway: "0x00000000fc56947c7e7183f8ca4b62398caadf0b".parse().unwrap(),
             bundler: "0x00000000fc04c910a0b5fea33b03e0447ad0b0aa".parse().unwrap(),
+            signed_key_request_validator: "0x00000000fc700472606ed4fa22623acf62c60553".parse().unwrap(),
         }
     }
 }
@@ -49,27 +51,8 @@ pub type StorageUnits = u32;
 /// Storage price in wei
 pub type StoragePrice = U256;
 
-/// Contract events
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum ContractEvent {
-    /// ID Registry events
-    IdRegistered { to: Address, id: Fid, recovery: RecoveryAddress },
-    IdTransfer { from: Address, to: Address, id: Fid },
-    IdRecovery { from: Address, to: Address, id: Fid },
-    
-    /// Key Registry events
-    KeyAdded { id: Fid, key: Vec<u8>, key_type: KeyType, metadata: Vec<u8> },
-    KeyRemoved { id: Fid, key: Vec<u8>, key_type: KeyType },
-    
-    /// Storage Registry events
-    Rent { id: Fid, units: StorageUnits, expiry: u64 },
-    
-    /// Gateway events
-    Transfer { from: Address, to: Address, token_id: U256 },
-}
-
-/// Contract call results
-#[derive(Debug, Clone, Serialize, Deserialize)]
+/// Result type for contract calls
+#[derive(Debug, Clone)]
 pub enum ContractResult<T> {
     Success(T),
     Error(String),
@@ -97,4 +80,64 @@ impl<T> ContractResult<T> {
             ContractResult::Error(_) => default,
         }
     }
+}
+
+/// Comprehensive FID information
+#[derive(Debug, Clone)]
+pub struct FidInfo {
+    pub fid: Fid,
+    pub custody: Address,
+    pub recovery: Address,
+    pub active_keys: u64,
+    pub inactive_keys: u64,
+    pub pending_keys: u64,
+}
+
+/// Network status information
+#[derive(Debug, Clone)]
+pub struct NetworkStatus {
+    pub chain_id: u64,
+    pub block_number: u64,
+    pub id_gateway_paused: bool,
+    pub key_gateway_paused: bool,
+    pub storage_registry_paused: bool,
+}
+
+/// Result of signer verification
+#[derive(Debug, Clone)]
+pub struct SignerVerificationResult {
+    pub found: bool,
+    pub is_active: bool,
+    pub is_correct_type: bool,
+    pub is_valid: bool,
+    pub state: u8,
+    pub key_type: u32,
+    pub message: String,
+}
+
+/// Detailed key information for a FID
+#[derive(Debug, Clone)]
+pub struct FidKeysInfo {
+    pub fid: Fid,
+    pub custody: Address,
+    pub recovery: Address,
+    pub active_keys: u64,
+    pub inactive_keys: u64,
+    pub pending_keys: u64,
+    pub active_keys_list: Vec<String>,
+    pub inactive_keys_list: Vec<String>,
+    pub pending_keys_list: Vec<String>,
+}
+
+/// Result of security test for unauthorized key operations
+#[derive(Debug, Clone)]
+pub struct SecurityTestResult {
+    pub target_fid: Fid,
+    pub caller_address: Address,
+    pub can_manage_keys: bool,
+    pub unauthorized_add_failed: bool,
+    pub unauthorized_remove_failed: bool,
+    pub direct_remove_failed: bool,
+    pub keys_unchanged: bool,
+    pub error_messages: Vec<String>,
 }

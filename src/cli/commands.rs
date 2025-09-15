@@ -1,5 +1,5 @@
-use clap::{Parser, Subcommand};
 use crate::cli::types::*;
+use clap::{Parser, Subcommand};
 
 /// Castorix - Farcaster ENS Domain Proof Tool
 /// A comprehensive tool for managing private keys, creating ENS domain proofs, and interacting with Farcaster Hub
@@ -51,7 +51,7 @@ pub struct Cli {
 #[derive(Subcommand)]
 pub enum Commands {
     /// 🔑 Key management operations
-    /// 
+    ///
     /// Manage encrypted private keys with secure password protection.
     /// Create, import, list, and organize your wallet keys with friendly aliases.
     Key {
@@ -59,25 +59,41 @@ pub enum Commands {
         action: KeyCommands,
     },
     /// 🌐 ENS domain proof operations
-    /// 
+    ///
     /// Create and verify ENS domain proofs for Farcaster integration.
     /// Link your ENS domains to your Farcaster identity.
-    /// 
+    ///
     /// Use --wallet-name to select specific encrypted wallets for signing.
     Ens {
         #[command(subcommand)]
         action: EnsCommands,
     },
     /// 📡 Farcaster Hub operations
-    /// 
+    ///
     /// Interact with Farcaster Hub to submit proofs and retrieve data.
     /// Submit casts, proofs, and get user information.
     Hub {
         #[command(subcommand)]
         action: HubCommands,
     },
+    /// 🔑 ECDSA custody key management
+    ///
+    /// Manage ECDSA keys used for Farcaster account management.
+    /// These keys are bound to specific FIDs and used for custody operations.
+    Custody {
+        #[command(subcommand)]
+        action: CustodyCommands,
+    },
+    /// 🔐 Signer management for Farcaster
+    ///
+    /// Manage and query signers (account keys) associated with Farcaster IDs.
+    /// These are Ed25519 public keys that are authorized to sign messages for FIDs.
+    Signers {
+        #[command(subcommand)]
+        action: SignersCommands,
+    },
     /// 🚀 Demo all functionality
-    /// 
+    ///
     /// Run a comprehensive demonstration of all Castorix features.
     /// Perfect for first-time users to see what the tool can do.
     Demo,

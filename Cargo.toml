@@ -20,7 +20,7 @@ ed25519-dalek = {version = "2.0.0", features = ["rand_core"]}
 rand = "0.8.5"
 hex = "0.4.3"
 protobuf = "2.25.2"
-reqwest = "0.11"
+reqwest = { version = "0.11", features = ["blocking"] }
 tokio = { version = "1", features = ["full"] }
 ethers = { version = "2.0", features = ["rustls", "abigen"] }
 bip32 = "0.5"
@@ -56,3 +56,4 @@ ethers = { version = "2.0", features = ["abigen"] }
 debug = true
 # Optimize tests for faster execution
 opt-level = 0
+

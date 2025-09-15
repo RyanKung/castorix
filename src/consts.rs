@@ -20,8 +20,9 @@ impl Config {
         }
 
         Ok(Self {
-            eth_rpc_url: env::var("ETH_RPC_URL")
-                .unwrap_or_else(|_| "https://eth-mainnet.g.alchemy.com/v2/your_api_key_here".to_string()),
+            eth_rpc_url: env::var("ETH_RPC_URL").unwrap_or_else(|_| {
+                "https://eth-mainnet.g.alchemy.com/v2/your_api_key_here".to_string()
+            }),
             eth_base_rpc_url: env::var("ETH_BASE_RPC_URL")
                 .unwrap_or_else(|_| "https://mainnet.base.org".to_string()),
             eth_op_rpc_url: env::var("ETH_OP_RPC_URL")
@@ -34,10 +35,11 @@ impl Config {
     /// Load configuration with custom .env file path
     pub fn load_from_file(env_file: &str) -> Result<Self, Box<dyn std::error::Error>> {
         dotenv::from_path(env_file)?;
-        
+
         Ok(Self {
-            eth_rpc_url: env::var("ETH_RPC_URL")
-                .unwrap_or_else(|_| "https://eth-mainnet.g.alchemy.com/v2/your_api_key_here".to_string()),
+            eth_rpc_url: env::var("ETH_RPC_URL").unwrap_or_else(|_| {
+                "https://eth-mainnet.g.alchemy.com/v2/your_api_key_here".to_string()
+            }),
             eth_base_rpc_url: env::var("ETH_BASE_RPC_URL")
                 .unwrap_or_else(|_| "https://mainnet.base.org".to_string()),
             eth_op_rpc_url: env::var("ETH_OP_RPC_URL")
@@ -52,7 +54,10 @@ impl Config {
         let mut errors = Vec::new();
 
         if self.eth_rpc_url.contains("your_api_key_here") {
-            errors.push("ETH_RPC_URL contains placeholder value, please set your actual API key".to_string());
+            errors.push(
+                "ETH_RPC_URL contains placeholder value, please set your actual API key"
+                    .to_string(),
+            );
         }
 
         if self.eth_base_rpc_url.is_empty() {
@@ -136,7 +141,7 @@ pub fn get_config() -> &'static Config {
 /// Call this at the start of your application
 pub fn init_config() -> Result<(), Box<dyn std::error::Error>> {
     let config = get_config();
-    
+
     match config.validate() {
         Ok(()) => {
             println!("Configuration loaded successfully");
@@ -177,7 +182,7 @@ mod tests {
     #[test]
     fn test_config_loading() {
         let config = Config::load().expect("Failed to load config");
-        
+
         // Test that all URLs are non-empty
         assert!(!config.eth_rpc_url.is_empty());
         assert!(!config.eth_base_rpc_url.is_empty());
@@ -188,15 +193,18 @@ mod tests {
     #[test]
     fn test_config_validation() {
         let config = Config::load().expect("Failed to load config");
-        
+
         // Validation might fail if using placeholder values, which is expected
         let validation_result = config.validate();
-        
+
         // We just test that validation returns either Ok or Err with messages
         match validation_result {
             Ok(()) => println!("Configuration is valid"),
             Err(errors) => {
-                println!("Configuration validation failed with {} errors", errors.len());
+                println!(
+                    "Configuration validation failed with {} errors",
+                    errors.len()
+                );
                 assert!(!errors.is_empty());
             }
         }
@@ -208,7 +216,7 @@ mod tests {
         let masked = mask_url(url_with_api_key);
         assert!(masked.contains("***"));
         assert!(!masked.contains("abc123def456"));
-        
+
         let placeholder_url = "https://eth-mainnet.g.alchemy.com/v2/your_api_key_here";
         let not_masked = mask_url(placeholder_url);
         assert_eq!(not_masked, placeholder_url);

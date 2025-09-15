@@ -1,411 +1,545 @@
-# Castorix
+# 🔐 Castorix - Comprehensive Farcaster Protocol Integration Suite
 
-A comprehensive Rust library and CLI tool for interacting with the Farcaster protocol, providing type-safe contract bindings, ENS resolution, key management, and message handling capabilities.
+[![License: GPL-2.0](https://img.shields.io/badge/License-GPL--2.0-blue.svg)](https://opensource.org/licenses/GPL-2.0)
+[![Rust](https://img.shields.io/badge/rust-1.70+-orange.svg)](https://www.rust-lang.org)
+[![Farcaster](https://img.shields.io/badge/Farcaster-Protocol-purple.svg)](https://farcaster.xyz)
+[![Snapchain](https://img.shields.io/badge/Snapchain-Data%20Layer-green.svg)](https://github.com/farcasterxyz/snapchain)
 
-## Overview
+A comprehensive Rust ecosystem for interacting with the Farcaster protocol, featuring secure encrypted key management, ENS domain proof creation, Farcaster Hub integration, and Snapchain data layer support.
 
-Castorix is a production-ready Rust SDK for the Farcaster protocol, featuring:
+## 🌟 Overview
 
-- 🔒 **Type-safe Farcaster contract bindings** using official ABI definitions
-- 🌐 **ENS resolution** for Ethereum and Base domains
-- 📨 **Message handling** with protobuf serialization
-- 🔑 **Encrypted key management** with secure storage
-- 🖥️ **CLI interface** for easy interaction with Farcaster
-- ⚡ **High-performance** async/await support
-- 🛡️ **Memory safety** with Rust's ownership system
+Castorix is a complete toolkit for Farcaster protocol interaction, consisting of three main components:
 
-## Features
+1. **🔐 Castorix Core** - CLI tool and library for Farcaster operations
+2. **📡 Snapchain** - Decentralized data storage layer implementation  
+3. **🏗️ Smart Contracts** - Farcaster protocol smart contracts
 
-### Contract Integration
+## 🚀 Quick Start
 
-- **Official ABI bindings** generated from Farcaster's official contract repository
-- **All major contracts supported**: IdRegistry, KeyRegistry, StorageRegistry, IdGateway, KeyGateway, Bundler, RecoveryProxy, SignedKeyRequestValidator
-- **Type-safe contract calls** with automatic parameter encoding/decoding
-- **Comprehensive error handling** with detailed error messages
-- **Network verification** with automatic contract address validation
+### Prerequisites
 
-### ENS Resolution
+- Rust 1.70+ installed
+- An Ethereum RPC URL (for mainnet operations)
+- A Farcaster Hub URL (or use the public API)
+- Docker (for Snapchain node)
 
-- **Multi-chain support**: Ethereum Mainnet and Base
-- **Subdomain resolution**: Handles complex ENS subdomain structures
-- **Username proof generation**: Create and verify Farcaster username proofs
-- **Fallback mechanisms**: Graceful handling of resolution failures
-
-### Key Management
-
-- **Encrypted storage**: Secure storage of private keys using AES-GCM
-- **Multiple key types**: Support for Ed25519 and Ethereum ECDSA keys
-- **Password protection**: Optional password-based encryption
-- **Environment-based configuration**: Flexible configuration management
-- **Key derivation**: Support for BIP39 mnemonic phrases
-
-### CLI Interface
-
-- **Interactive commands**: Easy-to-use CLI for all major operations
-- **Key management**: Generate, import, export, and manage cryptographic keys
-- **Hub interaction**: Submit messages and interact with Farcaster Hub
-- **ENS operations**: Resolve names and generate proofs
-- **Contract queries**: Query Farcaster contracts directly
-
-## Installation
-
-### From Source
+### Installation
 
 ```bash
 # Clone the repository
 git clone https://github.com/your-org/castorix.git
 cd castorix
-
-# Initialize and update submodules
-git submodule update --init --recursive
 
 # Build the project
 cargo build --release
 
-# Install the CLI tool
+# Install globally (optional)
 cargo install --path .
 ```
 
-### Dependencies
-
-- Rust 1.70+
-- Git (for submodule management)
-- Foundry (for contract compilation, optional)
-
-## Quick Start
-
-### CLI Usage
+### Basic Usage
 
 ```bash
-# Initialize configuration
-castorix init
+# Generate a new encrypted wallet
+castorix key generate-encrypted my-wallet "My Main Wallet"
 
-# Generate a new Ed25519 key pair
-castorix key generate --type ed25519
+# Create an ENS domain proof
+castorix ens create vitalik.eth 12345 --wallet-name my-wallet
 
-# Resolve an ENS name
+# Submit the proof to Farcaster Hub
+castorix hub submit-proof proof.json 12345
+
+# Run a comprehensive demo
+castorix demo
+```
+
+## 🏗️ Architecture
+
+```mermaid
+graph TB
+    subgraph "Castorix Ecosystem"
+        A[Castorix CLI] --> B[Key Management]
+        A --> C[ENS Proofs]
+        A --> D[Farcaster Hub]
+        A --> E[Smart Contracts]
+        
+        B --> F[Encrypted Storage]
+        B --> G[ECDSA Keys]
+        B --> H[Ed25519 Signers]
+        
+        C --> I[Domain Verification]
+        C --> J[Proof Creation]
+        C --> K[Base ENS Support]
+        
+        D --> L[User Data]
+        D --> M[Cast Publishing]
+        D --> N[Proof Submission]
+        
+        E --> O[Id Registry]
+        E --> P[Key Registry]
+        E --> Q[Storage Registry]
+    end
+    
+    subgraph "Snapchain Network"
+        R[Snapchain Node] --> S[Data Storage]
+        R --> T[P2P Network]
+        R --> U[Consensus]
+        
+        S --> V[User Messages]
+        S --> W[Social Data]
+        S --> X[State Management]
+    end
+    
+    A --> R
+    D --> R
+```
+
+## 🔧 Core Components
+
+### 1. Castorix CLI & Library
+
+A comprehensive command-line tool and Rust library for Farcaster protocol interaction.
+
+#### Key Features
+
+- **🔒 Secure Key Management**
+  - Encrypted private key storage with Argon2 encryption
+  - Multiple wallet support with friendly aliases
+  - Key import/export and recovery phrase support
+  - Support for both ECDSA and Ed25519 keys
+
+- **🌐 ENS Domain Integration**
+  - Domain proof creation linking ENS domains to Farcaster IDs
+  - Domain verification and ownership checking
+  - Base ENS subdomain support (*.base.eth)
+  - Reverse lookup for all domains owned by an address
+
+- **📡 Farcaster Hub Integration**
+  - Proof submission to Farcaster Hub
+  - User data retrieval and signer management
+  - Cast publishing and real-time sync monitoring
+  - EIP-712 signature support
+
+- **🔑 Account Management**
+  - FID registration and management
+  - Signer key registration (Ed25519)
+  - Custody key management (ECDSA)
+  - Storage unit rental and management
+
+### 2. Snapchain Data Layer
+
+A high-performance, decentralized data storage layer for Farcaster social data.
+
+#### Key Features
+
+- **High Throughput**: Processes 10,000+ transactions per second
+- **Data Availability**: Real-time access to user data for <$1,000/month
+- **Canonical Implementation**: Reference implementation for Farcaster protocol
+- **P2P Network**: Decentralized peer-to-peer data synchronization
+
+#### System Requirements
+
+- 16 GB RAM
+- 4 CPU cores or vCPUs
+- 1TB free storage
+- Public IP address
+- Ports 3381-3383 (TCP/UDP)
+
+### 3. Smart Contracts
+
+Complete implementation of Farcaster protocol smart contracts.
+
+#### Contract Overview
+
+| Contract | Purpose | Network |
+|----------|---------|---------|
+| **Id Registry** | Tracks Farcaster identity ownership | OP Mainnet |
+| **Storage Registry** | Allocates storage and collects rent | OP Mainnet |
+| **Key Registry** | Manages FID-key associations | OP Mainnet |
+| **Id Gateway** | Issues new Farcaster identities | OP Mainnet |
+| **Key Gateway** | Adds new key associations | OP Mainnet |
+| **Bundler** | Single-transaction operations | OP Mainnet |
+| **Tier Registry** | Pro subscription payments | Base Mainnet |
+| **Fname Resolver** | ENS name validation | ETH Mainnet |
+
+## 📖 Command Reference
+
+### 🔑 Key Management
+
+```bash
+# Generate a new encrypted key
+castorix key generate-encrypted [key-name] [alias]
+
+# Import an existing private key
+castorix key import [key-name] [alias] [private-key]
+
+# List all encrypted keys
+castorix key list
+
+# Load and use a specific key
+castorix key load [key-name]
+
+# Delete a key
+castorix key delete [key-name]
+
+# Rename a key
+castorix key rename [old-name] [new-name]
+
+# Update key alias
+castorix key update-alias [key-name] [new-alias]
+```
+
+### 🌐 ENS Operations
+
+```bash
+# Resolve ENS domain to address
 castorix ens resolve vitalik.eth
 
-# Query Farcaster contract data
-castorix hub get-fid --address 0x...
+# Get all domains owned by an address
+castorix ens domains 0x1234...
+
+# Check Base subdomain ownership
+castorix ens check-base-subdomain ryankung.base.eth
+
+# Verify domain ownership
+castorix ens verify mydomain.eth
+
+# Create username proof
+castorix ens create mydomain.eth 12345 --wallet-name my-wallet
+
+# Verify a proof
+castorix ens verify-proof proof.json
 ```
 
-### Library Usage
-
-#### Basic Contract Interaction
-
-```rust
-use castorix::farcaster::contracts::FarcasterContractClient;
-use castorix::consts::get_config;
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Get configuration
-    let config = get_config();
-    
-    // Create contract client with default addresses
-    let client = FarcasterContractClient::new_with_default_addresses(
-        config.eth_op_rpc_url().to_string()
-    )?;
-    
-    // Get network information
-    let network_info = client.get_network_info().await?;
-    println!("Chain ID: {}", network_info.chain_id);
-    println!("Block number: {}", network_info.block_number);
-    
-    // Verify contracts are accessible
-    let verification = client.verify_contracts().await?;
-    println!("ID Registry verified: {}", verification.id_registry);
-    
-    Ok(())
-}
-```
-
-#### ENS Resolution
-
-```rust
-use castorix::ens_proof::EnsProof;
-use castorix::consts::get_config;
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Get configuration
-    let config = get_config();
-    
-    // Create ENS proof resolver
-    let ens_proof = EnsProof::new(&config)?;
-    
-    // Resolve ENS name
-    let address = ens_proof.resolve_name("vitalik.eth").await?;
-    println!("Resolved address: {:?}", address);
-    
-    // Generate username proof
-    let proof = ens_proof.generate_username_proof("vitalik.eth").await?;
-    println!("Username proof: {:?}", proof);
-    
-    Ok(())
-}
-```
-
-#### Key Management
-
-```rust
-use castorix::key_manager::KeyManager;
-use castorix::consts::get_config;
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Get configuration
-    let config = get_config();
-    
-    // Create key manager
-    let key_manager = KeyManager::from_env(&config)?;
-    
-    // Generate new Ed25519 key pair
-    let (public_key, private_key) = key_manager.generate_ed25519_keypair()?;
-    println!("Generated public key: {:?}", public_key);
-    
-    // Store encrypted key
-    key_manager.store_encrypted_ed25519_key(&private_key, "my_key_id")?;
-    
-    Ok(())
-}
-```
-
-## Configuration
-
-Create a `.env` file in your project root:
+### 📡 Hub Operations
 
 ```bash
-# Ethereum RPC endpoint for ENS resolution and blockchain interactions
-ETH_RPC_URL=https://eth-mainnet.g.alchemy.com/v2/your_api_key_here
+# Get user information
+castorix hub user 12345
 
-# Base chain RPC endpoint for Base subdomain resolution
-ETH_BASE_RPC_URL=https://mainnet.base.org
+# Submit username proof
+castorix hub submit-proof proof.json 12345
 
-# Optimism RPC endpoint for Farcaster contract interactions
-ETH_OP_RPC_URL=https://optimism-mainnet.g.alchemy.com/v2/your_api_key_here
+# Submit proof with EIP-712 signature
+castorix hub submit-proof-eip712 proof.json --wallet-name my-wallet
 
-# Farcaster Hub URL for submitting messages and proofs
-FARCASTER_HUB_URL=https://hub-api.neynar.com
+# Get ENS domains for a FID
+castorix hub ens-domains 12345
 
-# Optional: Custom key storage directory
-KEY_STORAGE_PATH=~/.castorix/keys
+# Get custody address
+castorix hub custody-address 12345
+
+# Get Hub sync status
+castorix hub info
+
+# Post a cast
+castorix hub cast "Hello Farcaster!" 12345
 ```
 
-## Architecture
+### 🔑 Signer Management
+
+```bash
+# List all signers
+castorix signers list
+
+# Get signers for a FID
+castorix signers info 12345
+
+# Register a new signer
+castorix signers register 12345 --wallet my-wallet
+
+# Unregister a signer
+castorix signers unregister 12345 --wallet my-wallet
+
+# Export a signer key
+castorix signers export [public-key-or-index]
+
+# Delete a signer
+castorix signers delete [public-key-or-index]
+```
+
+### 🔐 Custody Key Management
+
+```bash
+# List custody keys
+castorix custody list
+
+# Import custody key
+castorix custody import 12345
+
+# Generate from mnemonic
+castorix custody from-mnemonic 12345
+
+# Delete custody key
+castorix custody delete 12345
+```
+
+## 🏗️ Development
 
 ### Project Structure
 
 ```
-src/
-├── cli/                      # Command-line interface
-│   ├── commands.rs          # CLI command definitions
-│   ├── handlers/            # Command handlers
-│   └── types.rs             # CLI types
-├── farcaster/               # Farcaster protocol integration
-│   ├── contracts/           # Contract bindings and clients
-│   │   ├── generated/       # Auto-generated ABI bindings
-│   │   ├── client.rs        # Unified contract client
-│   │   ├── types.rs         # Contract types and addresses
-│   │   └── *_tests.rs       # Contract tests
-│   └── mod.rs
-├── ens_proof/               # ENS resolution and proof generation
-├── message/                 # Message handling and protobuf
-├── key_manager.rs           # Key management
-├── encrypted_*_manager.rs   # Encrypted key storage
-├── farcaster_client.rs      # Farcaster Hub client
-├── consts.rs                # Configuration management
-└── lib.rs                   # Library root
+castorix/
+├── src/                          # Castorix Core
+│   ├── cli/                      # CLI command definitions
+│   │   ├── commands.rs           # Main command structure
+│   │   ├── types.rs             # Command type definitions
+│   │   └── handlers/            # Command handlers
+│   ├── farcaster/               # Farcaster protocol implementation
+│   │   ├── contracts/           # Smart contract interactions
+│   │   ├── key_manager.rs       # Key management utilities
+│   │   └── message/             # Message handling
+│   ├── ens_proof/               # ENS proof creation and verification
+│   └── main.rs                  # Application entry point
+├── examples/                    # Example code and demos
+├── tests/                       # Integration tests
+├── contracts/                   # Solidity contracts
+│   ├── src/                     # Contract source code
+│   ├── test/                    # Contract tests
+│   └── script/                  # Deployment scripts
+└── snapchain/                   # Snapchain data layer
+    ├── src/                     # Snapchain implementation
+    ├── site/                    # Documentation site
+    └── docker-compose.yml       # Node deployment
 ```
 
-### Contract Integration Flow
+### Available Cargo Commands
 
-1. **ABI Generation**: Solidity contracts are compiled using Foundry
-2. **Rust Binding Generation**: ethers-rs abigen generates type-safe bindings
-3. **Client Integration**: Unified client manages all contract interactions
-4. **Type Safety**: All contract calls are type-checked at compile time
+#### Test Commands
+- `cargo test-local` - Run local transaction tests
+- `cargo test-simple` - Run simple tests
+- `cargo test-integration` - Run integration tests
+- `cargo test-network` - Run network tests
+- `cargo test-write-read` - Run read/write tests
 
-## Examples
+#### Build Commands
+- `cargo build-all` - Build project
+- `cargo build-release` - Build release version
+- `cargo check-all` - Check code
+- `cargo check-tests` - Check tests
 
-### Contract Examples
+#### Development Commands
+- `cargo dev-test` - Development testing
+- `cargo dev-check` - Development checking
+- `cargo dev-build` - Development building
 
-- [`simple_contract_test.rs`](examples/simple_contract_test.rs): Basic contract connectivity test
-- [`contract_interface_test.rs`](examples/contract_interface_test.rs): Tests different contract interfaces
-- [`onchain_data_reader.rs`](examples/onchain_data_reader.rs): Reads on-chain contract data
-- [`farcaster_contracts_demo.rs`](examples/farcaster_contracts_demo.rs): Comprehensive contract demo
+#### Clean Commands
+- `cargo clean-all` - Clean build files
 
-### Configuration Examples
-
-- [`config_example.rs`](examples/config_example.rs): Shows how to use the configuration system
-
-## Development
-
-### Prerequisites
-
-- Rust 1.70+
-- Git (for submodule management)
-- Foundry (for contract compilation)
-
-### Building from Source
+### Running Tests
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-org/castorix.git
+# Start local Anvil node
+anvil --host 127.0.0.1 --port 8545 --accounts 10 --balance 10000 --gas-limit 30000000 --gas-price 1000000000 --chain-id 31337
+
+# Run local transaction tests
+cargo test-local
+
+# Run all tests
+cargo test
+```
+
+### Example Usage
+
+```rust
+use castorix::farcaster::contracts::FarcasterContractClient;
+use castorix::farcaster::contracts::types::*;
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    // Create a client
+    let client = FarcasterContractClient::new_with_default_addresses(
+        "http://127.0.0.1:8545".to_string()
+    )?;
+    
+    // Check network status
+    let status = client.get_network_status().await?;
+    println!("Network status: {:?}", status);
+    
+    Ok(())
+}
+```
+
+## 🔧 Configuration
+
+### Environment Variables
+
+Castorix supports configuration through environment variables:
+
+```bash
+# Ethereum RPC URL
+ETH_RPC_URL="https://eth-mainnet.g.alchemy.com/v2/your_api_key"
+
+# Farcaster Hub URL
+FARCASTER_HUB_URL="https://hub-api.neynar.com"
+
+# Snapchain configuration
+SNAPCHAIN_BASE_ONCHAIN_EVENTS__RPC_URL="https://base-mainnet.g.alchemy.com/v2/your_api_key"
+SNAPCHAIN_L1_RPC_URL="https://eth-mainnet.g.alchemy.com/v2/your_api_key"
+SNAPCHAIN_FC_NETWORK="Mainnet"
+```
+
+### Configuration Files
+
+Create a `.env` file in your project root:
+
+```env
+# Ethereum Configuration
+ETH_RPC_URL=https://eth-mainnet.g.alchemy.com/v2/your_api_key
+BASE_RPC_URL=https://base-mainnet.g.alchemy.com/v2/your_api_key
+
+# Farcaster Configuration
+FARCASTER_HUB_URL=https://hub-api.neynar.com
+
+# Snapchain Configuration
+SNAPCHAIN_BASE_ONCHAIN_EVENTS__RPC_URL=https://base-mainnet.g.alchemy.com/v2/your_api_key
+SNAPCHAIN_L1_RPC_URL=https://eth-mainnet.g.alchemy.com/v2/your_api_key
+SNAPCHAIN_FC_NETWORK=Mainnet
+SNAPCHAIN_BASE_ONCHAIN_EVENTS__START_BLOCK_NUMBER=31180908
+```
+
+## 🚀 Snapchain Node Setup
+
+### Quick Start
+
+```bash
+# Start a new Snapchain node
+curl -sSL https://raw.githubusercontent.com/farcasterxyz/snapchain/refs/heads/main/scripts/snapchain-bootstrap.sh | bash
+
+# Check node status
+curl http://localhost:3381/v1/info
+```
+
+### Manual Setup
+
+```bash
+cd snapchain
+
+# Build Snapchain
+cargo build --release
+
+# Run development nodes
+make dev
+
+# Check node logs
+docker compose logs -f node1
+```
+
+### Node Management
+
+```bash
+# Start node
+./snapchain.sh start
+
+# Stop node
+./snapchain.sh stop
+
+# Check status
+./snapchain.sh status
+
+# View logs
+./snapchain.sh logs
+
+# Upgrade node
+./snapchain.sh upgrade
+```
+
+## 🛡️ Security
+
+### Key Storage
+- All private keys are encrypted using Argon2
+- Keys are stored in the user's home directory
+- Passwords are never stored or logged
+- Support for hardware wallet integration (coming soon)
+
+### Best Practices
+- Always use encrypted key storage for production
+- Keep your recovery phrases secure and offline
+- Regularly backup your encrypted keys
+- Use strong, unique passwords for key encryption
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+### Development Setup
+
+```bash
+# Fork and clone the repository
+git clone https://github.com/your-username/castorix.git
 cd castorix
 
-# Initialize and update submodules
-git submodule update --init --recursive
-
-# Build the project
+# Install dependencies
 cargo build
 
 # Run tests
 cargo test
 
 # Run examples
-cargo run --example simple_contract_test
+cargo run --example complete_farcaster_test
 ```
 
-### Contract Development
+## 📚 Documentation
 
-The project includes the official Farcaster contracts as git submodules:
+- [API Documentation](https://docs.rs/castorix)
+- [Farcaster Protocol](https://docs.farcaster.xyz)
+- [ENS Documentation](https://docs.ens.domains)
+- [Snapchain Whitepaper](https://github.com/farcasterxyz/protocol/discussions/207)
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **"No client configured for chain: BaseMainnet"**
+   - Ensure you have set the `SNAPCHAIN_BASE_ONCHAIN_EVENTS__RPC_URL` environment variable
+   - Check that your Base RPC URL is valid and accessible
+
+2. **"Failed to submit message"**
+   - Verify your Farcaster Hub URL is correct
+   - Check that you have the necessary permissions for the FID
+   - Ensure your signer key is properly registered
+
+3. **"Insufficient balance"**
+   - Check your wallet balance
+   - Ensure you have enough ETH for gas fees
+   - Verify the RPC URL is pointing to the correct network
+
+4. **Snapchain node sync issues**
+   - Check that ports 3381-3383 are open
+   - Verify your node has sufficient resources (16GB RAM, 4 CPU cores)
+   - Check node logs for specific error messages
+
+### Getting Help
+
+- Check the [Issues](https://github.com/your-org/castorix/issues) page
+- Join our [Discord](https://discord.gg/your-discord) community
+- Read the [FAQ](docs/FAQ.md)
+
+## 📄 License
+
+This project is licensed under the GPL-2.0 License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Farcaster Protocol](https://farcaster.xyz) for the amazing social protocol
+- [Ethereum Name Service](https://ens.domains) for domain resolution
+- [Rust](https://rust-lang.org) for the excellent language and ecosystem
+- [Ethers.rs](https://github.com/gakonst/ethers-rs) for Ethereum integration
+- [Snapchain](https://github.com/farcasterxyz/snapchain) for the data layer implementation
+
+## 📊 Test Results
 
 ```bash
-# Update the submodules
-git submodule update --remote contracts
-git submodule update --remote snapchain
-
-# Rebuild to regenerate bindings
-cargo build
+$ cargo test-local
+running 2 tests
+test test_network_connectivity ... ok
+test test_simple_local_transaction ... ok
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
 ```
-
-## Testing
-
-```bash
-# Run all tests
-cargo test
-
-# Run contract tests
-cargo test --lib farcaster::contracts
-
-# Run tests with Anvil (local blockchain)
-make test-anvil
-
-# Run mock tests (no blockchain required)
-make test-mock
-```
-
-### Testing Strategy
-
-- **Unit tests**: Test individual components in isolation
-- **Integration tests**: Test contract interactions with mock blockchain
-- **On-chain tests**: Test with real blockchain (requires RPC access)
-- **Hybrid testing**: Automatically fall back to mock when blockchain unavailable
-
-## CLI Commands
-
-```bash
-# Key management
-castorix key generate --type ed25519
-castorix key list
-castorix key export --id <key_id>
-
-# ENS operations
-castorix ens resolve <name>
-castorix ens generate-proof <name>
-
-# Hub operations
-castorix hub get-fid --address <address>
-castorix hub submit-message --file <message.json>
-
-# Contract operations
-castorix contract verify
-castorix contract get-network-info
-```
-
-## Error Handling
-
-Castorix provides comprehensive error handling with detailed context:
-
-```rust
-use anyhow::Result;
-
-async fn example() -> Result<()> {
-    match client.get_network_info().await {
-        Ok(info) => println!("Chain ID: {}", info.chain_id),
-        Err(e) => println!("Network error: {}", e),
-    }
-    Ok(())
-}
-```
-
-## Performance
-
-- **Async/await**: Non-blocking I/O operations
-- **Connection pooling**: Efficient HTTP connection management
-- **Hybrid testing**: Automatic fallback between real and mock environments
-- **Batch operations**: Support for batch contract calls
-
-## Security
-
-- **Memory safety**: Rust's ownership system prevents memory leaks
-- **Encrypted storage**: Private keys are encrypted using AES-GCM
-- **Secure defaults**: Safe configuration defaults
-- **Input validation**: Comprehensive input validation
-- **Password protection**: Optional password-based key encryption
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Development Guidelines
-
-- Follow Rust naming conventions
-- Add tests for new features
-- Update documentation
-- Ensure all tests pass
-- Use `cargo fmt` and `cargo clippy`
-- Follow the existing code structure
-
-## License
-
-This project is licensed under the GNU General Public License v2.0 - see the [LICENSE](LICENSE) file for details.
-
-**Important:** GPLv2 is a copyleft license that requires derivative works to also be licensed under GPLv2. If you plan to use this library in a proprietary application, please contact the maintainers for alternative licensing options.
-
-## Acknowledgments
-
-- [Farcaster Protocol](https://farcaster.xyz/) for the amazing decentralized social protocol
-- [ethers-rs](https://github.com/gakonst/ethers-rs) for excellent Ethereum tooling
-- [OpenZeppelin](https://openzeppelin.com/) for secure smart contract libraries
-- [Foundry](https://book.getfoundry.sh/) for Solidity development tools
-
-## Support
-
-- 📖 [Documentation](https://docs.rs/castorix)
-- 🐛 [Issue Tracker](https://github.com/your-org/castorix/issues)
-- 💬 [Discussions](https://github.com/your-org/castorix/discussions)
-
-## Changelog
-
-### v0.1.0 (Current)
-
-- ✅ Official Farcaster contract ABI bindings
-- ✅ ENS resolution for Ethereum and Base
-- ✅ Encrypted key management with AES-GCM
-- ✅ CLI interface for easy interaction
-- ✅ Message handling with protobuf
-- ✅ Comprehensive error handling
-- ✅ Async/await support
-- ✅ Configuration management
-- ✅ Hybrid testing (real + mock environments)
-- ✅ Extensive test coverage
 
 ---
 
-**Castorix** - Empowering Rust developers to build on Farcaster with confidence and type safety.
+**Made with ❤️ for the Farcaster community**
+
+*Castorix - Bridging the gap between ENS domains and Farcaster identity with security, simplicity, and scalability.*

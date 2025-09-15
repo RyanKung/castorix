@@ -14,13 +14,17 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-use castorix::{
-    cli::{Cli, CliHandler, commands::Commands, types::{KeyCommands, HubCommands}},
-    key_manager::{KeyManager, init_env},
-    ens_proof::EnsProof,
-    farcaster_client::FarcasterClient
-};
 use anyhow::Result;
+use castorix::{
+    cli::{
+        commands::Commands,
+        types::{HubCommands, KeyCommands},
+        Cli, CliHandler,
+    },
+    ens_proof::EnsProof,
+    farcaster_client::FarcasterClient,
+    key_manager::{init_env, KeyManager},
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -34,14 +38,20 @@ async fn main() -> Result<()> {
         Commands::Key { action } => {
             // For encrypted key commands, we don't need to load from env
             match action {
-                KeyCommands::Info |
-                KeyCommands::GenerateEncrypted |
-                KeyCommands::Import |
-                KeyCommands::Load { .. } |
-                KeyCommands::List |
-                KeyCommands::Delete { .. } => {
+                KeyCommands::Info
+                | KeyCommands::GenerateEncrypted
+                | KeyCommands::Import
+                | KeyCommands::Load { .. }
+                | KeyCommands::List
+                | KeyCommands::Delete { .. } => {
                     // These commands handle their own key management
-                    CliHandler::handle_key_command(action, &KeyManager::from_private_key("0000000000000000000000000000000000000000000000000000000000000001")?).await?;
+                    CliHandler::handle_key_command(
+                        action,
+                        &KeyManager::from_private_key(
+                            "0000000000000000000000000000000000000000000000000000000000000001",
+                        )?,
+                    )
+                    .await?;
                 }
                 _ => {
                     // For other commands, try to load from environment
@@ -59,22 +69,23 @@ async fn main() -> Result<()> {
             }
         }
         Commands::Hub { action } => {
-            let hub_url = std::env::var("FARCASTER_HUB_URL").unwrap_or_else(|_| "https://hub-api.neynar.com".to_string());
-            
+            let hub_url = std::env::var("FARCASTER_HUB_URL")
+                .unwrap_or_else(|_| "https://hub-api.neynar.com".to_string());
+
             // For read-only operations, we don't need a key manager
             match action {
-                HubCommands::User { .. } |
-                HubCommands::EthAddresses { .. } |
-                HubCommands::EnsDomains { .. } |
-                HubCommands::CustodyAddress { .. } |
-                HubCommands::Signers { .. } |
-                HubCommands::Key { .. } => {
+                HubCommands::User { .. }
+                | HubCommands::EthAddresses { .. }
+                | HubCommands::EnsDomains { .. }
+                | HubCommands::CustodyAddress { .. }
+                | HubCommands::Info
+                => {
                     let hub_client = FarcasterClient::read_only(hub_url);
                     CliHandler::handle_hub_command(action, &hub_client).await?;
                 }
-                HubCommands::SubmitProof { .. } |
-                HubCommands::SubmitProofEip712 { .. } => {
-                    // SubmitProof and SubmitProofEip712 handle their own key management
+                HubCommands::SubmitProof { .. } 
+                | HubCommands::SubmitProofEip712 { .. } => {
+                    // These commands handle their own key management
                     let hub_client = FarcasterClient::read_only(hub_url);
                     CliHandler::handle_hub_command(action, &hub_client).await?;
                 }
@@ -82,23 +93,35 @@ async fn main() -> Result<()> {
                     // For write operations, we need a key manager
                     match KeyManager::from_env("PRIVATE_KEY") {
                         Ok(key_manager) => {
-                            let hub_client = FarcasterClient::with_key_manager(hub_url, key_manager);
+                            let hub_client =
+                                FarcasterClient::with_key_manager(hub_url, key_manager);
                             CliHandler::handle_hub_command(action, &hub_client).await?;
                         }
                         Err(_) => {
                             println!("❌ No private key found in environment variables.");
                             println!("💡 Please either:");
-                            println!("   1. Set PRIVATE_KEY environment variable for legacy mode, or");
+                            println!(
+                                "   1. Set PRIVATE_KEY environment variable for legacy mode, or"
+                            );
                             println!("   2. Use 'castorix key load <key-name>' to load an encrypted key first");
                         }
                     }
                 }
             }
         }
+        Commands::Custody { action } => {
+            CliHandler::handle_custody_command(action).await?;
+        }
+        Commands::Signers { action } => {
+            let hub_url = std::env::var("FARCASTER_HUB_URL")
+                .unwrap_or_else(|_| "https://hub-api.neynar.com".to_string());
+            let hub_client = FarcasterClient::read_only(hub_url);
+            CliHandler::handle_signers_command(action, &hub_client).await?;
+        }
         Commands::Ens { action } => {
             let rpc_url = std::env::var("ETH_RPC_URL")
                 .unwrap_or_else(|_| "https://eth-mainnet.g.alchemy.com/v2/demo".to_string());
-            
+
             // Create a dummy key manager for ENS operations
             let dummy_key = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
             if let Ok(key_manager) = KeyManager::from_private_key(dummy_key) {
@@ -128,12 +151,12 @@ async fn run_demo() -> Result<()> {
     println!("\n🔑 Key Management Demo:");
     let key_manager = KeyManager::from_env("PRIVATE_KEY")?;
     println!("   Wallet Address: {:?}", key_manager.address());
-    
+
     let message = "Hello, Castorix!";
     let signature = key_manager.sign_message(message).await?;
     println!("   Message: {message}");
     println!("   Signature: {signature:?}");
-    
+
     let is_valid = key_manager.verify_signature(message, &signature).await?;
     println!("   Signature valid: {is_valid}");
 
@@ -142,7 +165,7 @@ async fn run_demo() -> Result<()> {
     let ens_proof = EnsProof::from_env()?;
     let domain = "example.eth";
     let fid = 12345;
-    
+
     println!("   Attempting to create proof for domain: {domain}");
     match ens_proof.create_ens_proof(domain, fid).await {
         Ok(proof) => {
@@ -161,8 +184,11 @@ async fn run_demo() -> Result<()> {
     // Farcaster Hub Demo
     println!("\n📡 Farcaster Hub Integration Demo:");
     let farcaster_client = FarcasterClient::from_env()?;
-    println!("   Connected to Farcaster Hub: {}", farcaster_client.hub_url());
-    
+    println!(
+        "   Connected to Farcaster Hub: {}",
+        farcaster_client.hub_url()
+    );
+
     let fid = 12345;
     println!("   Fetching user information for FID: {fid}");
     match farcaster_client.get_user(fid).await {
@@ -189,42 +215,77 @@ mod tests {
     fn test_ecdsa_to_ed25519_conversion() {
         println!("🔑 Testing: ECDSA and Ed25519 private key length verification");
         println!("{}", "=".repeat(60));
-        
+
         // Generate an ECDSA private key
         let ecdsa_wallet = LocalWallet::new(&mut rand::thread_rng());
         let ecdsa_private_key = ecdsa_wallet.signer().to_bytes();
-        
+
         println!("📊 ECDSA Private Key Information:");
         println!("   Private Key (hex): {}", hex::encode(ecdsa_private_key));
         println!("   Private Key Length: {} bytes", ecdsa_private_key.len());
         println!("   Private Key Bits: {} bits", ecdsa_private_key.len() * 8);
         println!("   Address: {:?}", ecdsa_wallet.address());
-        
+
         // Assert that the private key is exactly 32 bytes (256 bits)
-        assert_eq!(ecdsa_private_key.len(), 32, "ECDSA private key must be exactly 32 bytes (256 bits)");
-        assert_eq!(ecdsa_private_key.len() * 8, 256, "ECDSA private key must be exactly 256 bits");
-        println!("✅ ECDSA private key length verification passed: {} bytes ({} bits)", 
-                ecdsa_private_key.len(), ecdsa_private_key.len() * 8);
-        
+        assert_eq!(
+            ecdsa_private_key.len(),
+            32,
+            "ECDSA private key must be exactly 32 bytes (256 bits)"
+        );
+        assert_eq!(
+            ecdsa_private_key.len() * 8,
+            256,
+            "ECDSA private key must be exactly 256 bits"
+        );
+        println!(
+            "✅ ECDSA private key length verification passed: {} bytes ({} bits)",
+            ecdsa_private_key.len(),
+            ecdsa_private_key.len() * 8
+        );
+
         // Use the same 256-bit private key for both algorithms
         let ed25519_key = SigningKey::from_bytes(&ecdsa_private_key[..32].try_into().unwrap());
         let ed25519_public = ed25519_key.verifying_key();
-        
+
         println!("\n📊 Ed25519 Private Key Information:");
-        println!("   Public Key (hex): {}", hex::encode(ed25519_public.to_bytes()));
-        println!("   Private Key Length: {} bytes", ed25519_key.to_bytes().len());
-        println!("   Private Key Bits: {} bits", ed25519_key.to_bytes().len() * 8);
-        
+        println!(
+            "   Public Key (hex): {}",
+            hex::encode(ed25519_public.to_bytes())
+        );
+        println!(
+            "   Private Key Length: {} bytes",
+            ed25519_key.to_bytes().len()
+        );
+        println!(
+            "   Private Key Bits: {} bits",
+            ed25519_key.to_bytes().len() * 8
+        );
+
         // Assert that Ed25519 also uses 32-byte private key
-        assert_eq!(ed25519_key.to_bytes().len(), 32, "Ed25519 private key must be exactly 32 bytes (256 bits)");
-        assert_eq!(ed25519_key.to_bytes().len() * 8, 256, "Ed25519 private key must be exactly 256 bits");
-        println!("✅ Ed25519 private key length verification passed: {} bytes ({} bits)", 
-                ed25519_key.to_bytes().len(), ed25519_key.to_bytes().len() * 8);
-        
+        assert_eq!(
+            ed25519_key.to_bytes().len(),
+            32,
+            "Ed25519 private key must be exactly 32 bytes (256 bits)"
+        );
+        assert_eq!(
+            ed25519_key.to_bytes().len() * 8,
+            256,
+            "Ed25519 private key must be exactly 256 bits"
+        );
+        println!(
+            "✅ Ed25519 private key length verification passed: {} bytes ({} bits)",
+            ed25519_key.to_bytes().len(),
+            ed25519_key.to_bytes().len() * 8
+        );
+
         // Verify that both private keys are identical
-        assert_eq!(ecdsa_private_key, ed25519_key.to_bytes().into(), "Both private keys must be identical 256-bit integers");
+        assert_eq!(
+            ecdsa_private_key,
+            ed25519_key.to_bytes().into(),
+            "Both private keys must be identical 256-bit integers"
+        );
         println!("✅ Private key consistency verification passed: Same 256-bit integer");
-        
+
         // The private key is the same 256-bit integer, but public keys are different
         println!("\n🎯 Conclusion:");
         println!("   ✅ Same 256-bit private key can be used for both algorithms!");

@@ -1,9 +1,11 @@
-pub mod key_handlers;
+pub mod custody_handlers;
 pub mod ens_handlers;
 pub mod hub_handlers;
+pub mod key_handlers;
+pub mod signers_handlers;
 
-use anyhow::Result;
 use crate::cli::types::*;
+use anyhow::Result;
 
 /// CLI command handler
 pub struct CliHandler;
@@ -36,5 +38,18 @@ impl CliHandler {
         hub_client: &crate::farcaster_client::FarcasterClient,
     ) -> Result<()> {
         hub_handlers::handle_hub_command(command, hub_client).await
+    }
+
+    /// Handle ECDSA custody key management commands
+    pub async fn handle_custody_command(command: CustodyCommands) -> Result<()> {
+        custody_handlers::handle_custody_command(command).await
+    }
+
+    /// Handle signer management commands
+    pub async fn handle_signers_command(
+        command: SignersCommands,
+        hub_client: &crate::farcaster_client::FarcasterClient,
+    ) -> Result<()> {
+        signers_handlers::handle_signers_command(command, hub_client).await
     }
 }
