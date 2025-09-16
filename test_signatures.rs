@@ -17,7 +17,7 @@ fn main() {
         println!("{}: 0x{:x}", sig, hash);
     }
     
-    // 从测试输出中看到的实际签名
+    // Actual signatures from test output
     println!("\nActual signatures from logs:");
     println!("0xf2e1…7e45: 0xf2e17e45...");
     println!("0xaabd…fe2f: 0xaabd...fe2f");

@@ -572,4 +572,44 @@ pub enum HubCommands {
     /// Example: castorix hub info
     Info,
 
+    /// 👥 Get followers for a FID
+    ///
+    /// Retrieve all users who follow the specified Farcaster ID.
+    /// This is a read-only operation that doesn't require authentication.
+    ///
+    /// Example: castorix hub followers 12345
+    Followers {
+        /// Farcaster ID (FID) to get followers for
+        fid: u64,
+        /// Maximum number of followers to retrieve (default: 100)
+        #[arg(long, default_value = "100")]
+        limit: u32,
+    },
+
+    /// 👤 Get following for a FID
+    ///
+    /// Retrieve all users that the specified Farcaster ID follows.
+    /// This is a read-only operation that doesn't require authentication.
+    ///
+    /// Example: castorix hub following 12345
+    Following {
+        /// Farcaster ID (FID) to get following for
+        fid: u64,
+        /// Maximum number of following to retrieve (default: 100)
+        #[arg(long, default_value = "100")]
+        limit: u32,
+    },
+
+    /// 👤 Get user profile for a FID
+    ///
+    /// Retrieve complete profile information for the specified Farcaster ID.
+    /// This includes username, display name, bio, profile picture, and other user data.
+    /// This is a read-only operation that doesn't require authentication.
+    ///
+    /// Example: castorix hub profile 12345
+    Profile {
+        /// Farcaster ID (FID) to get profile for
+        fid: u64,
+    },
+
 }

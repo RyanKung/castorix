@@ -78,7 +78,10 @@ async fn main() -> Result<()> {
                 | HubCommands::EthAddresses { .. }
                 | HubCommands::EnsDomains { .. }
                 | HubCommands::CustodyAddress { .. }
-                | HubCommands::Info
+                |             HubCommands::Info
+            | HubCommands::Followers { .. }
+            | HubCommands::Following { .. }
+            | HubCommands::Profile { .. }
                 => {
                     let hub_client = FarcasterClient::read_only(hub_url);
                     CliHandler::handle_hub_command(action, &hub_client).await?;

@@ -102,6 +102,15 @@ pub async fn handle_hub_command(
         HubCommands::Info => {
             handle_hub_info(hub_client).await?;
         }
+        HubCommands::Followers { fid, limit } => {
+            handle_followers(hub_client, fid, limit).await?;
+        }
+            HubCommands::Following { fid, limit } => {
+                handle_following(hub_client, fid, limit).await?;
+            }
+            HubCommands::Profile { fid } => {
+                handle_profile(hub_client, fid).await?;
+            }
     }
     Ok(())
 }
@@ -257,6 +266,162 @@ async fn handle_hub_info(hub_client: &crate::farcaster_client::FarcasterClient) 
             println!("❌ Failed to get Hub information: {e}");
             println!("💡 This might be because the Hub doesn't support the info endpoint");
         }
+    }
+    
+    Ok(())
+}
+
+async fn handle_followers(
+    hub_client: &crate::farcaster_client::FarcasterClient,
+    fid: u64,
+    limit: u32,
+) -> Result<()> {
+    println!("👥 Getting followers for FID: {fid} (limit: {limit})");
+    
+    match hub_client.get_followers(fid, limit).await {
+        Ok(followers) => {
+            if followers.is_empty() {
+                println!("❌ No followers found for FID: {fid}");
+            } else {
+                println!("✅ Found {} follower(s):", followers.len());
+                for (i, follower) in followers.iter().enumerate() {
+                    // Extract FID from the link message
+                    let follower_fid = follower
+                        .get("data")
+                        .and_then(|d| d.get("fid"))
+                        .and_then(|f| f.as_u64())
+                        .unwrap_or(0);
+                    
+                    // Extract timestamp for when they followed
+                    let timestamp = follower
+                        .get("data")
+                        .and_then(|d| d.get("timestamp"))
+                        .and_then(|t| t.as_u64())
+                        .unwrap_or(0);
+                    
+                    println!("   {}. FID: {} (followed at timestamp: {})", 
+                        i + 1, follower_fid, timestamp);
+                }
+            }
+        }
+        Err(e) => println!("❌ Failed to get followers: {e}"),
+    }
+    
+    Ok(())
+}
+
+async fn handle_following(
+    hub_client: &crate::farcaster_client::FarcasterClient,
+    fid: u64,
+    limit: u32,
+) -> Result<()> {
+    println!("👤 Getting following for FID: {fid} (limit: {limit})");
+    
+    match hub_client.get_following(fid, limit).await {
+        Ok(following) => {
+            if following.is_empty() {
+                println!("❌ No following found for FID: {fid}");
+            } else {
+                println!("✅ Found {} following:", following.len());
+                for (i, user) in following.iter().enumerate() {
+                    // Extract target FID from the link message
+                    let target_fid = user
+                        .get("data")
+                        .and_then(|d| d.get("linkBody"))
+                        .and_then(|lb| lb.get("targetFid"))
+                        .and_then(|f| f.as_u64())
+                        .unwrap_or(0);
+                    
+                    // Extract timestamp for when they followed
+                    let timestamp = user
+                        .get("data")
+                        .and_then(|d| d.get("timestamp"))
+                        .and_then(|t| t.as_u64())
+                        .unwrap_or(0);
+                    
+                    println!("   {}. FID: {} (followed at timestamp: {})", 
+                        i + 1, target_fid, timestamp);
+                }
+            }
+        }
+        Err(e) => println!("❌ Failed to get following: {e}"),
+    }
+    
+    Ok(())
+}
+
+async fn handle_profile(
+    hub_client: &crate::farcaster_client::FarcasterClient,
+    fid: u64,
+) -> Result<()> {
+    println!("👤 Getting profile for FID: {fid}");
+    
+    match hub_client.get_user_profile(fid).await {
+        Ok(profile_data) => {
+            if profile_data.is_empty() {
+                println!("❌ No profile data found for FID: {fid}");
+            } else {
+                println!("✅ Profile for FID: {fid}");
+                println!("{}", "─".repeat(50));
+                
+                // Parse and display profile information
+                let mut username = "Unknown".to_string();
+                let mut display_name = "Unknown".to_string();
+                let mut bio = "No bio".to_string();
+                let mut pfp_url = "No profile picture".to_string();
+                let mut location = "No location".to_string();
+                let mut twitter = "No Twitter".to_string();
+                let mut github = "No GitHub".to_string();
+                let mut url = "No website".to_string();
+                let mut eth_address = "No Ethereum address".to_string();
+                let mut sol_address = "No Solana address".to_string();
+                
+                for data in &profile_data {
+                    if let Some(user_data_body) = data.get("data").and_then(|d| d.get("userDataBody")) {
+                        if let Some(data_type) = user_data_body.get("type").and_then(|t| t.as_str()) {
+                            if let Some(value) = user_data_body.get("value").and_then(|v| v.as_str()) {
+                                match data_type {
+                                    "USER_DATA_TYPE_USERNAME" => username = value.to_string(),
+                                    "USER_DATA_TYPE_DISPLAY" => display_name = value.to_string(),
+                                    "USER_DATA_TYPE_BIO" => bio = value.to_string(),
+                                    "USER_DATA_TYPE_PFP" => pfp_url = value.to_string(),
+                                    "USER_DATA_TYPE_LOCATION" => location = value.to_string(),
+                                    "USER_DATA_TYPE_TWITTER" => twitter = format!("@{}", value),
+                                    "USER_DATA_TYPE_GITHUB" => github = format!("@{}", value),
+                                    "USER_DATA_TYPE_URL" => url = value.to_string(),
+                                    "USER_DATA_PRIMARY_ADDRESS_ETHEREUM" => eth_address = value.to_string(),
+                                    "USER_DATA_PRIMARY_ADDRESS_SOLANA" => sol_address = value.to_string(),
+                                    _ => {} // Ignore other types
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Display profile information in a nice format
+                println!("📝 Display Name: {}", display_name);
+                println!("👤 Username: @{}", username);
+                println!("📄 Bio: {}", bio);
+                println!("📍 Location: {}", location);
+                println!("🐦 Twitter: {}", twitter);
+                println!("💻 GitHub: {}", github);
+                println!("🌐 Website: {}", url);
+                println!("🔗 Ethereum: {}", eth_address);
+                println!("🔗 Solana: {}", sol_address);
+                println!("🖼️  Profile Picture: {}", pfp_url);
+                
+                // Display profile picture if available
+                if pfp_url != "No profile picture" && !pfp_url.is_empty() {
+                    if let Err(e) = crate::image_display::ImageDisplay::smart_display(&pfp_url).await {
+                        println!("❌ Failed to display profile picture: {}", e);
+                    }
+                }
+                
+                println!("{}", "─".repeat(50));
+                println!("📊 Total profile fields: {}", profile_data.len());
+            }
+        }
+        Err(e) => println!("❌ Failed to get profile: {e}"),
     }
     
     Ok(())

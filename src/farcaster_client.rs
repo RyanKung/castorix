@@ -738,6 +738,122 @@ impl FarcasterClient {
             ))
         }
     }
+
+    /// Get followers for a FID
+    ///
+    /// # Arguments
+    /// * `fid` - The Farcaster ID
+    /// * `limit` - Maximum number of followers to retrieve
+    ///
+    /// # Returns
+    /// * `Result<Vec<serde_json::Value>>` - List of follower information or an error
+    pub async fn get_followers(&self, fid: u64, limit: u32) -> Result<Vec<serde_json::Value>> {
+        let url = format!("{}/v1/linksByTargetFid?target_fid={}&link_type=follow&pageSize={}", self.hub_url, fid, limit);
+
+        let response = self
+            .client
+            .get(&url)
+            .send()
+            .await
+            .with_context(|| "Failed to get followers from Farcaster Hub")?;
+
+        let status = response.status();
+        let response_text = response.text().await?;
+
+        if status.is_success() {
+            let data: serde_json::Value = serde_json::from_str(&response_text)
+                .with_context(|| "Failed to parse followers response")?;
+
+            if let Some(messages) = data.get("messages").and_then(|m| m.as_array()) {
+                Ok(messages.clone())
+            } else {
+                Ok(vec![])
+            }
+        } else {
+            Err(anyhow::anyhow!(
+                "Farcaster Hub returned error {}: {}",
+                status,
+                response_text
+            ))
+        }
+    }
+
+    /// Get following for a FID
+    ///
+    /// # Arguments
+    /// * `fid` - The Farcaster ID
+    /// * `limit` - Maximum number of following to retrieve
+    ///
+    /// # Returns
+    /// * `Result<Vec<serde_json::Value>>` - List of following information or an error
+    pub async fn get_following(&self, fid: u64, limit: u32) -> Result<Vec<serde_json::Value>> {
+        let url = format!("{}/v1/linksByFid?fid={}&link_type=follow&pageSize={}", self.hub_url, fid, limit);
+
+        let response = self
+            .client
+            .get(&url)
+            .send()
+            .await
+            .with_context(|| "Failed to get following from Farcaster Hub")?;
+
+        let status = response.status();
+        let response_text = response.text().await?;
+
+        if status.is_success() {
+            let data: serde_json::Value = serde_json::from_str(&response_text)
+                .with_context(|| "Failed to parse following response")?;
+
+            if let Some(messages) = data.get("messages").and_then(|m| m.as_array()) {
+                Ok(messages.clone())
+            } else {
+                Ok(vec![])
+            }
+        } else {
+            Err(anyhow::anyhow!(
+                "Farcaster Hub returned error {}: {}",
+                status,
+                response_text
+            ))
+        }
+    }
+
+    /// Get user profile for a FID
+    ///
+    /// # Arguments
+    /// * `fid` - The Farcaster ID
+    ///
+    /// # Returns
+    /// * `Result<Vec<serde_json::Value>>` - List of user profile data or an error
+    pub async fn get_user_profile(&self, fid: u64) -> Result<Vec<serde_json::Value>> {
+        let url = format!("{}/v1/userDataByFid?fid={}", self.hub_url, fid);
+
+        let response = self
+            .client
+            .get(&url)
+            .send()
+            .await
+            .with_context(|| "Failed to get user profile from Farcaster Hub")?;
+
+        let status = response.status();
+        let response_text = response.text().await?;
+
+        if status.is_success() {
+            let data: serde_json::Value = serde_json::from_str(&response_text)
+                .with_context(|| "Failed to parse user profile response")?;
+
+            if let Some(messages) = data.get("messages").and_then(|m| m.as_array()) {
+                Ok(messages.clone())
+            } else {
+                Ok(vec![])
+            }
+        } else {
+            Err(anyhow::anyhow!(
+                "Farcaster Hub returned error {}: {}",
+                status,
+                response_text
+            ))
+        }
+    }
 }
 
 /// Get Ed25519 public key for a specific FID from encrypted storage
