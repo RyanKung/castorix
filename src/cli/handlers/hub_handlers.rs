@@ -114,6 +114,9 @@ pub async fn handle_hub_command(
             HubCommands::Stats { fid } => {
                 handle_stats(hub_client, fid).await?;
             }
+            HubCommands::Spam { fids } => {
+                handle_spam_check(fids).await?;
+            }
     }
     Ok(())
 }
@@ -538,6 +541,43 @@ async fn handle_stats(
             }
         }
         Err(e) => println!("❌ Failed to get storage limits: {e}"),
+    }
+    
+    Ok(())
+}
+
+async fn handle_spam_check(fids: Vec<u64>) -> Result<()> {
+    println!("🚫 Checking spam status for FIDs: {:?}", fids);
+    
+    // Load spam checker
+    let spam_checker = match crate::spam_checker::SpamChecker::load_from_file("labels/spam.jsonl") {
+        Ok(checker) => checker,
+        Err(e) => {
+            println!("❌ Failed to load spam labels: {e}");
+            println!("💡 Make sure the labels submodule is properly initialized");
+            return Ok(());
+        }
+    };
+    
+    // Get statistics
+    let (total, spam_count, non_spam_count) = spam_checker.get_stats();
+    println!("📊 Spam labels loaded: {} total, {} spam, {} non-spam", total, spam_count, non_spam_count);
+    
+    // Check each FID
+    for fid in fids {
+        match spam_checker.get_label(fid) {
+            Some(label) => {
+                let status = match label.label_type {
+                    0 => "🚫 SPAM",
+                    2 => "✅ CLEAN",
+                    _ => "❓ UNKNOWN",
+                };
+                println!("   FID {}: {} (label_type: {})", fid, status, label.label_type);
+            }
+            None => {
+                println!("   FID {}: ❓ NOT FOUND (not in dataset)", fid);
+            }
+        }
     }
     
     Ok(())

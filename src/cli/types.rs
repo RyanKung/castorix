@@ -631,4 +631,17 @@ pub enum HubCommands {
         fid: u64,
     },
 
+    /// 🚫 Check spam status for FIDs
+    ///
+    /// Check if one or more FIDs are marked as spam in Warpcast's spam labels dataset.
+    /// This uses the public spam labels from merkle-team/labels repository.
+    /// This is a read-only operation that doesn't require authentication.
+    ///
+    /// Example: castorix hub spam 12345
+    /// Example: castorix hub spam 12345 67890 11111
+    Spam {
+        /// Farcaster ID(s) (FID) to check for spam status
+        fids: Vec<u64>,
+    },
+
 }

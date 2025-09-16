@@ -28,3 +28,4 @@ pub mod message;
 pub mod username_proof;
 pub mod username_proofs;
 pub mod image_display;
+pub mod spam_checker;
