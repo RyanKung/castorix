@@ -84,9 +84,9 @@ impl ImageDisplay {
             }
         }
         
-        // Fixed dimensions for optimal display (reduced by 50%)
-        let width = 43;  // 减少50%宽度 (86 * 0.5)
-        let height = 12; // 减少50%高度 (24 * 0.5)
+        // Fixed dimensions for optimal display (increased by 30%)
+        let width = 56;  // 增加30%宽度 (43 * 1.3)
+        let height = 16; // 增加30%高度 (12 * 1.3)
         (width, height)
     }
     
