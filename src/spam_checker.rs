@@ -95,6 +95,16 @@ impl SpamChecker {
             .map(|&fid| (fid, self.is_spam(fid)))
             .collect()
     }
+
+    /// Get the oldest timestamp from all labels
+    pub fn get_oldest_timestamp(&self) -> Option<u64> {
+        self.labels.values().map(|label| label.timestamp).min()
+    }
+
+    /// Get the newest timestamp from all labels
+    pub fn get_newest_timestamp(&self) -> Option<u64> {
+        self.labels.values().map(|label| label.timestamp).max()
+    }
 }
 
 #[cfg(test)]

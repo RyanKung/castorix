@@ -84,6 +84,7 @@ async fn main() -> Result<()> {
             | HubCommands::Profile { .. }
             | HubCommands::Stats { .. }
             | HubCommands::Spam { .. }
+            | HubCommands::SpamStat
                 => {
                     let hub_client = FarcasterClient::read_only(hub_url);
                     CliHandler::handle_hub_command(action, &hub_client).await?;

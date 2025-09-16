@@ -117,6 +117,9 @@ pub async fn handle_hub_command(
             HubCommands::Spam { fids } => {
                 handle_spam_check(fids).await?;
             }
+            HubCommands::SpamStat => {
+                handle_spam_stat(hub_client).await?;
+            }
     }
     Ok(())
 }
@@ -579,6 +582,150 @@ async fn handle_spam_check(fids: Vec<u64>) -> Result<()> {
             }
         }
     }
+    
+    Ok(())
+}
+
+async fn handle_spam_stat(hub_client: &crate::farcaster_client::FarcasterClient) -> Result<()> {
+    println!("📊 Getting comprehensive spam statistics...");
+    
+    // Load spam checker
+    let spam_checker = match crate::spam_checker::SpamChecker::load_from_file("labels/labels/spam.jsonl") {
+        Ok(checker) => checker,
+        Err(e) => {
+            println!("❌ Failed to load spam labels: {e}");
+            println!("💡 Make sure the labels submodule is properly initialized");
+            return Ok(());
+        }
+    };
+    
+    // Get spam statistics
+    let (total_labels, spam_count, non_spam_count) = spam_checker.get_stats();
+    let unknown_count = total_labels - spam_count - non_spam_count;
+    
+    // Calculate percentages
+    let spam_percentage = if total_labels > 0 { (spam_count * 100) / total_labels } else { 0 };
+    let non_spam_percentage = if total_labels > 0 { (non_spam_count * 100) / total_labels } else { 0 };
+    let unknown_percentage = if total_labels > 0 { (unknown_count * 100) / total_labels } else { 0 };
+    
+    println!("\n🚫 Spam Labels Statistics:");
+    println!("{}", "─".repeat(50));
+    println!("📊 Total Spam Labels: {}", total_labels);
+    println!("🚫 Spam: {} ({:.1}%)", spam_count, spam_percentage as f64);
+    println!("✅ Non-Spam: {} ({:.1}%)", non_spam_count, non_spam_percentage as f64);
+    println!("❓ Unknown: {} ({:.1}%)", unknown_count, unknown_percentage as f64);
+    
+    // Get hub information for additional context
+    println!("\n🌐 Hub Information:");
+    println!("{}", "─".repeat(50));
+    
+    match hub_client.get_hub_info().await {
+        Ok(hub_info) => {
+            // Try to extract total user count from hub info
+            let total_users = hub_info
+                .get("totalUsers")
+                .and_then(|v| v.as_u64())
+                .or_else(|| {
+                    // Try alternative field names
+                    hub_info.get("total_users")
+                        .and_then(|v| v.as_u64())
+                        .or_else(|| hub_info.get("userCount").and_then(|v| v.as_u64()))
+                });
+            
+            if let Some(total_users) = total_users {
+                println!("👥 Total Users in Hub: {}", total_users);
+                
+                // Calculate coverage percentage
+                let coverage_percentage = if total_users > 0 { 
+                    (total_labels * 100) / total_users as usize 
+                } else { 0 };
+                
+                println!("📈 Label Coverage: {:.1}% of total users", coverage_percentage as f64);
+                
+                // Calculate spam rate among total users
+                let spam_rate_total = if total_users > 0 { 
+                    (spam_count * 100) / total_users as usize 
+                } else { 0 };
+                
+                println!("🚫 Spam Rate (vs total users): {:.1}%", spam_rate_total as f64);
+                
+                // Show additional context
+                let unlabeled_users = total_users as usize - total_labels;
+                println!("❓ Unlabeled Users: {} ({:.1}%)", 
+                    unlabeled_users, 
+                    if total_users > 0 { (unlabeled_users * 100) / total_users as usize } else { 0 } as f64
+                );
+            } else {
+                // Try to extract total users from dbStats
+                if let Some(db_stats) = hub_info.get("dbStats") {
+                    if let Some(num_fid_registrations) = db_stats.get("numFidRegistrations").and_then(|v| v.as_u64()) {
+                        println!("👥 Total FID Registrations: {}", num_fid_registrations);
+                        
+                        // Calculate coverage percentage
+                        let coverage_percentage = if num_fid_registrations > 0 { 
+                            (total_labels * 100) / num_fid_registrations as usize 
+                        } else { 0 };
+                        
+                        println!("📈 Label Coverage: {:.1}% of registered FIDs", coverage_percentage as f64);
+                        
+                        // Calculate spam rate among total users
+                        let spam_rate_total = if num_fid_registrations > 0 { 
+                            (spam_count * 100) / num_fid_registrations as usize 
+                        } else { 0 };
+                        
+                        println!("🚫 Spam Rate (vs registered FIDs): {:.1}%", spam_rate_total as f64);
+                        
+                        // Show additional context
+                        let unlabeled_users = num_fid_registrations as usize - total_labels;
+                        println!("❓ Unlabeled FIDs: {} ({:.1}%)", 
+                            unlabeled_users, 
+                            if num_fid_registrations > 0 { (unlabeled_users * 100) / num_fid_registrations as usize } else { 0 } as f64
+                        );
+                    } else {
+                        println!("❓ Total user count not available in hub info");
+                        println!("📋 Hub Info: {}", serde_json::to_string_pretty(&hub_info)?);
+                    }
+                } else {
+                    println!("❓ Total user count not available in hub info");
+                    println!("📋 Hub Info: {}", serde_json::to_string_pretty(&hub_info)?);
+                }
+            }
+        }
+        Err(e) => {
+            println!("❌ Failed to get hub information: {e}");
+            println!("💡 This might be because the Hub doesn't support the info endpoint");
+        }
+    }
+    
+    // Show additional statistics
+    println!("\n📈 Additional Statistics:");
+    println!("{}", "─".repeat(50));
+    
+    if total_labels > 0 {
+        let spam_ratio = spam_count as f64 / total_labels as f64;
+        let non_spam_ratio = non_spam_count as f64 / total_labels as f64;
+        
+        println!("📊 Spam to Non-Spam Ratio: {:.2}:1", spam_ratio / non_spam_ratio);
+        println!("📊 Clean Rate: {:.1}%", non_spam_percentage as f64);
+        println!("📊 Spam Rate: {:.1}%", spam_percentage as f64);
+    }
+    
+    // Show data freshness info if available
+    if let Some(first_timestamp) = spam_checker.get_oldest_timestamp() {
+        let first_date = chrono::DateTime::from_timestamp(first_timestamp as i64, 0)
+            .map(|dt| dt.format("%Y-%m-%d %H:%M:%S").to_string())
+            .unwrap_or_else(|| "Unknown".to_string());
+        println!("📅 Oldest Label: {}", first_date);
+    }
+    
+    if let Some(last_timestamp) = spam_checker.get_newest_timestamp() {
+        let last_date = chrono::DateTime::from_timestamp(last_timestamp as i64, 0)
+            .map(|dt| dt.format("%Y-%m-%d %H:%M:%S").to_string())
+            .unwrap_or_else(|| "Unknown".to_string());
+        println!("📅 Newest Label: {}", last_date);
+    }
+    
+    println!("\n✅ Spam statistics retrieved successfully!");
     
     Ok(())
 }
