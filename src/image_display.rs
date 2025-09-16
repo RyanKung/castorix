@@ -110,42 +110,10 @@ impl ImageDisplay {
         }
     }
     
-    /// Display image info and URL
-    pub async fn display_info(image_url: &str) -> Result<()> {
-        println!("\n🖼️  Profile Picture Information:");
-        println!("{}", "─".repeat(50));
-        println!("🔗 URL: {}", image_url);
-        
-        // Try to get image dimensions
-        match Self::get_image_info(image_url).await {
-            Ok((width, height)) => {
-                println!("📐 Dimensions: {}x{} pixels", width, height);
-            }
-            Err(_) => {
-                println!("📐 Dimensions: Unable to determine");
-            }
-        }
-        
-        println!("💡 Tip: Copy the URL above to view in your browser");
-        println!("{}", "─".repeat(50));
-        Ok(())
-    }
     
-    /// Get image dimensions
-    async fn get_image_info(image_url: &str) -> Result<(u32, u32)> {
-        let response = reqwest::get(image_url).await?;
-        let image_data = response.bytes().await?;
-        let img = image::load_from_memory(&image_data)?;
-        Ok((img.width(), img.height()))
-    }
-    
-    /// Smart display - show image info and colored block art
+    /// Smart display - show colored block art only
     pub async fn smart_display(image_url: &str) -> Result<()> {
-        // First show basic info
-        Self::display_info(image_url).await?;
-        
         // Try colored block art display
-        println!("\n🎨 Attempting colored block art display...");
         match Self::display_as_ascii(image_url).await {
             Ok(_) => {
                 println!("✅ Colored block art displayed successfully!");
