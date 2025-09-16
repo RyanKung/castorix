@@ -550,7 +550,7 @@ async fn handle_spam_check(fids: Vec<u64>) -> Result<()> {
     println!("🚫 Checking spam status for FIDs: {:?}", fids);
     
     // Load spam checker
-    let spam_checker = match crate::spam_checker::SpamChecker::load_from_file("labels/spam.jsonl") {
+    let spam_checker = match crate::spam_checker::SpamChecker::load_from_file("labels/labels/spam.jsonl") {
         Ok(checker) => checker,
         Err(e) => {
             println!("❌ Failed to load spam labels: {e}");
@@ -567,12 +567,12 @@ async fn handle_spam_check(fids: Vec<u64>) -> Result<()> {
     for fid in fids {
         match spam_checker.get_label(fid) {
             Some(label) => {
-                let status = match label.label_type {
+                let status = match label.label_value {
                     0 => "🚫 SPAM",
                     2 => "✅ CLEAN",
                     _ => "❓ UNKNOWN",
                 };
-                println!("   FID {}: {} (label_type: {})", fid, status, label.label_type);
+                println!("   FID {}: {} (label_value: {})", fid, status, label.label_value);
             }
             None => {
                 println!("   FID {}: ❓ NOT FOUND (not in dataset)", fid);

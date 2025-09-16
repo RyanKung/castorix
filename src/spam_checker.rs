@@ -6,9 +6,18 @@ use std::io::{BufRead, BufReader};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SpamLabel {
+    pub provider: u64,
+    #[serde(rename = "type")]
+    pub target_type: TargetType,
+    pub label_type: String,
+    pub label_value: u8,
+    pub timestamp: u64,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct TargetType {
+    pub target: String,
     pub fid: u64,
-    pub label_type: u8,
-    pub updated_at: Option<String>,
 }
 
 pub struct SpamChecker {
@@ -30,7 +39,10 @@ impl SpamChecker {
 
             match serde_json::from_str::<SpamLabel>(&line) {
                 Ok(label) => {
-                    labels.insert(label.fid, label);
+                    // Only process spam labels
+                    if label.label_type == "spam" {
+                        labels.insert(label.target_type.fid, label);
+                    }
                 }
                 Err(e) => {
                     eprintln!("Warning: Failed to parse line: {} - Error: {}", line, e);
@@ -43,7 +55,7 @@ impl SpamChecker {
 
     /// Check if a FID is marked as spam
     pub fn is_spam(&self, fid: u64) -> Option<bool> {
-        self.labels.get(&fid).map(|label| label.label_type == 0)
+        self.labels.get(&fid).map(|label| label.label_value == 0)
     }
 
     /// Get spam label for a FID
@@ -55,7 +67,7 @@ impl SpamChecker {
     pub fn get_spam_fids(&self) -> Vec<u64> {
         self.labels
             .iter()
-            .filter(|(_, label)| label.label_type == 0)
+            .filter(|(_, label)| label.label_value == 0)
             .map(|(fid, _)| *fid)
             .collect()
     }
@@ -64,7 +76,7 @@ impl SpamChecker {
     pub fn get_non_spam_fids(&self) -> Vec<u64> {
         self.labels
             .iter()
-            .filter(|(_, label)| label.label_type == 2)
+            .filter(|(_, label)| label.label_value == 2)
             .map(|(fid, _)| *fid)
             .collect()
     }
@@ -72,8 +84,8 @@ impl SpamChecker {
     /// Get statistics
     pub fn get_stats(&self) -> (usize, usize, usize) {
         let total = self.labels.len();
-        let spam_count = self.labels.values().filter(|l| l.label_type == 0).count();
-        let non_spam_count = self.labels.values().filter(|l| l.label_type == 2).count();
+        let spam_count = self.labels.values().filter(|l| l.label_value == 0).count();
+        let non_spam_count = self.labels.values().filter(|l| l.label_value == 2).count();
         (total, spam_count, non_spam_count)
     }
 
