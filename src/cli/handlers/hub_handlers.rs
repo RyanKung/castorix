@@ -111,6 +111,9 @@ pub async fn handle_hub_command(
             HubCommands::Profile { fid, all } => {
                 handle_profile(hub_client, fid, all).await?;
             }
+            HubCommands::Stats { fid } => {
+                handle_stats(hub_client, fid).await?;
+            }
     }
     Ok(())
 }
@@ -276,7 +279,8 @@ async fn handle_followers(
     fid: u64,
     limit: u32,
 ) -> Result<()> {
-    println!("👥 Getting followers for FID: {fid} (limit: {limit})");
+    let limit_text = if limit == 0 { "all".to_string() } else { limit.to_string() };
+    println!("👥 Getting followers for FID: {fid} (limit: {limit_text})");
     
     match hub_client.get_followers(fid, limit).await {
         Ok(followers) => {
@@ -315,7 +319,8 @@ async fn handle_following(
     fid: u64,
     limit: u32,
 ) -> Result<()> {
-    println!("👤 Getting following for FID: {fid} (limit: {limit})");
+    let limit_text = if limit == 0 { "all".to_string() } else { limit.to_string() };
+    println!("👤 Getting following for FID: {fid} (limit: {limit_text})");
     
     match hub_client.get_following(fid, limit).await {
         Ok(following) => {
@@ -437,6 +442,102 @@ async fn handle_profile(
             }
         }
         Err(e) => println!("❌ Failed to get profile: {e}"),
+    }
+    
+    Ok(())
+}
+
+async fn handle_stats(
+    hub_client: &crate::farcaster_client::FarcasterClient,
+    fid: u64,
+) -> Result<()> {
+    println!("📊 Getting statistics for FID: {fid}");
+    
+    // Get storage limits which includes following count
+    match hub_client.get_storage_limits(fid).await {
+        Ok(storage_data) => {
+            println!("✅ Storage limits retrieved:");
+            
+            if let Some(limits) = storage_data.get("limits").and_then(|l| l.as_array()) {
+                for limit in limits {
+                    if let (Some(store_type), Some(name), Some(limit_val), Some(used)) = (
+                        limit.get("storeType").and_then(|s| s.as_str()),
+                        limit.get("name").and_then(|n| n.as_str()),
+                        limit.get("limit").and_then(|l| l.as_u64()),
+                        limit.get("used").and_then(|u| u.as_u64()),
+                    ) {
+                        match name {
+                            "LINKS" => {
+                                println!("   👥 Following: {}/{} ({}%)", 
+                                    used, limit_val, 
+                                    if limit_val > 0 { (used * 100) / limit_val } else { 0 }
+                                );
+                            }
+                            "CASTS" => {
+                                println!("   📝 Casts: {}/{} ({}%)", 
+                                    used, limit_val,
+                                    if limit_val > 0 { (used * 100) / limit_val } else { 0 }
+                                );
+                            }
+                            "REACTIONS" => {
+                                println!("   ❤️  Reactions: {}/{} ({}%)", 
+                                    used, limit_val,
+                                    if limit_val > 0 { (used * 100) / limit_val } else { 0 }
+                                );
+                            }
+                            "USER_DATA" => {
+                                println!("   👤 Profile Data: {}/{} ({}%)", 
+                                    used, limit_val,
+                                    if limit_val > 0 { (used * 100) / limit_val } else { 0 }
+                                );
+                            }
+                            "VERIFICATIONS" => {
+                                println!("   ✅ Verifications: {}/{} ({}%)", 
+                                    used, limit_val,
+                                    if limit_val > 0 { (used * 100) / limit_val } else { 0 }
+                                );
+                            }
+                            "USERNAME_PROOFS" => {
+                                println!("   🏷️  Username Proofs: {}/{} ({}%)", 
+                                    used, limit_val,
+                                    if limit_val > 0 { (used * 100) / limit_val } else { 0 }
+                                );
+                            }
+                            _ => {
+                                println!("   {} {}: {}/{} ({}%)", 
+                                    store_type, name, used, limit_val,
+                                    if limit_val > 0 { (used * 100) / limit_val } else { 0 }
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+            
+            
+            // Show tier information if available
+            if let Some(tier_subscriptions) = storage_data.get("tier_subscriptions").and_then(|t| t.as_array()) {
+                if !tier_subscriptions.is_empty() {
+                    println!("\n💎 Tier Information:");
+                    for tier in tier_subscriptions {
+                        if let (Some(tier_type), Some(expires_at)) = (
+                            tier.get("tier_type").and_then(|t| t.as_str()),
+                            tier.get("expires_at").and_then(|e| e.as_u64()),
+                        ) {
+                            if expires_at > 0 {
+                                let expire_date = chrono::DateTime::from_timestamp(expires_at as i64, 0)
+                                    .map(|dt| dt.format("%Y-%m-%d %H:%M:%S").to_string())
+                                    .unwrap_or_else(|| "Unknown".to_string());
+                                println!("   {} (expires: {})", tier_type, expire_date);
+                            } else {
+                                println!("   {} (permanent)", tier_type);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        Err(e) => println!("❌ Failed to get storage limits: {e}"),
     }
     
     Ok(())

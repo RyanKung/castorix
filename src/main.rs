@@ -82,6 +82,7 @@ async fn main() -> Result<()> {
             | HubCommands::Followers { .. }
             | HubCommands::Following { .. }
             | HubCommands::Profile { .. }
+            | HubCommands::Stats { .. }
                 => {
                     let hub_client = FarcasterClient::read_only(hub_url);
                     CliHandler::handle_hub_command(action, &hub_client).await?;

@@ -578,11 +578,12 @@ pub enum HubCommands {
     /// This is a read-only operation that doesn't require authentication.
     ///
     /// Example: castorix hub followers 12345
+    /// Example: castorix hub followers 12345 --limit 0  # Get all followers
     Followers {
         /// Farcaster ID (FID) to get followers for
         fid: u64,
-        /// Maximum number of followers to retrieve (default: 100)
-        #[arg(long, default_value = "100")]
+        /// Maximum number of followers to retrieve (0 for all, default: 1000)
+        #[arg(long, default_value = "1000")]
         limit: u32,
     },
 
@@ -592,11 +593,12 @@ pub enum HubCommands {
     /// This is a read-only operation that doesn't require authentication.
     ///
     /// Example: castorix hub following 12345
+    /// Example: castorix hub following 12345 --limit 0  # Get all following
     Following {
         /// Farcaster ID (FID) to get following for
         fid: u64,
-        /// Maximum number of following to retrieve (default: 100)
-        #[arg(long, default_value = "100")]
+        /// Maximum number of following to retrieve (0 for all, default: 1000)
+        #[arg(long, default_value = "1000")]
         limit: u32,
     },
 
@@ -615,6 +617,18 @@ pub enum HubCommands {
         /// Show all profile information instead of just basic info
         #[arg(long)]
         all: bool,
+    },
+
+    /// 📊 Get user statistics for a FID
+    ///
+    /// Retrieve statistics and storage limits for the specified Farcaster ID.
+    /// This shows follower count, following count, and storage usage.
+    /// This is a read-only operation that doesn't require authentication.
+    ///
+    /// Example: castorix hub stats 12345
+    Stats {
+        /// Farcaster ID (FID) to get statistics for
+        fid: u64,
     },
 
 }

@@ -743,71 +743,218 @@ impl FarcasterClient {
     ///
     /// # Arguments
     /// * `fid` - The Farcaster ID
-    /// * `limit` - Maximum number of followers to retrieve
+    /// * `limit` - Maximum number of followers to retrieve (0 for all)
     ///
     /// # Returns
     /// * `Result<Vec<serde_json::Value>>` - List of follower information or an error
     pub async fn get_followers(&self, fid: u64, limit: u32) -> Result<Vec<serde_json::Value>> {
-        let url = format!("{}/v1/linksByTargetFid?target_fid={}&link_type=follow&pageSize={}", self.hub_url, fid, limit);
+        let mut all_followers = Vec::new();
+        let mut page_token: Option<String> = None;
+        let page_size = 100; // Fixed page size for better performance
+        let mut total_retrieved = 0;
+        let mut page_count = 0;
 
-        let response = self
-            .client
-            .get(&url)
-            .send()
-            .await
-            .with_context(|| "Failed to get followers from Farcaster Hub")?;
+        println!("🔄 Starting to fetch followers for FID: {fid}");
 
-        let status = response.status();
-        let response_text = response.text().await?;
-
-        if status.is_success() {
-            let data: serde_json::Value = serde_json::from_str(&response_text)
-                .with_context(|| "Failed to parse followers response")?;
-
-            if let Some(messages) = data.get("messages").and_then(|m| m.as_array()) {
-                Ok(messages.clone())
-            } else {
-                Ok(vec![])
+        loop {
+            page_count += 1;
+            let mut url = format!(
+                "{}/v1/linksByTargetFid?target_fid={}&link_type=follow&pageSize={}",
+                self.hub_url, fid, page_size
+            );
+            
+            if let Some(ref token) = page_token {
+                url.push_str(&format!("&pageToken={}", token));
             }
-        } else {
-            Err(anyhow::anyhow!(
-                "Farcaster Hub returned error {}: {}",
-                status,
-                response_text
-            ))
+
+            println!("📄 Fetching page {page_count} (page size: {page_size})...");
+            println!("🔗 URL: {}", url);
+
+            let response = self
+                .client
+                .get(&url)
+                .send()
+                .await
+                .with_context(|| "Failed to get followers from Farcaster Hub")?;
+
+            let status = response.status();
+            let response_text = response.text().await?;
+
+            if status.is_success() {
+                let data: serde_json::Value = serde_json::from_str(&response_text)
+                    .with_context(|| "Failed to parse followers response")?;
+
+                if let Some(messages) = data.get("messages").and_then(|m| m.as_array()) {
+                    let page_followers = messages.clone();
+                    let page_follower_count = page_followers.len();
+                    
+                    println!("✅ Page {page_count}: Retrieved {page_follower_count} followers");
+                    
+                    // If we have a limit, check if we would exceed it
+                    if limit > 0 && total_retrieved + page_follower_count as u32 > limit {
+                        let remaining = limit - total_retrieved;
+                        let mut truncated_followers = page_followers;
+                        truncated_followers.truncate(remaining as usize);
+                        let truncated_count = truncated_followers.len();
+                        all_followers.extend(truncated_followers);
+                        println!("🛑 Reached limit of {limit}, stopping at {} total followers", total_retrieved + truncated_count as u32);
+                        break;
+                    }
+                    
+                    all_followers.extend(page_followers);
+                    total_retrieved = all_followers.len() as u32;
+                    println!("📊 Total followers so far: {total_retrieved}");
+
+                    // Check if there's a next page
+                    if let Some(next_token) = data.get("nextPageToken").and_then(|t| t.as_str()) {
+                        if !next_token.is_empty() {
+                            page_token = Some(next_token.to_string());
+                            println!("➡️  More pages available, continuing...");
+                        } else {
+                            println!("🏁 No more pages available");
+                            break;
+                        }
+                    } else {
+                        println!("🏁 No nextPageToken found, stopping");
+                        break;
+                    }
+                } else {
+                    println!("⚠️  No messages found in response, stopping");
+                    break;
+                }
+            } else {
+                return Err(anyhow::anyhow!(
+                    "Farcaster Hub returned error {}: {}",
+                    status,
+                    response_text
+                ));
+            }
         }
+
+        println!("✅ Completed fetching followers: {total_retrieved} total followers from {page_count} pages");
+        Ok(all_followers)
     }
 
     /// Get following for a FID
     ///
     /// # Arguments
     /// * `fid` - The Farcaster ID
-    /// * `limit` - Maximum number of following to retrieve
+    /// * `limit` - Maximum number of following to retrieve (0 for all)
     ///
     /// # Returns
     /// * `Result<Vec<serde_json::Value>>` - List of following information or an error
     pub async fn get_following(&self, fid: u64, limit: u32) -> Result<Vec<serde_json::Value>> {
-        let url = format!("{}/v1/linksByFid?fid={}&link_type=follow&pageSize={}", self.hub_url, fid, limit);
+        let mut all_following = Vec::new();
+        let mut page_token: Option<String> = None;
+        let page_size = 100; // Fixed page size for better performance
+        let mut total_retrieved = 0;
+        let mut page_count = 0;
+
+        println!("🔄 Starting to fetch following for FID: {fid}");
+
+        loop {
+            page_count += 1;
+            let mut url = format!(
+                "{}/v1/linksByFid?fid={}&link_type=follow&pageSize={}",
+                self.hub_url, fid, page_size
+            );
+            
+            if let Some(ref token) = page_token {
+                url.push_str(&format!("&pageToken={}", token));
+            }
+
+            println!("📄 Fetching page {page_count} (page size: {page_size})...");
+            println!("🔗 URL: {}", url);
+
+            let response = self
+                .client
+                .get(&url)
+                .send()
+                .await
+                .with_context(|| "Failed to get following from Farcaster Hub")?;
+
+            let status = response.status();
+            let response_text = response.text().await?;
+
+            if status.is_success() {
+                let data: serde_json::Value = serde_json::from_str(&response_text)
+                    .with_context(|| "Failed to parse following response")?;
+
+                if let Some(messages) = data.get("messages").and_then(|m| m.as_array()) {
+                    let page_following = messages.clone();
+                    let page_following_count = page_following.len();
+                    
+                    println!("✅ Page {page_count}: Retrieved {page_following_count} following");
+                    
+                    // If we have a limit, check if we would exceed it
+                    if limit > 0 && total_retrieved + page_following_count as u32 > limit {
+                        let remaining = limit - total_retrieved;
+                        let mut truncated_following = page_following;
+                        truncated_following.truncate(remaining as usize);
+                        let truncated_count = truncated_following.len();
+                        all_following.extend(truncated_following);
+                        println!("🛑 Reached limit of {limit}, stopping at {} total following", total_retrieved + truncated_count as u32);
+                        break;
+                    }
+                    
+                    all_following.extend(page_following);
+                    total_retrieved = all_following.len() as u32;
+                    println!("📊 Total following so far: {total_retrieved}");
+
+                    // Check if there's a next page
+                    if let Some(next_token) = data.get("nextPageToken").and_then(|t| t.as_str()) {
+                        if !next_token.is_empty() {
+                            page_token = Some(next_token.to_string());
+                            println!("➡️  More pages available, continuing...");
+                        } else {
+                            println!("🏁 No more pages available");
+                            break;
+                        }
+                    } else {
+                        println!("🏁 No nextPageToken found, stopping");
+                        break;
+                    }
+                } else {
+                    println!("⚠️  No messages found in response, stopping");
+                    break;
+                }
+            } else {
+                return Err(anyhow::anyhow!(
+                    "Farcaster Hub returned error {}: {}",
+                    status,
+                    response_text
+                ));
+            }
+        }
+
+        println!("✅ Completed fetching following: {total_retrieved} total following from {page_count} pages");
+        Ok(all_following)
+    }
+
+    /// Get storage limits for a FID
+    ///
+    /// # Arguments
+    /// * `fid` - The Farcaster ID
+    ///
+    /// # Returns
+    /// * `Result<serde_json::Value>` - Storage limits information or an error
+    pub async fn get_storage_limits(&self, fid: u64) -> Result<serde_json::Value> {
+        let url = format!("{}/v1/storageLimitsByFid?fid={}", self.hub_url, fid);
 
         let response = self
             .client
             .get(&url)
             .send()
             .await
-            .with_context(|| "Failed to get following from Farcaster Hub")?;
+            .with_context(|| "Failed to get storage limits from Farcaster Hub")?;
 
         let status = response.status();
         let response_text = response.text().await?;
 
         if status.is_success() {
             let data: serde_json::Value = serde_json::from_str(&response_text)
-                .with_context(|| "Failed to parse following response")?;
-
-            if let Some(messages) = data.get("messages").and_then(|m| m.as_array()) {
-                Ok(messages.clone())
-            } else {
-                Ok(vec![])
-            }
+                .with_context(|| "Failed to parse storage limits response")?;
+            Ok(data)
         } else {
             Err(anyhow::anyhow!(
                 "Farcaster Hub returned error {}: {}",
