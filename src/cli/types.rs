@@ -602,14 +602,19 @@ pub enum HubCommands {
 
     /// 👤 Get user profile for a FID
     ///
-    /// Retrieve complete profile information for the specified Farcaster ID.
-    /// This includes username, display name, bio, profile picture, and other user data.
+    /// Retrieve profile information for the specified Farcaster ID.
+    /// By default shows only username, display name, bio, and profile picture.
+    /// Use --all to show complete profile information including all user data.
     /// This is a read-only operation that doesn't require authentication.
     ///
     /// Example: castorix hub profile 12345
+    /// Example: castorix hub profile 12345 --all
     Profile {
         /// Farcaster ID (FID) to get profile for
         fid: u64,
+        /// Show all profile information instead of just basic info
+        #[arg(long)]
+        all: bool,
     },
 
 }

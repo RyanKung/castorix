@@ -108,8 +108,8 @@ pub async fn handle_hub_command(
             HubCommands::Following { fid, limit } => {
                 handle_following(hub_client, fid, limit).await?;
             }
-            HubCommands::Profile { fid } => {
-                handle_profile(hub_client, fid).await?;
+            HubCommands::Profile { fid, all } => {
+                handle_profile(hub_client, fid, all).await?;
             }
     }
     Ok(())
@@ -353,6 +353,7 @@ async fn handle_following(
 async fn handle_profile(
     hub_client: &crate::farcaster_client::FarcasterClient,
     fid: u64,
+    show_all: bool,
 ) -> Result<()> {
     println!("👤 Getting profile for FID: {fid}");
     
@@ -398,27 +399,41 @@ async fn handle_profile(
                     }
                 }
                 
-                // Display profile information in a nice format
-                println!("📝 Display Name: {}", display_name);
-                println!("👤 Username: @{}", username);
-                println!("📄 Bio: {}", bio);
-                println!("📍 Location: {}", location);
-                println!("🐦 Twitter: {}", twitter);
-                println!("💻 GitHub: {}", github);
-                println!("🌐 Website: {}", url);
-                println!("🔗 Ethereum: {}", eth_address);
-                println!("🔗 Solana: {}", sol_address);
-                println!("🖼️  Profile Picture: {}", pfp_url);
-                
-                // Display profile picture if available
-                if pfp_url != "No profile picture" && !pfp_url.is_empty() {
-                    if let Err(e) = crate::image_display::ImageDisplay::smart_display(&pfp_url).await {
-                        println!("❌ Failed to display profile picture: {}", e);
+                if show_all {
+                    // Display all profile information
+                    println!("📝 Display Name: {}", display_name);
+                    println!("👤 Username: @{}", username);
+                    println!("📄 Bio: {}", bio);
+                    println!("📍 Location: {}", location);
+                    println!("🐦 Twitter: {}", twitter);
+                    println!("💻 GitHub: {}", github);
+                    println!("🌐 Website: {}", url);
+                    println!("🔗 Ethereum: {}", eth_address);
+                    println!("🔗 Solana: {}", sol_address);
+                    println!("🖼️  Profile Picture: {}", pfp_url);
+                    
+                    // Display profile picture if available
+                    if pfp_url != "No profile picture" && !pfp_url.is_empty() {
+                        if let Err(e) = crate::image_display::ImageDisplay::smart_display(&pfp_url).await {
+                            println!("❌ Failed to display profile picture: {}", e);
+                        }
+                    }
+                    
+                    println!("{}", "─".repeat(50));
+                    println!("📊 Total profile fields: {}", profile_data.len());
+                } else {
+                    // Display only basic information
+                    println!("👤 @{}", username);
+                    println!("📝 {}", display_name);
+                    println!("📄 {}", bio);
+                    
+                    // Display profile picture if available
+                    if pfp_url != "No profile picture" && !pfp_url.is_empty() {
+                        if let Err(e) = crate::image_display::ImageDisplay::smart_display(&pfp_url).await {
+                            println!("❌ Failed to display profile picture: {}", e);
+                        }
                     }
                 }
-                
-                println!("{}", "─".repeat(50));
-                println!("📊 Total profile fields: {}", profile_data.len());
             }
         }
         Err(e) => println!("❌ Failed to get profile: {e}"),
