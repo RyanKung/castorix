@@ -1,110 +1,113 @@
-# Castorix
+# 🔐 Castorix — Farcaster Power Toolkit
 
-Castorix is a Rust command-line interface and library for interacting with the Farcaster protocol. It helps you manage encrypted Ethereum custody keys, produce ENS username proofs, inspect Hub data, and keep track of Ed25519 signer keys from a single toolchain.
+[![License: GPL-2.0](https://img.shields.io/badge/License-GPL--2.0-blue.svg)](https://opensource.org/licenses/GPL-2.0)
+[![Rust](https://img.shields.io/badge/Rust-1.70%2B-orange.svg)](https://www.rust-lang.org)
+[![Farcaster](https://img.shields.io/badge/Farcaster-Protocol-purple.svg)](https://farcaster.xyz)
+[![Snapchain](https://img.shields.io/badge/Snapchain-Ready-green.svg)](https://github.com/farcasterxyz/snapchain)
 
-## Feature Highlights
-- Encrypted Ethereum key storage with interactive CLI flows that keep secrets under `~/.castorix/keys`
-- ENS tooling to resolve domains, inspect Base subdomains, and generate Farcaster-compatible username proofs
-- Farcaster Hub client for querying users, followers, storage stats, spam labels, and submitting username proofs
-- Custody and Ed25519 signer key workflows, including dry-run support before talking to Key Gateway contracts
-- Optional spam label inspection using the `merkle-team/labels` dataset tracked via the `labels/` submodule
-- Additional crates for contract bindings, helper binaries, and a Snapchain reference implementation bundled with the repository
+Castorix is a Rust command-line interface and library for Farcaster builders. It keeps your custody wallets encrypted, generates Basenames/ENS username proofs, registers Ed25519 signers, pulls Hub data, and stays in sync with Snapchain — all from one toolchain.
 
-## Repository Layout
+## 🌟 Feature Highlights
+- 🔐 **Encrypted key vault** — interactive flows keep ECDSA custody wallets under `~/.castorix/keys`
+- 🏷️ **Basename & ENS proofs** — resolve domains, audit Base subdomains, and mint Farcaster-ready username proofs
+- 📡 **Hub power tools** — fetch user graphs, storage stats, custody addresses, and push proof submissions
+- ✍️ **Signer management** — generate Ed25519 keys, register/unregister with dry-run previews, and export safely
+- 🚨 **Spam intelligence** — optional labels from the `merkle-team/labels` dataset bundled as a submodule
+- 🧩 **All-in-one workspace** — Farcaster contract bindings, helper binaries, and a Snapchain node live in the repo
+
+## 🗂️ Repository Layout
 ```
 .
 ├── src/                  # CLI entry points, Farcaster client, key managers
 ├── tests/                # Integration tests (many expect a local Anvil node)
-├── examples/             # Example binaries
-├── contracts/            # Farcaster Solidity contracts & tooling
+├── examples/             # Example binaries and demos
+├── contracts/            # Solidity contracts, scripts, Foundry config
 ├── snapchain/            # Snapchain Rust node (see snapchain/README.md)
-├── labels/labels/        # Spam label dataset used by hub spam commands
+├── labels/labels/        # Spam label dataset for hub spam tooling
 └── README.md
 ```
 
-## Prerequisites
-- Rust 1.70 or newer (`rustup` recommended)
-- `cargo` and `git`
-- An Ethereum JSON-RPC endpoint (`ETH_RPC_URL`) for ENS lookups
-- A Farcaster Hub endpoint (`FARCASTER_HUB_URL`), e.g. Neynar's public hub
-- Optional: Foundry's `anvil` for local Optimism forks (`cargo install --locked foundry-cli`)
-- Optional: `git submodule update --init --recursive` to download the spam labels used by `castorix hub spam*`
+## 🧰 Prerequisites
+- 🦀 Rust 1.70 or newer (`rustup` makes this painless)
+- 🧱 `cargo` and `git`
+- 🌐 An Ethereum JSON-RPC endpoint (`ETH_RPC_URL`) for ENS lookups
+- 🛰️ A Farcaster Hub endpoint (`FARCASTER_HUB_URL`), e.g. Neynar's public hub
+- 🛠️ Optional: Foundry's `anvil` for local Optimism forks (`cargo install --locked foundry-cli`)
+- 🗃️ Optional: `git submodule update --init --recursive` to pull spam labels for `castorix hub spam*`
 
-## Installation
+## 🚀 Installation
 ```bash
 git clone https://github.com/RyanKung/castorix.git
 cd castorix
 git submodule update --init --recursive  # required for spam tooling
 
-cp env.example .env                      # customise to match your environment
+cp env.example .env                      # customize to match your environment
 cargo build                              # build the CLI and library
 
 # Optional: install a global binary
 cargo install --path .
 ```
 
-During development you can invoke commands with `cargo run -- <subcommand>`. After installing globally, use `castorix <subcommand>`.
+During development call commands with `cargo run -- <subcommand>`. After installing globally, just run `castorix <subcommand>`.
 
-## Configuration
-`env.example` lists the environment variables the CLI understands. The most commonly used ones are:
+## ⚙️ Configuration
+`env.example` lists the knobs Castorix understands. Common ones:
 
-- `ETH_RPC_URL` – mainnet RPC used for ENS queries
-- `ETH_BASE_RPC_URL` – Base RPC for `.base.eth` lookups
-- `ETH_OP_RPC_URL` – Optimism RPC when talking to Farcaster contracts
-- `FARCASTER_HUB_URL` – Hub REST API endpoint
+- `ETH_RPC_URL` — mainnet RPC for ENS queries
+- `ETH_BASE_RPC_URL` — Base RPC for `.base.eth` lookups
+- `ETH_OP_RPC_URL` — Optimism RPC when touching on-chain Farcaster contracts
+- `FARCASTER_HUB_URL` — Hub REST endpoint
 
-Copy `env.example` to `.env` and adjust values so `dotenv` can load them automatically. Commands that sign messages need an ECDSA key. You can either:
+Copy `env.example` to `.env` so `dotenv` can load values automatically. Signing commands either need:
 
-1. Load an encrypted key (`castorix key load <name>`) before running signing commands, or
-2. Set a `PRIVATE_KEY` environment variable for legacy mode.
+1. an encrypted key loaded via `castorix key load <name>`, or
+2. a `PRIVATE_KEY` environment variable for legacy mode.
 
-Encrypted ECDSA keys, custody wallets, and Ed25519 signer keys are stored beneath `~/.castorix/`.
+Encrypted ECDSA keys, custody wallets, and Ed25519 signers live under `~/.castorix/`.
 
-## CLI Quick Tour
-While developing, prefix commands with `cargo run --`. The examples below assume the binary is installed as `castorix`.
+## 🧭 CLI Quick Tour
+Prefix examples with `cargo run --` while developing. They assume the binary name is `castorix` once installed.
 
-### Key management (ECDSA wallets)
-- `castorix key generate-encrypted` — interactive; creates a new key stored under `~/.castorix/keys`
-- `castorix key import` — interactive; encrypts an existing hex private key
-- `castorix key list` — shows stored keys with aliases and creation dates
-- `castorix key load <name>` — decrypts a key into the current session
-- `castorix key info` — prints details about the loaded wallet
-- `castorix key sign "Message"` — signs a message with the loaded wallet
-- `castorix key verify "Message" <signature>` — verifies a signature against the loaded wallet
-- `castorix key rename <old> <new>` / `castorix key update-alias <name> "Alias"`
-- `castorix key delete <name>` — securely removes an encrypted key file
-- `castorix key generate` — legacy helper that prints the raw private key (use with caution)
+### 🔑 Key management (ECDSA wallets)
+- `castorix key generate-encrypted` — interactive flow, stores a new wallet under `~/.castorix/keys`
+- `castorix key import` — encrypt an existing hex key without leaking it to shell history
+- `castorix key list` — show aliases, addresses, and creation dates
+- `castorix key load <name>` — decrypt into the current session
+- `castorix key info` — inspect the loaded wallet
+- `castorix key sign "Message"` / `verify` — quick signature helpers
+- `castorix key rename` / `update-alias` / `delete`
+- `castorix key generate` — legacy plain-text key generator (use carefully)
 
-### Custody key management (FID specific wallets)
+### 🛡️ Custody key management (FID specific)
 - `castorix custody list`
-- `castorix custody import <fid>` — prompts for a private key and stores it encrypted per FID
-- `castorix custody from-mnemonic <fid>` — derives a custody wallet from a recovery phrase
-- `castorix custody delete <fid>`
+- `castorix custody import <fid>` — store the custody private key encrypted per FID
+- `castorix custody from-mnemonic <fid>` — derive from a recovery phrase
+- `castorix custody delete <fid>` — remove the encrypted file
 
-Custody files live in `~/.castorix/custody/` and must exist before registering signers.
+Custody wallets live in `~/.castorix/custody/` and power signer registration workflows.
 
-### ENS utilities
+### 🌐 ENS & Basenames
 - `castorix ens resolve vitalik.eth`
-- `castorix ens domains 0x...` / `castorix ens all-domains 0x...`
-- `castorix ens base-subdomains 0x...` (best-effort; Base reverse lookups are limited)
+- `castorix ens domains 0x...` / `all-domains`
+- `castorix ens base-subdomains 0x...` — best-effort Base reverse lookups
 - `castorix ens check-base-subdomain name.base.eth`
 - `castorix ens query-base-contract name.base.eth`
-- `castorix ens verify mydomain.eth` — ensures the loaded wallet controls the name
+- `castorix ens verify mydomain.eth`
 - `castorix ens create mydomain.eth 12345 --wallet-name <key>` — writes `proof_<domain>_<fid>.json`
 - `castorix ens verify-proof ./proof.json`
 
-### Farcaster Hub tooling
-- `castorix hub user <fid>` / `castorix hub profile <fid> [--all]`
-- `castorix hub followers <fid> [--limit N]` / `castorix hub following <fid> [--limit N]`
-- `castorix hub eth-addresses <fid>` / `castorix hub ens-domains <fid>` / `castorix hub custody-address <fid>`
-- `castorix hub info` / `castorix hub stats <fid>`
-- `castorix hub spam <fid> [more fids...]` / `castorix hub spam-stat`
+### 📡 Farcaster Hub tooling
+- `castorix hub user <fid>` / `profile <fid> [--all]`
+- `castorix hub followers <fid> [--limit N]` / `following`
+- `castorix hub eth-addresses <fid>` / `ens-domains <fid>` / `custody-address <fid>`
+- `castorix hub info` / `stats <fid>`
+- `castorix hub spam <fid> [more]` / `spam-stat`
 - `castorix hub submit-proof ./proof.json <fid> [--wallet-name <key>]`
 - `castorix hub submit-proof-eip712 ./proof.json --wallet-name <key>`
 
-`hub cast` and `hub verify-eth` currently emit “not implemented” messages while the protobuf workflow is being rebuilt.
+`hub cast` and `hub verify-eth` currently emit “not implemented” messages while the protobuf workflow is rebuilt.
 
-### Signer management (Ed25519)
+### ✍️ Signer management (Ed25519)
 - `castorix signers list`
 - `castorix signers info <fid>`
 - `castorix signers register <fid> [--wallet <custody>] [--payment-wallet <key>] [--dry-run]`
@@ -112,13 +115,13 @@ Custody files live in `~/.castorix/custody/` and must exist before registering s
 - `castorix signers export <index|pubkey>`
 - `castorix signers delete <index|pubkey>`
 
-`--dry-run` previews the Key Gateway transaction without submitting it but still encrypts the generated signer under `~/.castorix/ed25519/`.
+`--dry-run` previews the Key Gateway transaction and still stores the generated signer encrypted under `~/.castorix/ed25519/`.
 
-### Miscellaneous
-- `cargo start-node` / `cargo stop-node` manage an Optimism-forking Anvil instance for local testing
+### 🧪 Miscellaneous helpers
+- `cargo start-node` / `cargo stop-node` — spin up or tear down an Optimism-forking Anvil instance
 
-## Running Tests
-Most integration tests expect a local Optimism fork on `http://127.0.0.1:8545` and the environment variable `RUNNING_TESTS=1`. A typical workflow:
+## ✅ Running Tests
+Most integration suites expect a local Optimism fork on `http://127.0.0.1:8545` plus `RUNNING_TESTS=1`.
 
 ```bash
 cargo start-node                     # launches an Anvil fork (requires foundry)
@@ -126,19 +129,19 @@ RUNNING_TESTS=1 cargo test
 cargo stop-node
 ```
 
-Some tests rely on network access or external datasets; skip them if the prerequisites are unavailable.
+Some tests lean on external RPCs or datasets; skip them if prerequisites aren’t ready.
 
-## Snapchain crate
-The `snapchain/` directory contains a Rust implementation of the Snapchain data layer. Consult `snapchain/README.md` for build and deployment instructions. The CLI does not require this component unless you are working on the Snapchain node itself.
+## 🪐 Snapchain crate
+The `snapchain/` directory contains a Rust implementation of the Snapchain data layer. Check `snapchain/README.md` for build docs. Castorix CLI doesn’t require it unless you’re hacking on the node itself.
 
-## Known Limitations / Roadmap
-- Casting (`castorix hub cast`) and Ethereum verification submissions are placeholders until the protobuf migration is complete
-- Username proof submission requires hub support for Ed25519 signer registration
-- The spam tooling needs `labels/labels/spam.jsonl`; run `git submodule update --init --recursive` after cloning
-- Many CLI commands interact with mainnet services—understand gas costs and rate limits before using production endpoints
+## 🛣️ Known Limitations & Roadmap
+- 📝 `castorix hub cast` and `hub verify-eth` are placeholders until the protobuf migration lands
+- 🔑 Username proof submission requires hub-side Ed25519 signer support
+- 🗃️ Spam tooling expects `labels/labels/spam.jsonl` — run `git submodule update --init --recursive`
+- ⛽ Many commands touch mainnet services — mind gas costs and RPC rate limits
 
-## Contributing
-Contributions are welcome. Start with [contracts/CONTRIBUTING.md](contracts/CONTRIBUTING.md) and open an issue or discussion before large changes.
+## 🤝 Contributing
+We love patches! Start with [contracts/CONTRIBUTING.md](contracts/CONTRIBUTING.md) and open an issue or discussion before large changes.
 
-## License
-Castorix is distributed under the GPL-2.0 License. See [LICENSE](LICENSE) for details.
+## 📄 License
+Castorix ships under the GPL-2.0 License. See [LICENSE](LICENSE) for the legalese.
