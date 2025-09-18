@@ -38,9 +38,6 @@ Examples:
   # Create an ENS proof (using specific encrypted wallet)
   castorix ens create ryankung.base.eth 460432 --wallet-name my-wallet
   
-  # Run a comprehensive demo
-  castorix demo
-
 For more information, visit: https://github.com/your-repo/castorix
 "#)]
 pub struct Cli {
@@ -92,11 +89,6 @@ pub enum Commands {
         #[command(subcommand)]
         action: SignersCommands,
     },
-    /// 🚀 Demo all functionality
-    ///
-    /// Run a comprehensive demonstration of all Castorix features.
-    /// Perfect for first-time users to see what the tool can do.
-    Demo,
 }
 
 impl Cli {

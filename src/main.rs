@@ -78,19 +78,17 @@ async fn main() -> Result<()> {
                 | HubCommands::EthAddresses { .. }
                 | HubCommands::EnsDomains { .. }
                 | HubCommands::CustodyAddress { .. }
-                |             HubCommands::Info
-            | HubCommands::Followers { .. }
-            | HubCommands::Following { .. }
-            | HubCommands::Profile { .. }
-            | HubCommands::Stats { .. }
-            | HubCommands::Spam { .. }
-            | HubCommands::SpamStat
-                => {
+                | HubCommands::Info
+                | HubCommands::Followers { .. }
+                | HubCommands::Following { .. }
+                | HubCommands::Profile { .. }
+                | HubCommands::Stats { .. }
+                | HubCommands::Spam { .. }
+                | HubCommands::SpamStat => {
                     let hub_client = FarcasterClient::read_only(hub_url);
                     CliHandler::handle_hub_command(action, &hub_client).await?;
                 }
-                HubCommands::SubmitProof { .. } 
-                | HubCommands::SubmitProofEip712 { .. } => {
+                HubCommands::SubmitProof { .. } | HubCommands::SubmitProofEip712 { .. } => {
                     // These commands handle their own key management
                     let hub_client = FarcasterClient::read_only(hub_url);
                     CliHandler::handle_hub_command(action, &hub_client).await?;
@@ -137,78 +135,8 @@ async fn main() -> Result<()> {
                 println!("❌ Failed to create key manager for ENS operations");
             }
         }
-        Commands::Demo => {
-            run_demo().await?;
-        }
     }
 
-    Ok(())
-}
-
-/// Run a comprehensive demo of all functionality
-async fn run_demo() -> Result<()> {
-    println!("🚀 Castorix Demo - Comprehensive Farcaster ENS Integration");
-    println!("{}", "=".repeat(60));
-
-    // Initialize environment variables
-    castorix::key_manager::init_env()?;
-
-    // Key Management Demo
-    println!("\n🔑 Key Management Demo:");
-    let key_manager = KeyManager::from_env("PRIVATE_KEY")?;
-    println!("   Wallet Address: {:?}", key_manager.address());
-
-    let message = "Hello, Castorix!";
-    let signature = key_manager.sign_message(message).await?;
-    println!("   Message: {message}");
-    println!("   Signature: {signature:?}");
-
-    let is_valid = key_manager.verify_signature(message, &signature).await?;
-    println!("   Signature valid: {is_valid}");
-
-    // ENS Proof Demo
-    println!("\n🌐 ENS Domain Proof Demo:");
-    let ens_proof = EnsProof::from_env()?;
-    let domain = "example.eth";
-    let fid = 12345;
-
-    println!("   Attempting to create proof for domain: {domain}");
-    match ens_proof.create_ens_proof(domain, fid).await {
-        Ok(proof) => {
-            println!("   ✅ Successfully created ENS proof!");
-            if let Ok(json) = ens_proof.serialize_proof(&proof) {
-                println!("   📄 Proof JSON:");
-                println!("   {json}");
-            }
-        }
-        Err(e) => {
-            println!("   ❌ Failed to create ENS proof: {e}");
-            println!("   💡 This is expected if you don't own the domain '{domain}'");
-        }
-    }
-
-    // Farcaster Hub Demo
-    println!("\n📡 Farcaster Hub Integration Demo:");
-    let farcaster_client = FarcasterClient::from_env()?;
-    println!(
-        "   Connected to Farcaster Hub: {}",
-        farcaster_client.hub_url()
-    );
-
-    let fid = 12345;
-    println!("   Fetching user information for FID: {fid}");
-    match farcaster_client.get_user(fid).await {
-        Ok(user_data) => {
-            println!("   ✅ User data retrieved:");
-            println!("   {}", serde_json::to_string_pretty(&user_data)?);
-        }
-        Err(e) => {
-            println!("   ❌ Failed to get user data: {e}");
-            println!("   💡 This is expected if the FID doesn't exist or hub is unreachable");
-        }
-    }
-
-    println!("\n🎉 Demo completed! Use 'castorix --help' to see all available commands.");
     Ok(())
 }
 
