@@ -7,19 +7,19 @@ pub mod types;
 
 // ABI modules
 #[cfg(not(doctest))]
-pub mod id_registry_abi;
-#[cfg(not(doctest))]
-pub mod key_registry_abi;
-#[cfg(not(doctest))]
-pub mod storage_registry_abi;
-#[cfg(not(doctest))]
 pub mod bundler_abi;
 #[cfg(not(doctest))]
 pub mod id_gateway_abi;
 #[cfg(not(doctest))]
+pub mod id_registry_abi;
+#[cfg(not(doctest))]
 pub mod key_gateway_abi;
 #[cfg(not(doctest))]
+pub mod key_registry_abi;
+#[cfg(not(doctest))]
 pub mod signed_key_request_validator_abi;
+#[cfg(not(doctest))]
+pub mod storage_registry_abi;
 
 #[cfg(not(doctest))]
 pub mod generated;

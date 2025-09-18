@@ -1,6 +1,6 @@
 use anyhow::Result;
-use castorix::farcaster::contracts::FarcasterContractClient;
 use castorix::farcaster::contracts::types::*;
+use castorix::farcaster::contracts::FarcasterContractClient;
 use ed25519_dalek::{Signer as Ed25519Signer, SigningKey, Verifier as Ed25519Verifier};
 use ethers::{
     providers::{Http, Middleware, Provider},
@@ -36,7 +36,10 @@ async fn test_farcaster_contracts_connectivity() -> Result<()> {
             println!("   Block Number: {}", result.block_number);
             println!("   ID Gateway Paused: {}", result.id_gateway_paused);
             println!("   Key Gateway Paused: {}", result.key_gateway_paused);
-            println!("   Storage Registry Paused: {}", result.storage_registry_paused);
+            println!(
+                "   Storage Registry Paused: {}",
+                result.storage_registry_paused
+            );
         }
         Err(e) => {
             println!("❌ Contract verification failed: {}", e);
@@ -52,7 +55,10 @@ async fn test_farcaster_contracts_connectivity() -> Result<()> {
             println!("   Block Number: {}", info.block_number);
             println!("   ID Gateway Paused: {}", info.id_gateway_paused);
             println!("   Key Gateway Paused: {}", info.key_gateway_paused);
-            println!("   Storage Registry Paused: {}", info.storage_registry_paused);
+            println!(
+                "   Storage Registry Paused: {}",
+                info.storage_registry_paused
+            );
         }
         Err(e) => {
             let error_msg = e.to_string();
@@ -224,7 +230,6 @@ impl TestConfig {
     }
 }
 
-
 /// Test FID registration with real contract calls
 #[tokio::test]
 async fn test_fid_registration_real() -> Result<()> {
@@ -238,7 +243,8 @@ async fn test_fid_registration_real() -> Result<()> {
     let config = TestConfig::for_local_test();
     let provider = Provider::<Http>::try_from(&config.rpc_url)?;
     let wallet = LocalWallet::from_str(&config.private_key)?;
-    let client = FarcasterContractClient::new(config.rpc_url.clone(), ContractAddresses::default())?;
+    let client =
+        FarcasterContractClient::new(config.rpc_url.clone(), ContractAddresses::default())?;
 
     println!("📋 Wallet Information:");
     println!("   Address: {}", wallet.address());
@@ -250,7 +256,10 @@ async fn test_fid_registration_real() -> Result<()> {
     // Note: balance_of method doesn't exist, we'll check price instead
     match client.id_gateway.price().await {
         Ok(ContractResult::Success(price)) => {
-            println!("✅ ID Gateway accessible, price: {} ETH", ethers::utils::format_ether(price));
+            println!(
+                "✅ ID Gateway accessible, price: {} ETH",
+                ethers::utils::format_ether(price)
+            );
         }
         Ok(ContractResult::Error(e)) => {
             println!("⚠️  Error checking ID Gateway: {}", e);
@@ -302,7 +311,8 @@ async fn test_storage_registry_real() -> Result<()> {
     let config = TestConfig::for_local_test();
     let _provider = Provider::<Http>::try_from(&config.rpc_url)?;
     let _wallet = LocalWallet::from_str(&config.private_key)?;
-    let client = FarcasterContractClient::new(config.rpc_url.clone(), ContractAddresses::default())?;
+    let client =
+        FarcasterContractClient::new(config.rpc_url.clone(), ContractAddresses::default())?;
     let _fid = 1u64; // Test FID
 
     // Step 1: Check current storage status
@@ -310,7 +320,10 @@ async fn test_storage_registry_real() -> Result<()> {
     // Note: get_storage_status method doesn't exist, we'll check unit_price instead
     match client.storage_registry.unit_price().await {
         Ok(ContractResult::Success(price)) => {
-            println!("✅ Storage Registry accessible, unit price: {} ETH", ethers::utils::format_ether(price));
+            println!(
+                "✅ Storage Registry accessible, unit price: {} ETH",
+                ethers::utils::format_ether(price)
+            );
         }
         Ok(ContractResult::Error(e)) => {
             println!("⚠️  Error getting storage registry: {}", e);
@@ -360,7 +373,8 @@ async fn test_key_registry_real() -> Result<()> {
     let config = TestConfig::for_local_test();
     let _provider = Provider::<Http>::try_from(&config.rpc_url)?;
     let _wallet = LocalWallet::from_str(&config.private_key)?;
-    let client = FarcasterContractClient::new(config.rpc_url.clone(), ContractAddresses::default())?;
+    let client =
+        FarcasterContractClient::new(config.rpc_url.clone(), ContractAddresses::default())?;
     let fid = 1u64; // Test FID
 
     // Step 1: Generate Ed25519 keypair
@@ -415,7 +429,8 @@ async fn test_complete_farcaster_contracts() -> Result<()> {
     let config = TestConfig::for_local_test();
     let provider = Provider::<Http>::try_from(&config.rpc_url)?;
     let wallet = LocalWallet::from_str(&config.private_key)?;
-    let client = FarcasterContractClient::new(config.rpc_url.clone(), ContractAddresses::default())?;
+    let client =
+        FarcasterContractClient::new(config.rpc_url.clone(), ContractAddresses::default())?;
 
     println!("📋 Initial Setup:");
     println!("   Address: {}", wallet.address());
@@ -431,7 +446,10 @@ async fn test_complete_farcaster_contracts() -> Result<()> {
             println!("   Block Number: {}", result.block_number);
             println!("   ID Gateway Paused: {}", result.id_gateway_paused);
             println!("   Key Gateway Paused: {}", result.key_gateway_paused);
-            println!("   Storage Registry Paused: {}", result.storage_registry_paused);
+            println!(
+                "   Storage Registry Paused: {}",
+                result.storage_registry_paused
+            );
         }
         Err(e) => {
             println!("❌ Contract verification failed: {}", e);

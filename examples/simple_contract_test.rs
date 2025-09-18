@@ -14,8 +14,10 @@ async fn main() -> Result<()> {
         mask_url(config.eth_op_rpc_url())
     );
 
-    let client =
-        FarcasterContractClient::new(config.eth_op_rpc_url().to_string(), castorix::farcaster::contracts::types::ContractAddresses::default())?;
+    let client = FarcasterContractClient::new(
+        config.eth_op_rpc_url().to_string(),
+        castorix::farcaster::contracts::types::ContractAddresses::default(),
+    )?;
 
     println!("✅ Connected to Farcaster contracts on Optimism\n");
 

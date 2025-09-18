@@ -91,9 +91,7 @@ impl SpamChecker {
 
     /// Check multiple FIDs at once
     pub fn check_multiple(&self, fids: &[u64]) -> HashMap<u64, Option<bool>> {
-        fids.iter()
-            .map(|&fid| (fid, self.is_spam(fid)))
-            .collect()
+        fids.iter().map(|&fid| (fid, self.is_spam(fid))).collect()
     }
 
     /// Get the oldest timestamp from all labels

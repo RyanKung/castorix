@@ -20,8 +20,6 @@ pub async fn handle_hub_key_command(command: HubKeyCommands) -> Result<()> {
     Ok(())
 }
 
-
-
 async fn handle_hub_key_import(fid: u64) -> Result<()> {
     println!("📥 Importing ECDSA private key");
     println!("{}", "=".repeat(40));
@@ -63,8 +61,7 @@ async fn handle_hub_key_import(fid: u64) -> Result<()> {
     // Prompt for password
     let password =
         crate::encrypted_eth_key_manager::prompt_password("Enter password for encryption: ")?;
-    let confirm_password =
-        crate::encrypted_eth_key_manager::prompt_password("Confirm password: ")?;
+    let confirm_password = crate::encrypted_eth_key_manager::prompt_password("Confirm password: ")?;
 
     if password != confirm_password {
         println!("❌ Passwords do not match!");
@@ -98,22 +95,21 @@ async fn handle_hub_key_import(fid: u64) -> Result<()> {
     Ok(())
 }
 
-
 async fn handle_hub_key_list() -> Result<()> {
     println!("📋 All ECDSA Keys");
     println!("{}", "=".repeat(50));
 
-    let keys_file =
-        crate::encrypted_eth_key_manager::EncryptedEthKeyManager::default_keys_file()?;
-    let manager = crate::encrypted_eth_key_manager::EncryptedEthKeyManager::load_from_file(
-        &keys_file,
-    )?;
+    let keys_file = crate::encrypted_eth_key_manager::EncryptedEthKeyManager::default_keys_file()?;
+    let manager =
+        crate::encrypted_eth_key_manager::EncryptedEthKeyManager::load_from_file(&keys_file)?;
 
     let keys = manager.list_keys();
     if keys.is_empty() {
         println!("❌ No ECDSA keys found.");
         println!("💡 Use 'castorix hub key import <fid>' to import your first ECDSA key!");
-        println!("   Or use 'castorix hub key from-mnemonic <fid>' to generate from recovery phrase");
+        println!(
+            "   Or use 'castorix hub key from-mnemonic <fid>' to generate from recovery phrase"
+        );
     } else {
         println!("🔒 ECDSA keys found:");
 

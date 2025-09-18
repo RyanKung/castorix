@@ -1,6 +1,6 @@
 use crate::farcaster::contracts::{
-    FarcasterContractClient,
     test_utils::{create_funded_wallet, MockContractAddresses, TestEnvironment},
+    FarcasterContractClient,
 };
 use anyhow::Result;
 use ethers::{

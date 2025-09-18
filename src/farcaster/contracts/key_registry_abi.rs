@@ -51,7 +51,12 @@ impl KeyRegistryAbi {
 
     /// Get the key data for a specific key
     pub async fn key_data_of(&self, fid: Fid, key: Vec<u8>) -> Result<ContractResult<(u8, u32)>> {
-        match self.contract.key_data_of(fid.into(), key.into()).call().await {
+        match self
+            .contract
+            .key_data_of(fid.into(), key.into())
+            .call()
+            .await
+        {
             Ok(key_data) => {
                 // Extract fields from the KeyData struct
                 let state_u8 = key_data.state.try_into().unwrap_or(0);
@@ -76,7 +81,12 @@ impl KeyRegistryAbi {
 
     /// Get the key at a specific index for a FID in a specific state
     pub async fn key_at(&self, fid: Fid, state: u8, index: u64) -> Result<ContractResult<Vec<u8>>> {
-        match self.contract.key_at(fid.into(), state, index.into()).call().await {
+        match self
+            .contract
+            .key_at(fid.into(), state, index.into())
+            .call()
+            .await
+        {
             Ok(key_bytes) => Ok(ContractResult::Success(key_bytes.to_vec())),
             Err(e) => Ok(ContractResult::Error(format!("Contract call failed: {e}"))),
         }
@@ -139,32 +149,35 @@ impl KeyRegistryAbi {
     /// Remove a key (requires proper authorization)
     pub async fn remove(&self, key: Vec<u8>) -> Result<ContractResult<()>> {
         match self.contract.remove(key.into()).send().await {
-            Ok(tx) => {
-                match tx.await {
-                    Ok(_receipt) => Ok(ContractResult::Success(())),
-                    Err(e) => Ok(ContractResult::Error(format!("Transaction failed: {e}"))),
-                }
-            }
+            Ok(tx) => match tx.await {
+                Ok(_receipt) => Ok(ContractResult::Success(())),
+                Err(e) => Ok(ContractResult::Error(format!("Transaction failed: {e}"))),
+            },
             Err(e) => Ok(ContractResult::Error(format!("Contract call failed: {e}"))),
         }
     }
 
     /// Remove a key for another FID owner (requires authorization signature)
     pub async fn remove_for(
-        &self, 
-        fid_owner: Address, 
-        key: Vec<u8>, 
-        deadline: u64, 
-        signature: Vec<u8>
+        &self,
+        fid_owner: Address,
+        key: Vec<u8>,
+        deadline: u64,
+        signature: Vec<u8>,
     ) -> Result<ContractResult<ethers::types::TransactionReceipt>> {
-        match self.contract.remove_for(fid_owner, key.into(), deadline.into(), signature.into()).send().await {
-            Ok(pending_tx) => {
-                match pending_tx.await {
-                    Ok(Some(receipt)) => Ok(ContractResult::Success(receipt)),
-                    Ok(None) => Ok(ContractResult::Error("Transaction failed - no receipt received".to_string())),
-                    Err(e) => Ok(ContractResult::Error(format!("Transaction failed: {e}"))),
-                }
-            }
+        match self
+            .contract
+            .remove_for(fid_owner, key.into(), deadline.into(), signature.into())
+            .send()
+            .await
+        {
+            Ok(pending_tx) => match pending_tx.await {
+                Ok(Some(receipt)) => Ok(ContractResult::Success(receipt)),
+                Ok(None) => Ok(ContractResult::Error(
+                    "Transaction failed - no receipt received".to_string(),
+                )),
+                Err(e) => Ok(ContractResult::Error(format!("Transaction failed: {e}"))),
+            },
             Err(e) => Ok(ContractResult::Error(format!("Contract call failed: {e}"))),
         }
     }

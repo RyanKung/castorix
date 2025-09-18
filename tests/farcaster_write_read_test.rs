@@ -276,14 +276,8 @@ impl WriteReadTestClient {
         // 2. Test contract connectivity
         println!("🔍 Step 2: Testing contract connectivity...");
         let contract_verification = self.contract_client.get_network_status().await?;
-        println!(
-            "   Chain ID: {}",
-            contract_verification.chain_id
-        );
-        println!(
-            "   Block Number: {}",
-            contract_verification.block_number
-        );
+        println!("   Chain ID: {}", contract_verification.chain_id);
+        println!("   Block Number: {}", contract_verification.block_number);
         println!(
             "   ID Gateway Paused: {}",
             contract_verification.id_gateway_paused
@@ -307,12 +301,7 @@ impl WriteReadTestClient {
         }
 
         // Test Storage Registry
-        match self
-            .contract_client
-            .storage_registry
-            .unit_price()
-            .await
-        {
+        match self.contract_client.storage_registry.unit_price().await {
             Ok(result) => println!("   Storage Registry price: {:?}", result),
             Err(e) => println!("   Storage Registry error: {}", e),
         }

@@ -646,11 +646,10 @@ pub enum HubCommands {
 
     /// 📊 Get spam statistics
     ///
-    /// Display comprehensive spam statistics including total labels, spam count, 
-    /// non-spam count, and percentages. Combines with hub status to show total 
+    /// Display comprehensive spam statistics including total labels, spam count,
+    /// non-spam count, and percentages. Combines with hub status to show total
     /// user count and provide additional context.
     ///
     /// Example: castorix hub spam-stat
     SpamStat,
-
 }

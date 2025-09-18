@@ -111,7 +111,6 @@ impl StorageRegistryAbi {
         }
     }
 
-
     /// Get the contract version
     pub async fn version(&self) -> Result<ContractResult<String>> {
         match self.contract.version().call().await {

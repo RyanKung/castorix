@@ -437,7 +437,7 @@ mod tests {
     #[tokio::test]
     async fn test_encryption_decryption_roundtrip() {
         use ed25519_dalek::{Signer, Verifier};
-        
+
         let mut manager = EncryptedEd25519KeyManager::new();
         let fid = 789;
         let password = "secure_password_123";
@@ -466,7 +466,10 @@ mod tests {
         let wrong_password = "wrong_password";
 
         // Generate and encrypt with correct password
-        manager.generate_and_encrypt(fid, correct_password).await.unwrap();
+        manager
+            .generate_and_encrypt(fid, correct_password)
+            .await
+            .unwrap();
 
         // Try to decrypt with wrong password - should fail
         let result = manager.get_signing_key(fid, wrong_password);
@@ -502,14 +505,17 @@ mod tests {
 
         // Test different hex formats
         let formats = vec![
-            private_key_hex.clone(),                    // Pure hex
-            format!("0x{}", private_key_hex),          // With 0x prefix
+            private_key_hex.clone(),          // Pure hex
+            format!("0x{}", private_key_hex), // With 0x prefix
         ];
 
         for (i, format) in formats.iter().enumerate() {
             let test_fid = fid + i as u64;
-            manager.import_and_encrypt(test_fid, format, password).await.unwrap();
-            
+            manager
+                .import_and_encrypt(test_fid, format, password)
+                .await
+                .unwrap();
+
             let imported_key = manager.get_signing_key(test_fid, password).unwrap();
             assert_eq!(imported_key.to_bytes(), private_key_bytes);
         }
@@ -522,7 +528,7 @@ mod tests {
 
         let temp_dir = tempdir().unwrap();
         let file_path = temp_dir.path().join("test_keys.json");
-        
+
         let mut manager = EncryptedEd25519KeyManager::new();
         let fid1 = 333;
         let fid2 = 444;
@@ -552,7 +558,7 @@ mod tests {
         let message = b"Test message";
         let sig1 = key1.sign(message);
         let sig2 = key2.sign(message);
-        
+
         assert_ne!(sig1.to_bytes(), sig2.to_bytes());
         assert!(key1.verifying_key().verify(message, &sig1).is_ok());
         assert!(key2.verifying_key().verify(message, &sig2).is_ok());
@@ -610,7 +616,9 @@ mod tests {
         let password = "test_password";
 
         // Test invalid hex string
-        let result = manager.import_and_encrypt(fid, "invalid_hex", password).await;
+        let result = manager
+            .import_and_encrypt(fid, "invalid_hex", password)
+            .await;
         assert!(result.is_err());
 
         // Test wrong length hex (not 32 or 64 bytes)

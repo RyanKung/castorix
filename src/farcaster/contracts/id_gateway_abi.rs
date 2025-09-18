@@ -6,8 +6,7 @@
 #![cfg(not(doctest))]
 
 use crate::farcaster::contracts::{
-    generated::idgateway_bindings::IdGateway as IdGatewayContract,
-    types::ContractResult,
+    generated::idgateway_bindings::IdGateway as IdGatewayContract, types::ContractResult,
 };
 use anyhow::Result;
 use ethers::{
@@ -88,11 +87,16 @@ impl IdGatewayAbi {
     }
 
     /// Register a new FID with extra storage (requires wallet client for actual transaction)
-    pub async fn register_with_storage(&self, _recovery: Address, _extra_storage: u64) -> Result<ContractResult<(u64, U256)>> {
+    pub async fn register_with_storage(
+        &self,
+        _recovery: Address,
+        _extra_storage: u64,
+    ) -> Result<ContractResult<(u64, U256)>> {
         // This would require a wallet client for actual transaction
         // For now, return an error indicating this is read-only
         Ok(ContractResult::Error(
-            "Register with storage requires wallet client - use wallet-based registration".to_string(),
+            "Register with storage requires wallet client - use wallet-based registration"
+                .to_string(),
         ))
     }
 }

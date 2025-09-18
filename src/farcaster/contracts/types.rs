@@ -17,13 +17,27 @@ impl Default for ContractAddresses {
     fn default() -> Self {
         Self {
             // Farcaster contract addresses on Optimism mainnet (corrected from screenshot)
-            id_registry: "0x00000000fc6c5f01fc30151999387bb99a9f489b".parse().unwrap(),
-            key_registry: "0x00000000fc1237824fb747abde0ff18990e59b7e".parse().unwrap(),
-            storage_registry: "0x00000000fcce7f938e7ae6d3c335bd6a1a7c593d".parse().unwrap(),
-            id_gateway: "0x00000000fc25870c6ed6b6c7e41fb078b7656f69".parse().unwrap(),
-            key_gateway: "0x00000000fc56947c7e7183f8ca4b62398caadf0b".parse().unwrap(),
-            bundler: "0x00000000fc04c910a0b5fea33b03e0447ad0b0aa".parse().unwrap(),
-            signed_key_request_validator: "0x00000000fc700472606ed4fa22623acf62c60553".parse().unwrap(),
+            id_registry: "0x00000000fc6c5f01fc30151999387bb99a9f489b"
+                .parse()
+                .unwrap(),
+            key_registry: "0x00000000fc1237824fb747abde0ff18990e59b7e"
+                .parse()
+                .unwrap(),
+            storage_registry: "0x00000000fcce7f938e7ae6d3c335bd6a1a7c593d"
+                .parse()
+                .unwrap(),
+            id_gateway: "0x00000000fc25870c6ed6b6c7e41fb078b7656f69"
+                .parse()
+                .unwrap(),
+            key_gateway: "0x00000000fc56947c7e7183f8ca4b62398caadf0b"
+                .parse()
+                .unwrap(),
+            bundler: "0x00000000fc04c910a0b5fea33b03e0447ad0b0aa"
+                .parse()
+                .unwrap(),
+            signed_key_request_validator: "0x00000000fc700472606ed4fa22623acf62c60553"
+                .parse()
+                .unwrap(),
         }
     }
 }
@@ -62,18 +76,18 @@ impl<T> ContractResult<T> {
     pub fn is_success(&self) -> bool {
         matches!(self, ContractResult::Success(_))
     }
-    
+
     pub fn is_error(&self) -> bool {
         matches!(self, ContractResult::Error(_))
     }
-    
+
     pub fn unwrap(self) -> T {
         match self {
             ContractResult::Success(value) => value,
             ContractResult::Error(msg) => panic!("Contract error: {msg}"),
         }
     }
-    
+
     pub fn unwrap_or(self, default: T) -> T {
         match self {
             ContractResult::Success(value) => value,

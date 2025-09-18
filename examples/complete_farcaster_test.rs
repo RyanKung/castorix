@@ -1,6 +1,6 @@
 use anyhow::Result;
-use castorix::farcaster::contracts::FarcasterContractClient;
 use castorix::farcaster::contracts::types::*;
+use castorix::farcaster::contracts::FarcasterContractClient;
 use ed25519_dalek::SigningKey;
 use ethers::{
     providers::{Http, Middleware, Provider},
@@ -47,7 +47,6 @@ impl TestConfig {
         }
     }
 }
-
 
 impl FarcasterWalletClient {
     /// Create a new wallet client
@@ -279,7 +278,8 @@ async fn main() -> Result<()> {
     println!("\n🔧 Initializing client...");
     let provider = Provider::<Http>::try_from(&config.rpc_url)?;
     let wallet = LocalWallet::from_str(&config.private_key)?;
-    let client = FarcasterContractClient::new(config.rpc_url.clone(), ContractAddresses::default())?;
+    let client =
+        FarcasterContractClient::new(config.rpc_url.clone(), ContractAddresses::default())?;
 
     println!("   Address: {}", wallet.address());
     let balance = provider.get_balance(wallet.address(), None).await?;
@@ -306,16 +306,19 @@ async fn main() -> Result<()> {
 
     // Test basic contract functionality
     println!("\n🚀 Testing basic contract functionality...");
-    
+
     // Test ID Gateway
     match client.id_gateway.total_supply().await {
         Ok(result) => println!("✅ ID Gateway total supply: {}", result),
         Err(e) => println!("❌ ID Gateway error: {}", e),
     }
-    
+
     // Test Storage Registry
     match client.storage_registry.price_per_unit().await {
-        Ok(result) => println!("✅ Storage Registry price per unit: {} ETH", ethers::utils::format_ether(result)),
+        Ok(result) => println!(
+            "✅ Storage Registry price per unit: {} ETH",
+            ethers::utils::format_ether(result)
+        ),
         Err(e) => println!("❌ Storage Registry error: {}", e),
     }
 
@@ -338,7 +341,8 @@ mod tests {
     #[tokio::test]
     async fn test_client_creation() {
         let config = TestConfig::for_local_test();
-        let client = FarcasterContractClient::new(config.rpc_url.clone(), ContractAddresses::default());
+        let client =
+            FarcasterContractClient::new(config.rpc_url.clone(), ContractAddresses::default());
         assert!(client.is_ok());
     }
 }

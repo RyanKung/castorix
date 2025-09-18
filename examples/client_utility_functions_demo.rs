@@ -1,8 +1,5 @@
 use anyhow::Result;
-use castorix::farcaster::contracts::{
-    FarcasterContractClient,
-    types::ContractAddresses,
-};
+use castorix::farcaster::contracts::{types::ContractAddresses, FarcasterContractClient};
 use ethers::types::Address;
 use std::str::FromStr;
 
@@ -25,12 +22,27 @@ async fn main() -> Result<()> {
             println!("✅ FID {} Keys Information:", keys_info.fid);
             println!("   Custody: {}", keys_info.custody);
             println!("   Recovery: {}", keys_info.recovery);
-            println!("   Active Keys: {} ({} items)", keys_info.active_keys, keys_info.active_keys_list.len());
-            println!("   Inactive Keys: {} ({} items)", keys_info.inactive_keys, keys_info.inactive_keys_list.len());
-            println!("   Pending Keys: {} ({} items)", keys_info.pending_keys, keys_info.pending_keys_list.len());
-            
+            println!(
+                "   Active Keys: {} ({} items)",
+                keys_info.active_keys,
+                keys_info.active_keys_list.len()
+            );
+            println!(
+                "   Inactive Keys: {} ({} items)",
+                keys_info.inactive_keys,
+                keys_info.inactive_keys_list.len()
+            );
+            println!(
+                "   Pending Keys: {} ({} items)",
+                keys_info.pending_keys,
+                keys_info.pending_keys_list.len()
+            );
+
             if !keys_info.inactive_keys_list.is_empty() {
-                println!("   Sample Inactive Key: {}", keys_info.inactive_keys_list[0]);
+                println!(
+                    "   Sample Inactive Key: {}",
+                    keys_info.inactive_keys_list[0]
+                );
             }
         }
         Err(e) => {
@@ -43,7 +55,7 @@ async fn main() -> Result<()> {
         Ok(signing_key) => {
             let public_key = signing_key.verifying_key().to_bytes();
             println!("✅ Generated unique key: {}", hex::encode(public_key));
-            
+
             // Test keypair verification
             println!("\n🔐 3. Verifying keypair...");
             let test_message = b"test message for keypair verification";
@@ -59,7 +71,7 @@ async fn main() -> Result<()> {
                     println!("❌ Keypair verification error: {}", e);
                 }
             }
-            
+
             // Test signer registration verification
             println!("\n🔍 4. Verifying signer registration (should not be found)...");
             match client.verify_signer_registration(fid, public_key).await {
@@ -67,7 +79,7 @@ async fn main() -> Result<()> {
                     println!("   Found: {}", verification_result.found);
                     println!("   Is Valid: {}", verification_result.is_valid);
                     println!("   Message: {}", verification_result.message);
-                    
+
                     if verification_result.found {
                         println!("⚠️  Unexpected: Key found in registry");
                     } else {
@@ -88,9 +100,15 @@ async fn main() -> Result<()> {
     let test_address = Address::from_str("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")?;
     match client.can_manage_fid_keys(test_address, fid).await {
         Ok(can_manage) => {
-            println!("   Address {} can manage FID {} keys: {}", test_address, fid, can_manage);
+            println!(
+                "   Address {} can manage FID {} keys: {}",
+                test_address, fid, can_manage
+            );
             if can_manage {
-                println!("⚠️  Unexpected: Test address should not be able to manage FID {} keys", fid);
+                println!(
+                    "⚠️  Unexpected: Test address should not be able to manage FID {} keys",
+                    fid
+                );
             } else {
                 println!("✅ Correct: Test address cannot manage FID {} keys", fid);
             }
@@ -101,17 +119,26 @@ async fn main() -> Result<()> {
     }
 
     println!("\n🛡️ 6. Testing unauthorized key operations (security check)...");
-    match client.test_unauthorized_key_operations(fid, test_address).await {
+    match client
+        .test_unauthorized_key_operations(fid, test_address)
+        .await
+    {
         Ok(result) => {
             println!("✅ Security test completed successfully");
             println!("   Target FID: {}", result.target_fid);
             println!("   Caller Address: {}", result.caller_address);
             println!("   Can Manage Keys: {}", result.can_manage_keys);
-            println!("   Unauthorized Add Failed: {}", result.unauthorized_add_failed);
-            println!("   Unauthorized Remove Failed: {}", result.unauthorized_remove_failed);
+            println!(
+                "   Unauthorized Add Failed: {}",
+                result.unauthorized_add_failed
+            );
+            println!(
+                "   Unauthorized Remove Failed: {}",
+                result.unauthorized_remove_failed
+            );
             println!("   Direct Remove Failed: {}", result.direct_remove_failed);
             println!("   Keys Unchanged: {}", result.keys_unchanged);
-            
+
             if !result.error_messages.is_empty() {
                 println!("   Error Messages:");
                 for msg in &result.error_messages {

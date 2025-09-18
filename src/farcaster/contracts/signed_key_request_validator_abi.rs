@@ -1,7 +1,4 @@
-use ethers::{
-    providers::Middleware,
-    types::Address,
-};
+use ethers::{providers::Middleware, types::Address};
 use std::sync::Arc;
 
 use crate::farcaster::contracts::generated::signedkeyrequestvalidator_bindings::SignedKeyRequestValidator as SignedKeyRequestValidatorContract;

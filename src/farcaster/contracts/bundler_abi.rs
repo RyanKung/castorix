@@ -6,8 +6,7 @@
 #![cfg(not(doctest))]
 
 use crate::farcaster::contracts::{
-    generated::bundler_bindings::Bundler as BundlerContract,
-    types::ContractResult,
+    generated::bundler_bindings::Bundler as BundlerContract, types::ContractResult,
 };
 use anyhow::Result;
 use ethers::{

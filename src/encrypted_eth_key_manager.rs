@@ -71,7 +71,7 @@ impl EncryptedEthKeyManager {
             .to_string_lossy()
             .to_string())
     }
-    
+
     /// Get the custody key file path for a specific FID
     pub fn custody_key_file(fid: u64) -> Result<String> {
         let home_dir =
@@ -136,19 +136,24 @@ impl EncryptedEthKeyManager {
             .collect::<Vec<&str>>()
             .join(" ");
 
-        
- 
         // Use BIP44 standard path for Ethereum: m/44'/60'/0'/0/0
         // This matches the approach used by MetaMask, Rabby, and other standard wallets
         let derivation_path = "m/44'/60'/0'/0/0";
-        
+
         // Use ethers' built-in BIP44 derivation
-        let wallet = ethers::signers::MnemonicBuilder::<ethers::signers::coins_bip39::English>::default()
-            .phrase(&*cleaned_phrase)
-            .derivation_path(&derivation_path)
-            .map_err(|e| anyhow::anyhow!("Failed to create wallet from mnemonic with derivation path {}: {}", derivation_path, e))?
-            .build()
-            .map_err(|e| anyhow::anyhow!("Failed to build wallet: {}", e))?;
+        let wallet =
+            ethers::signers::MnemonicBuilder::<ethers::signers::coins_bip39::English>::default()
+                .phrase(&*cleaned_phrase)
+                .derivation_path(&derivation_path)
+                .map_err(|e| {
+                    anyhow::anyhow!(
+                        "Failed to create wallet from mnemonic with derivation path {}: {}",
+                        derivation_path,
+                        e
+                    )
+                })?
+                .build()
+                .map_err(|e| anyhow::anyhow!("Failed to build wallet: {}", e))?;
 
         let address = format!("{:?}", wallet.address());
         let private_key_bytes = wallet.signer().to_bytes();
@@ -380,10 +385,10 @@ impl EncryptedEthKeyManager {
         let salt_bytes = general_purpose::STANDARD
             .decode(salt)
             .map_err(|e| anyhow::anyhow!("Failed to decode salt: {}", e))?;
-        
+
         let salt_str = String::from_utf8(salt_bytes)
             .map_err(|e| anyhow::anyhow!("Failed to convert salt to string: {}", e))?;
-        
+
         let salt = SaltString::from_b64(&salt_str)
             .map_err(|e| anyhow::anyhow!("Failed to recreate salt: {}", e))?;
 

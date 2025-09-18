@@ -56,7 +56,10 @@ async fn test_network_info_retrieval() -> Result<()> {
 
     // Test 4: Test the combined get_network_info method
     println!("📋 Testing combined get_network_info()...");
-    let client = FarcasterContractClient::new(rpc_url.to_string(), castorix::farcaster::contracts::types::ContractAddresses::default())?;
+    let client = FarcasterContractClient::new(
+        rpc_url.to_string(),
+        castorix::farcaster::contracts::types::ContractAddresses::default(),
+    )?;
     match client.get_network_status().await {
         Ok(info) => {
             println!("   ✅ Network Info:");
@@ -64,7 +67,10 @@ async fn test_network_info_retrieval() -> Result<()> {
             println!("      Block Number: {}", info.block_number);
             println!("      ID Gateway Paused: {}", info.id_gateway_paused);
             println!("      Key Gateway Paused: {}", info.key_gateway_paused);
-            println!("      Storage Registry Paused: {}", info.storage_registry_paused);
+            println!(
+                "      Storage Registry Paused: {}",
+                info.storage_registry_paused
+            );
         }
         Err(e) => {
             println!("   ❌ Combined method failed: {}", e);

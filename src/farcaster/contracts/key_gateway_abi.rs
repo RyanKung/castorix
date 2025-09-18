@@ -6,15 +6,14 @@
 #![cfg(not(doctest))]
 
 use crate::farcaster::contracts::{
-    generated::keygateway_bindings::KeyGateway as KeyGatewayContract,
-    types::ContractResult,
+    generated::keygateway_bindings::KeyGateway as KeyGatewayContract, types::ContractResult,
 };
 use anyhow::Result;
 use ethers::{
-    providers::{Http, Provider},
-    types::{Address, U256, Bytes},
-    types::transaction::eip2718::TypedTransaction,
     middleware::Middleware,
+    providers::{Http, Provider},
+    types::transaction::eip2718::TypedTransaction,
+    types::{Address, Bytes, U256},
 };
 
 /// ABI-based KeyGateway contract wrapper
@@ -56,7 +55,6 @@ impl KeyGatewayAbi {
         }
     }
 
-
     /// Get the contract version
     pub async fn version(&self) -> Result<ContractResult<String>> {
         match self.contract.version().call().await {
@@ -73,7 +71,8 @@ impl KeyGatewayAbi {
         metadata_type: u8,
         metadata: Vec<u8>,
     ) -> Result<ContractResult<()>> {
-        match self.contract
+        match self
+            .contract
             .add(key_type, key.into(), metadata_type, metadata.into())
             .call()
             .await
@@ -94,7 +93,8 @@ impl KeyGatewayAbi {
         deadline: U256,
         sig: Vec<u8>,
     ) -> Result<ContractResult<ethers::types::TransactionReceipt>> {
-        match self.contract
+        match self
+            .contract
             .add_for(
                 fid_owner,
                 key_type,
@@ -107,13 +107,13 @@ impl KeyGatewayAbi {
             .send()
             .await
         {
-            Ok(pending_tx) => {
-                match pending_tx.await {
-                    Ok(Some(receipt)) => Ok(ContractResult::Success(receipt)),
-                    Ok(None) => Ok(ContractResult::Error("Transaction failed - no receipt received".to_string())),
-                    Err(e) => Ok(ContractResult::Error(format!("Transaction failed: {e}"))),
-                }
-            }
+            Ok(pending_tx) => match pending_tx.await {
+                Ok(Some(receipt)) => Ok(ContractResult::Success(receipt)),
+                Ok(None) => Ok(ContractResult::Error(
+                    "Transaction failed - no receipt received".to_string(),
+                )),
+                Err(e) => Ok(ContractResult::Error(format!("Transaction failed: {e}"))),
+            },
             Err(e) => Ok(ContractResult::Error(format!("Contract call failed: {e}"))),
         }
     }
@@ -132,14 +132,15 @@ impl KeyGatewayAbi {
         sig: Vec<u8>,
     ) -> Result<ContractResult<ethers::types::TransactionReceipt>> {
         use ethers::signers::Signer;
-        
+
         // Clone parameters to avoid move issues
         let key_clone = key.clone();
         let metadata_clone = metadata.clone();
         let sig_clone = sig.clone();
-        
+
         // Build the transaction data
-        let tx_data = self.contract
+        let tx_data = self
+            .contract
             .add_for(
                 fid_owner,
                 key_type,
@@ -154,7 +155,8 @@ impl KeyGatewayAbi {
 
         // Get gas price and estimate gas
         let gas_price = provider.get_gas_price().await?;
-        let gas_limit = self.contract
+        let gas_limit = self
+            .contract
             .add_for(
                 fid_owner,
                 key_type,
@@ -168,7 +170,9 @@ impl KeyGatewayAbi {
             .await?;
 
         // Get nonce
-        let nonce = provider.get_transaction_count(wallet.address(), None).await?;
+        let nonce = provider
+            .get_transaction_count(wallet.address(), None)
+            .await?;
 
         // Create transaction request
         let tx_request = ethers::types::TransactionRequest::new()
@@ -184,17 +188,19 @@ impl KeyGatewayAbi {
         let wallet_with_chain_id = wallet.clone().with_chain_id(chain_id.as_u64());
         let typed_tx = TypedTransaction::Legacy(tx_request);
         let signature = wallet_with_chain_id.sign_transaction(&typed_tx).await?;
-        
+
         // Create signed transaction bytes
         let signed_tx_bytes = typed_tx.rlp_signed(&signature);
 
         // Send raw transaction
         let tx_hash = provider.send_raw_transaction(signed_tx_bytes).await?;
-        
+
         // Wait for receipt
         match tx_hash.await {
             Ok(Some(receipt)) => Ok(ContractResult::Success(receipt)),
-            Ok(None) => Ok(ContractResult::Error("Transaction failed - no receipt received".to_string())),
+            Ok(None) => Ok(ContractResult::Error(
+                "Transaction failed - no receipt received".to_string(),
+            )),
             Err(e) => Ok(ContractResult::Error(format!("Transaction failed: {e}"))),
         }
     }

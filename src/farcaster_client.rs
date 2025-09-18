@@ -762,7 +762,7 @@ impl FarcasterClient {
                 "{}/v1/linksByTargetFid?target_fid={}&link_type=follow&pageSize={}",
                 self.hub_url, fid, page_size
             );
-            
+
             if let Some(ref token) = page_token {
                 url.push_str(&format!("&pageToken={}", token));
             }
@@ -787,9 +787,9 @@ impl FarcasterClient {
                 if let Some(messages) = data.get("messages").and_then(|m| m.as_array()) {
                     let page_followers = messages.clone();
                     let page_follower_count = page_followers.len();
-                    
+
                     println!("✅ Page {page_count}: Retrieved {page_follower_count} followers");
-                    
+
                     // If we have a limit, check if we would exceed it
                     if limit > 0 && total_retrieved + page_follower_count as u32 > limit {
                         let remaining = limit - total_retrieved;
@@ -797,10 +797,13 @@ impl FarcasterClient {
                         truncated_followers.truncate(remaining as usize);
                         let truncated_count = truncated_followers.len();
                         all_followers.extend(truncated_followers);
-                        println!("🛑 Reached limit of {limit}, stopping at {} total followers", total_retrieved + truncated_count as u32);
+                        println!(
+                            "🛑 Reached limit of {limit}, stopping at {} total followers",
+                            total_retrieved + truncated_count as u32
+                        );
                         break;
                     }
-                    
+
                     all_followers.extend(page_followers);
                     total_retrieved = all_followers.len() as u32;
                     println!("📊 Total followers so far: {total_retrieved}");
@@ -858,7 +861,7 @@ impl FarcasterClient {
                 "{}/v1/linksByFid?fid={}&link_type=follow&pageSize={}",
                 self.hub_url, fid, page_size
             );
-            
+
             if let Some(ref token) = page_token {
                 url.push_str(&format!("&pageToken={}", token));
             }
@@ -883,9 +886,9 @@ impl FarcasterClient {
                 if let Some(messages) = data.get("messages").and_then(|m| m.as_array()) {
                     let page_following = messages.clone();
                     let page_following_count = page_following.len();
-                    
+
                     println!("✅ Page {page_count}: Retrieved {page_following_count} following");
-                    
+
                     // If we have a limit, check if we would exceed it
                     if limit > 0 && total_retrieved + page_following_count as u32 > limit {
                         let remaining = limit - total_retrieved;
@@ -893,10 +896,13 @@ impl FarcasterClient {
                         truncated_following.truncate(remaining as usize);
                         let truncated_count = truncated_following.len();
                         all_following.extend(truncated_following);
-                        println!("🛑 Reached limit of {limit}, stopping at {} total following", total_retrieved + truncated_count as u32);
+                        println!(
+                            "🛑 Reached limit of {limit}, stopping at {} total following",
+                            total_retrieved + truncated_count as u32
+                        );
                         break;
                     }
-                    
+
                     all_following.extend(page_following);
                     total_retrieved = all_following.len() as u32;
                     println!("📊 Total following so far: {total_retrieved}");

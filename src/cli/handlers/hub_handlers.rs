@@ -105,21 +105,21 @@ pub async fn handle_hub_command(
         HubCommands::Followers { fid, limit } => {
             handle_followers(hub_client, fid, limit).await?;
         }
-            HubCommands::Following { fid, limit } => {
-                handle_following(hub_client, fid, limit).await?;
-            }
-            HubCommands::Profile { fid, all } => {
-                handle_profile(hub_client, fid, all).await?;
-            }
-            HubCommands::Stats { fid } => {
-                handle_stats(hub_client, fid).await?;
-            }
-            HubCommands::Spam { fids } => {
-                handle_spam_check(fids).await?;
-            }
-            HubCommands::SpamStat => {
-                handle_spam_stat(hub_client).await?;
-            }
+        HubCommands::Following { fid, limit } => {
+            handle_following(hub_client, fid, limit).await?;
+        }
+        HubCommands::Profile { fid, all } => {
+            handle_profile(hub_client, fid, all).await?;
+        }
+        HubCommands::Stats { fid } => {
+            handle_stats(hub_client, fid).await?;
+        }
+        HubCommands::Spam { fids } => {
+            handle_spam_check(fids).await?;
+        }
+        HubCommands::SpamStat => {
+            handle_spam_stat(hub_client).await?;
+        }
     }
     Ok(())
 }
@@ -264,7 +264,7 @@ async fn handle_submit_proof_eip712(
 
 async fn handle_hub_info(hub_client: &crate::farcaster_client::FarcasterClient) -> Result<()> {
     println!("📊 Getting Hub information and sync status...");
-    
+
     // Get Hub info from the API
     match hub_client.get_hub_info().await {
         Ok(hub_info) => {
@@ -276,7 +276,7 @@ async fn handle_hub_info(hub_client: &crate::farcaster_client::FarcasterClient) 
             println!("💡 This might be because the Hub doesn't support the info endpoint");
         }
     }
-    
+
     Ok(())
 }
 
@@ -285,9 +285,13 @@ async fn handle_followers(
     fid: u64,
     limit: u32,
 ) -> Result<()> {
-    let limit_text = if limit == 0 { "all".to_string() } else { limit.to_string() };
+    let limit_text = if limit == 0 {
+        "all".to_string()
+    } else {
+        limit.to_string()
+    };
     println!("👥 Getting followers for FID: {fid} (limit: {limit_text})");
-    
+
     match hub_client.get_followers(fid, limit).await {
         Ok(followers) => {
             if followers.is_empty() {
@@ -301,22 +305,26 @@ async fn handle_followers(
                         .and_then(|d| d.get("fid"))
                         .and_then(|f| f.as_u64())
                         .unwrap_or(0);
-                    
+
                     // Extract timestamp for when they followed
                     let timestamp = follower
                         .get("data")
                         .and_then(|d| d.get("timestamp"))
                         .and_then(|t| t.as_u64())
                         .unwrap_or(0);
-                    
-                    println!("   {}. FID: {} (followed at timestamp: {})", 
-                        i + 1, follower_fid, timestamp);
+
+                    println!(
+                        "   {}. FID: {} (followed at timestamp: {})",
+                        i + 1,
+                        follower_fid,
+                        timestamp
+                    );
                 }
             }
         }
         Err(e) => println!("❌ Failed to get followers: {e}"),
     }
-    
+
     Ok(())
 }
 
@@ -325,9 +333,13 @@ async fn handle_following(
     fid: u64,
     limit: u32,
 ) -> Result<()> {
-    let limit_text = if limit == 0 { "all".to_string() } else { limit.to_string() };
+    let limit_text = if limit == 0 {
+        "all".to_string()
+    } else {
+        limit.to_string()
+    };
     println!("👤 Getting following for FID: {fid} (limit: {limit_text})");
-    
+
     match hub_client.get_following(fid, limit).await {
         Ok(following) => {
             if following.is_empty() {
@@ -342,22 +354,26 @@ async fn handle_following(
                         .and_then(|lb| lb.get("targetFid"))
                         .and_then(|f| f.as_u64())
                         .unwrap_or(0);
-                    
+
                     // Extract timestamp for when they followed
                     let timestamp = user
                         .get("data")
                         .and_then(|d| d.get("timestamp"))
                         .and_then(|t| t.as_u64())
                         .unwrap_or(0);
-                    
-                    println!("   {}. FID: {} (followed at timestamp: {})", 
-                        i + 1, target_fid, timestamp);
+
+                    println!(
+                        "   {}. FID: {} (followed at timestamp: {})",
+                        i + 1,
+                        target_fid,
+                        timestamp
+                    );
                 }
             }
         }
         Err(e) => println!("❌ Failed to get following: {e}"),
     }
-    
+
     Ok(())
 }
 
@@ -367,7 +383,7 @@ async fn handle_profile(
     show_all: bool,
 ) -> Result<()> {
     println!("👤 Getting profile for FID: {fid}");
-    
+
     match hub_client.get_user_profile(fid).await {
         Ok(profile_data) => {
             if profile_data.is_empty() {
@@ -375,7 +391,7 @@ async fn handle_profile(
             } else {
                 println!("✅ Profile for FID: {fid}");
                 println!("{}", "─".repeat(50));
-                
+
                 // Parse and display profile information
                 let mut username = "Unknown".to_string();
                 let mut display_name = "Unknown".to_string();
@@ -387,11 +403,16 @@ async fn handle_profile(
                 let mut url = "No website".to_string();
                 let mut eth_address = "No Ethereum address".to_string();
                 let mut sol_address = "No Solana address".to_string();
-                
+
                 for data in &profile_data {
-                    if let Some(user_data_body) = data.get("data").and_then(|d| d.get("userDataBody")) {
-                        if let Some(data_type) = user_data_body.get("type").and_then(|t| t.as_str()) {
-                            if let Some(value) = user_data_body.get("value").and_then(|v| v.as_str()) {
+                    if let Some(user_data_body) =
+                        data.get("data").and_then(|d| d.get("userDataBody"))
+                    {
+                        if let Some(data_type) = user_data_body.get("type").and_then(|t| t.as_str())
+                        {
+                            if let Some(value) =
+                                user_data_body.get("value").and_then(|v| v.as_str())
+                            {
                                 match data_type {
                                     "USER_DATA_TYPE_USERNAME" => username = value.to_string(),
                                     "USER_DATA_TYPE_DISPLAY" => display_name = value.to_string(),
@@ -401,15 +422,19 @@ async fn handle_profile(
                                     "USER_DATA_TYPE_TWITTER" => twitter = format!("@{}", value),
                                     "USER_DATA_TYPE_GITHUB" => github = format!("@{}", value),
                                     "USER_DATA_TYPE_URL" => url = value.to_string(),
-                                    "USER_DATA_PRIMARY_ADDRESS_ETHEREUM" => eth_address = value.to_string(),
-                                    "USER_DATA_PRIMARY_ADDRESS_SOLANA" => sol_address = value.to_string(),
+                                    "USER_DATA_PRIMARY_ADDRESS_ETHEREUM" => {
+                                        eth_address = value.to_string()
+                                    }
+                                    "USER_DATA_PRIMARY_ADDRESS_SOLANA" => {
+                                        sol_address = value.to_string()
+                                    }
                                     _ => {} // Ignore other types
                                 }
                             }
                         }
                     }
                 }
-                
+
                 if show_all {
                     // Display all profile information
                     println!("📝 Display Name: {}", display_name);
@@ -422,14 +447,16 @@ async fn handle_profile(
                     println!("🔗 Ethereum: {}", eth_address);
                     println!("🔗 Solana: {}", sol_address);
                     println!("🖼️  Profile Picture: {}", pfp_url);
-                    
+
                     // Display profile picture if available
                     if pfp_url != "No profile picture" && !pfp_url.is_empty() {
-                        if let Err(e) = crate::image_display::ImageDisplay::smart_display(&pfp_url).await {
+                        if let Err(e) =
+                            crate::image_display::ImageDisplay::smart_display(&pfp_url).await
+                        {
                             println!("❌ Failed to display profile picture: {}", e);
                         }
                     }
-                    
+
                     println!("{}", "─".repeat(50));
                     println!("📊 Total profile fields: {}", profile_data.len());
                 } else {
@@ -437,10 +464,12 @@ async fn handle_profile(
                     println!("👤 @{}", username);
                     println!("📝 {}", display_name);
                     println!("📄 {}", bio);
-                    
+
                     // Display profile picture if available
                     if pfp_url != "No profile picture" && !pfp_url.is_empty() {
-                        if let Err(e) = crate::image_display::ImageDisplay::smart_display(&pfp_url).await {
+                        if let Err(e) =
+                            crate::image_display::ImageDisplay::smart_display(&pfp_url).await
+                        {
                             println!("❌ Failed to display profile picture: {}", e);
                         }
                     }
@@ -449,7 +478,7 @@ async fn handle_profile(
         }
         Err(e) => println!("❌ Failed to get profile: {e}"),
     }
-    
+
     Ok(())
 }
 
@@ -458,12 +487,12 @@ async fn handle_stats(
     fid: u64,
 ) -> Result<()> {
     println!("📊 Getting statistics for FID: {fid}");
-    
+
     // Get storage limits which includes following count
     match hub_client.get_storage_limits(fid).await {
         Ok(storage_data) => {
             println!("✅ Storage limits retrieved:");
-            
+
             if let Some(limits) = storage_data.get("limits").and_then(|l| l.as_array()) {
                 for limit in limits {
                     if let (Some(store_type), Some(name), Some(limit_val), Some(used)) = (
@@ -474,55 +503,101 @@ async fn handle_stats(
                     ) {
                         match name {
                             "LINKS" => {
-                                println!("   👥 Following: {}/{} ({}%)", 
-                                    used, limit_val, 
-                                    if limit_val > 0 { (used * 100) / limit_val } else { 0 }
+                                println!(
+                                    "   👥 Following: {}/{} ({}%)",
+                                    used,
+                                    limit_val,
+                                    if limit_val > 0 {
+                                        (used * 100) / limit_val
+                                    } else {
+                                        0
+                                    }
                                 );
                             }
                             "CASTS" => {
-                                println!("   📝 Casts: {}/{} ({}%)", 
-                                    used, limit_val,
-                                    if limit_val > 0 { (used * 100) / limit_val } else { 0 }
+                                println!(
+                                    "   📝 Casts: {}/{} ({}%)",
+                                    used,
+                                    limit_val,
+                                    if limit_val > 0 {
+                                        (used * 100) / limit_val
+                                    } else {
+                                        0
+                                    }
                                 );
                             }
                             "REACTIONS" => {
-                                println!("   ❤️  Reactions: {}/{} ({}%)", 
-                                    used, limit_val,
-                                    if limit_val > 0 { (used * 100) / limit_val } else { 0 }
+                                println!(
+                                    "   ❤️  Reactions: {}/{} ({}%)",
+                                    used,
+                                    limit_val,
+                                    if limit_val > 0 {
+                                        (used * 100) / limit_val
+                                    } else {
+                                        0
+                                    }
                                 );
                             }
                             "USER_DATA" => {
-                                println!("   👤 Profile Data: {}/{} ({}%)", 
-                                    used, limit_val,
-                                    if limit_val > 0 { (used * 100) / limit_val } else { 0 }
+                                println!(
+                                    "   👤 Profile Data: {}/{} ({}%)",
+                                    used,
+                                    limit_val,
+                                    if limit_val > 0 {
+                                        (used * 100) / limit_val
+                                    } else {
+                                        0
+                                    }
                                 );
                             }
                             "VERIFICATIONS" => {
-                                println!("   ✅ Verifications: {}/{} ({}%)", 
-                                    used, limit_val,
-                                    if limit_val > 0 { (used * 100) / limit_val } else { 0 }
+                                println!(
+                                    "   ✅ Verifications: {}/{} ({}%)",
+                                    used,
+                                    limit_val,
+                                    if limit_val > 0 {
+                                        (used * 100) / limit_val
+                                    } else {
+                                        0
+                                    }
                                 );
                             }
                             "USERNAME_PROOFS" => {
-                                println!("   🏷️  Username Proofs: {}/{} ({}%)", 
-                                    used, limit_val,
-                                    if limit_val > 0 { (used * 100) / limit_val } else { 0 }
+                                println!(
+                                    "   🏷️  Username Proofs: {}/{} ({}%)",
+                                    used,
+                                    limit_val,
+                                    if limit_val > 0 {
+                                        (used * 100) / limit_val
+                                    } else {
+                                        0
+                                    }
                                 );
                             }
                             _ => {
-                                println!("   {} {}: {}/{} ({}%)", 
-                                    store_type, name, used, limit_val,
-                                    if limit_val > 0 { (used * 100) / limit_val } else { 0 }
+                                println!(
+                                    "   {} {}: {}/{} ({}%)",
+                                    store_type,
+                                    name,
+                                    used,
+                                    limit_val,
+                                    if limit_val > 0 {
+                                        (used * 100) / limit_val
+                                    } else {
+                                        0
+                                    }
                                 );
                             }
                         }
                     }
                 }
             }
-            
-            
+
             // Show tier information if available
-            if let Some(tier_subscriptions) = storage_data.get("tier_subscriptions").and_then(|t| t.as_array()) {
+            if let Some(tier_subscriptions) = storage_data
+                .get("tier_subscriptions")
+                .and_then(|t| t.as_array())
+            {
                 if !tier_subscriptions.is_empty() {
                     println!("\n💎 Tier Information:");
                     for tier in tier_subscriptions {
@@ -531,9 +606,10 @@ async fn handle_stats(
                             tier.get("expires_at").and_then(|e| e.as_u64()),
                         ) {
                             if expires_at > 0 {
-                                let expire_date = chrono::DateTime::from_timestamp(expires_at as i64, 0)
-                                    .map(|dt| dt.format("%Y-%m-%d %H:%M:%S").to_string())
-                                    .unwrap_or_else(|| "Unknown".to_string());
+                                let expire_date =
+                                    chrono::DateTime::from_timestamp(expires_at as i64, 0)
+                                        .map(|dt| dt.format("%Y-%m-%d %H:%M:%S").to_string())
+                                        .unwrap_or_else(|| "Unknown".to_string());
                                 println!("   {} (expires: {})", tier_type, expire_date);
                             } else {
                                 println!("   {} (permanent)", tier_type);
@@ -545,27 +621,31 @@ async fn handle_stats(
         }
         Err(e) => println!("❌ Failed to get storage limits: {e}"),
     }
-    
+
     Ok(())
 }
 
 async fn handle_spam_check(fids: Vec<u64>) -> Result<()> {
     println!("🚫 Checking spam status for FIDs: {:?}", fids);
-    
+
     // Load spam checker
-    let spam_checker = match crate::spam_checker::SpamChecker::load_from_file("labels/labels/spam.jsonl") {
-        Ok(checker) => checker,
-        Err(e) => {
-            println!("❌ Failed to load spam labels: {e}");
-            println!("💡 Make sure the labels submodule is properly initialized");
-            return Ok(());
-        }
-    };
-    
+    let spam_checker =
+        match crate::spam_checker::SpamChecker::load_from_file("labels/labels/spam.jsonl") {
+            Ok(checker) => checker,
+            Err(e) => {
+                println!("❌ Failed to load spam labels: {e}");
+                println!("💡 Make sure the labels submodule is properly initialized");
+                return Ok(());
+            }
+        };
+
     // Get statistics
     let (total, spam_count, non_spam_count) = spam_checker.get_stats();
-    println!("📊 Spam labels loaded: {} total, {} spam, {} non-spam", total, spam_count, non_spam_count);
-    
+    println!(
+        "📊 Spam labels loaded: {} total, {} spam, {} non-spam",
+        total, spam_count, non_spam_count
+    );
+
     // Check each FID
     for fid in fids {
         match spam_checker.get_label(fid) {
@@ -575,50 +655,72 @@ async fn handle_spam_check(fids: Vec<u64>) -> Result<()> {
                     2 => "✅ CLEAN",
                     _ => "❓ UNKNOWN",
                 };
-                println!("   FID {}: {} (label_value: {})", fid, status, label.label_value);
+                println!(
+                    "   FID {}: {} (label_value: {})",
+                    fid, status, label.label_value
+                );
             }
             None => {
                 println!("   FID {}: ❓ NOT FOUND (not in dataset)", fid);
             }
         }
     }
-    
+
     Ok(())
 }
 
 async fn handle_spam_stat(hub_client: &crate::farcaster_client::FarcasterClient) -> Result<()> {
     println!("📊 Getting comprehensive spam statistics...");
-    
+
     // Load spam checker
-    let spam_checker = match crate::spam_checker::SpamChecker::load_from_file("labels/labels/spam.jsonl") {
-        Ok(checker) => checker,
-        Err(e) => {
-            println!("❌ Failed to load spam labels: {e}");
-            println!("💡 Make sure the labels submodule is properly initialized");
-            return Ok(());
-        }
-    };
-    
+    let spam_checker =
+        match crate::spam_checker::SpamChecker::load_from_file("labels/labels/spam.jsonl") {
+            Ok(checker) => checker,
+            Err(e) => {
+                println!("❌ Failed to load spam labels: {e}");
+                println!("💡 Make sure the labels submodule is properly initialized");
+                return Ok(());
+            }
+        };
+
     // Get spam statistics
     let (total_labels, spam_count, non_spam_count) = spam_checker.get_stats();
     let unknown_count = total_labels - spam_count - non_spam_count;
-    
+
     // Calculate percentages
-    let spam_percentage = if total_labels > 0 { (spam_count * 100) / total_labels } else { 0 };
-    let non_spam_percentage = if total_labels > 0 { (non_spam_count * 100) / total_labels } else { 0 };
-    let unknown_percentage = if total_labels > 0 { (unknown_count * 100) / total_labels } else { 0 };
-    
+    let spam_percentage = if total_labels > 0 {
+        (spam_count * 100) / total_labels
+    } else {
+        0
+    };
+    let non_spam_percentage = if total_labels > 0 {
+        (non_spam_count * 100) / total_labels
+    } else {
+        0
+    };
+    let unknown_percentage = if total_labels > 0 {
+        (unknown_count * 100) / total_labels
+    } else {
+        0
+    };
+
     println!("\n🚫 Spam Labels Statistics:");
     println!("{}", "─".repeat(50));
     println!("📊 Total Spam Labels: {}", total_labels);
     println!("🚫 Spam: {} ({:.1}%)", spam_count, spam_percentage as f64);
-    println!("✅ Non-Spam: {} ({:.1}%)", non_spam_count, non_spam_percentage as f64);
-    println!("❓ Unknown: {} ({:.1}%)", unknown_count, unknown_percentage as f64);
-    
+    println!(
+        "✅ Non-Spam: {} ({:.1}%)",
+        non_spam_count, non_spam_percentage as f64
+    );
+    println!(
+        "❓ Unknown: {} ({:.1}%)",
+        unknown_count, unknown_percentage as f64
+    );
+
     // Get hub information for additional context
     println!("\n🌐 Hub Information:");
     println!("{}", "─".repeat(50));
-    
+
     match hub_client.get_hub_info().await {
         Ok(hub_info) => {
             // Try to extract total user count from hub info
@@ -627,59 +729,92 @@ async fn handle_spam_stat(hub_client: &crate::farcaster_client::FarcasterClient)
                 .and_then(|v| v.as_u64())
                 .or_else(|| {
                     // Try alternative field names
-                    hub_info.get("total_users")
+                    hub_info
+                        .get("total_users")
                         .and_then(|v| v.as_u64())
                         .or_else(|| hub_info.get("userCount").and_then(|v| v.as_u64()))
                 });
-            
+
             if let Some(total_users) = total_users {
                 println!("👥 Total Users in Hub: {}", total_users);
-                
+
                 // Calculate coverage percentage
-                let coverage_percentage = if total_users > 0 { 
-                    (total_labels * 100) / total_users as usize 
-                } else { 0 };
-                
-                println!("📈 Label Coverage: {:.1}% of total users", coverage_percentage as f64);
-                
+                let coverage_percentage = if total_users > 0 {
+                    (total_labels * 100) / total_users as usize
+                } else {
+                    0
+                };
+
+                println!(
+                    "📈 Label Coverage: {:.1}% of total users",
+                    coverage_percentage as f64
+                );
+
                 // Calculate spam rate among total users
-                let spam_rate_total = if total_users > 0 { 
-                    (spam_count * 100) / total_users as usize 
-                } else { 0 };
-                
-                println!("🚫 Spam Rate (vs total users): {:.1}%", spam_rate_total as f64);
-                
+                let spam_rate_total = if total_users > 0 {
+                    (spam_count * 100) / total_users as usize
+                } else {
+                    0
+                };
+
+                println!(
+                    "🚫 Spam Rate (vs total users): {:.1}%",
+                    spam_rate_total as f64
+                );
+
                 // Show additional context
                 let unlabeled_users = total_users as usize - total_labels;
-                println!("❓ Unlabeled Users: {} ({:.1}%)", 
-                    unlabeled_users, 
-                    if total_users > 0 { (unlabeled_users * 100) / total_users as usize } else { 0 } as f64
+                println!(
+                    "❓ Unlabeled Users: {} ({:.1}%)",
+                    unlabeled_users,
+                    if total_users > 0 {
+                        (unlabeled_users * 100) / total_users as usize
+                    } else {
+                        0
+                    } as f64
                 );
             } else {
                 // Try to extract total users from dbStats
                 if let Some(db_stats) = hub_info.get("dbStats") {
-                    if let Some(num_fid_registrations) = db_stats.get("numFidRegistrations").and_then(|v| v.as_u64()) {
+                    if let Some(num_fid_registrations) =
+                        db_stats.get("numFidRegistrations").and_then(|v| v.as_u64())
+                    {
                         println!("👥 Total FID Registrations: {}", num_fid_registrations);
-                        
+
                         // Calculate coverage percentage
-                        let coverage_percentage = if num_fid_registrations > 0 { 
-                            (total_labels * 100) / num_fid_registrations as usize 
-                        } else { 0 };
-                        
-                        println!("📈 Label Coverage: {:.1}% of registered FIDs", coverage_percentage as f64);
-                        
+                        let coverage_percentage = if num_fid_registrations > 0 {
+                            (total_labels * 100) / num_fid_registrations as usize
+                        } else {
+                            0
+                        };
+
+                        println!(
+                            "📈 Label Coverage: {:.1}% of registered FIDs",
+                            coverage_percentage as f64
+                        );
+
                         // Calculate spam rate among total users
-                        let spam_rate_total = if num_fid_registrations > 0 { 
-                            (spam_count * 100) / num_fid_registrations as usize 
-                        } else { 0 };
-                        
-                        println!("🚫 Spam Rate (vs registered FIDs): {:.1}%", spam_rate_total as f64);
-                        
+                        let spam_rate_total = if num_fid_registrations > 0 {
+                            (spam_count * 100) / num_fid_registrations as usize
+                        } else {
+                            0
+                        };
+
+                        println!(
+                            "🚫 Spam Rate (vs registered FIDs): {:.1}%",
+                            spam_rate_total as f64
+                        );
+
                         // Show additional context
                         let unlabeled_users = num_fid_registrations as usize - total_labels;
-                        println!("❓ Unlabeled FIDs: {} ({:.1}%)", 
-                            unlabeled_users, 
-                            if num_fid_registrations > 0 { (unlabeled_users * 100) / num_fid_registrations as usize } else { 0 } as f64
+                        println!(
+                            "❓ Unlabeled FIDs: {} ({:.1}%)",
+                            unlabeled_users,
+                            if num_fid_registrations > 0 {
+                                (unlabeled_users * 100) / num_fid_registrations as usize
+                            } else {
+                                0
+                            } as f64
                         );
                     } else {
                         println!("❓ Total user count not available in hub info");
@@ -696,20 +831,23 @@ async fn handle_spam_stat(hub_client: &crate::farcaster_client::FarcasterClient)
             println!("💡 This might be because the Hub doesn't support the info endpoint");
         }
     }
-    
+
     // Show additional statistics
     println!("\n📈 Additional Statistics:");
     println!("{}", "─".repeat(50));
-    
+
     if total_labels > 0 {
         let spam_ratio = spam_count as f64 / total_labels as f64;
         let non_spam_ratio = non_spam_count as f64 / total_labels as f64;
-        
-        println!("📊 Spam to Non-Spam Ratio: {:.2}:1", spam_ratio / non_spam_ratio);
+
+        println!(
+            "📊 Spam to Non-Spam Ratio: {:.2}:1",
+            spam_ratio / non_spam_ratio
+        );
         println!("📊 Clean Rate: {:.1}%", non_spam_percentage as f64);
         println!("📊 Spam Rate: {:.1}%", spam_percentage as f64);
     }
-    
+
     // Show data freshness info if available
     if let Some(first_timestamp) = spam_checker.get_oldest_timestamp() {
         let first_date = chrono::DateTime::from_timestamp(first_timestamp as i64, 0)
@@ -717,16 +855,15 @@ async fn handle_spam_stat(hub_client: &crate::farcaster_client::FarcasterClient)
             .unwrap_or_else(|| "Unknown".to_string());
         println!("📅 Oldest Label: {}", first_date);
     }
-    
+
     if let Some(last_timestamp) = spam_checker.get_newest_timestamp() {
         let last_date = chrono::DateTime::from_timestamp(last_timestamp as i64, 0)
             .map(|dt| dt.format("%Y-%m-%d %H:%M:%S").to_string())
             .unwrap_or_else(|| "Unknown".to_string());
         println!("📅 Newest Label: {}", last_date);
     }
-    
+
     println!("\n✅ Spam statistics retrieved successfully!");
-    
+
     Ok(())
 }
-
