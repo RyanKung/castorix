@@ -23,6 +23,11 @@ jobs:
           components: rustfmt, clippy
           override: true
 
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
       - name: Cache cargo registry
         uses: actions/cache@v3
         with:
@@ -41,14 +46,23 @@ jobs:
           path: target
           key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
 
+      - name: Initialize contracts submodule
+        run: |
+          if [ -f "contracts/.git" ]; then
+            echo "Contracts submodule already initialized"
+          else
+            echo "Initializing contracts submodule..."
+            git submodule update --init --recursive contracts || echo "Warning: Failed to initialize contracts submodule"
+          fi
+
+      - name: Build contracts and generate bindings
+        run: cargo build --release --all-features
+
       - name: Check formatting
         run: cargo fmt --all -- --check
 
       - name: Run clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
-
-      - name: Build project
-        run: cargo build --release --all-features
 
       - name: Run tests
         run: cargo test --release --all-features
@@ -70,6 +84,20 @@ jobs:
         with:
           toolchain: stable
           override: true
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Initialize contracts submodule
+        run: |
+          if [ -f "contracts/.git" ]; then
+            echo "Contracts submodule already initialized"
+          else
+            echo "Initializing contracts submodule..."
+            git submodule update --init --recursive contracts || echo "Warning: Failed to initialize contracts submodule"
+          fi
 
       - name: Build release binary
         run: cargo build --release
