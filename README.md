@@ -1,5 +1,9 @@
 # 🔐 Castorix — Farcaster Power Toolkit
 
+<div align="center">
+  <img src="logo.png" alt="Castorix Logo" width="200" height="200">
+</div>
+
 [![License: GPL-2.0](https://img.shields.io/badge/License-GPL--2.0-blue.svg)](https://opensource.org/licenses/GPL-2.0)
 [![Rust](https://img.shields.io/badge/Rust-1.70%2B-orange.svg)](https://www.rust-lang.org)
 [![Farcaster](https://img.shields.io/badge/Farcaster-Protocol-purple.svg)](https://farcaster.xyz)
