@@ -507,7 +507,7 @@ async fn test_complete_farcaster_contracts() -> Result<()> {
     let mut csprng = OsRng {};
     let signing_key = SigningKey::generate(&mut csprng);
     let public_key = signing_key.verifying_key().to_bytes();
-    println!("   Public key: {}", hex::encode(&public_key));
+    println!("   Public key: {}", hex::encode(public_key));
 
     // Test message signing capability
     println!("\n✍️  Step 6: Testing message signing capability...");
