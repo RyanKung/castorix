@@ -27,9 +27,6 @@ pub mod generated;
 #[cfg(test)]
 mod test_utils;
 
-#[cfg(test)]
-mod simple_tests;
-
 // Re-export main types and clients
 pub use contract_client::FarcasterContractClient;
 pub use types::*;
