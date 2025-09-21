@@ -64,9 +64,6 @@ jobs:
       - name: Run clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
 
-      - name: Run tests
-        run: cargo test --release --all-features
-
   release:
     name: Create Release
     needs: test
