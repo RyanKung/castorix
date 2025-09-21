@@ -84,7 +84,7 @@ impl FarcasterContractClient {
         for (state, _state_name) in [(0u8, "Active"), (1u8, "Inactive"), (2u8, "Pending")] {
             match self.key_registry.keys_of(fid, state).await {
                 Ok(ContractResult::Success(keys)) => {
-                    let keys_hex: Vec<String> = keys.iter().map(|k| hex::encode(k)).collect();
+                    let keys_hex: Vec<String> = keys.iter().map(hex::encode).collect();
                     match state {
                         0 => keys_info.active_keys_list = keys_hex,
                         1 => keys_info.inactive_keys_list = keys_hex,

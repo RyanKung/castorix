@@ -59,8 +59,8 @@ impl KeyRegistryAbi {
         {
             Ok(key_data) => {
                 // Extract fields from the KeyData struct
-                let state_u8 = key_data.state.try_into().unwrap_or(0);
-                let key_type_u32 = key_data.key_type.try_into().unwrap_or(0);
+                let state_u8 = key_data.state;
+                let key_type_u32 = key_data.key_type;
                 Ok(ContractResult::Success((state_u8, key_type_u32)))
             }
             Err(e) => Ok(ContractResult::Error(format!("Contract call failed: {e}"))),
@@ -71,8 +71,8 @@ impl KeyRegistryAbi {
     pub async fn keys(&self, fid: Fid, key: Vec<u8>) -> Result<ContractResult<(u8, u32)>> {
         match self.contract.keys(fid.into(), key.into()).call().await {
             Ok((state, key_type)) => {
-                let state_u8 = state.try_into().unwrap_or(0);
-                let key_type_u32 = key_type.try_into().unwrap_or(0);
+                let state_u8 = state;
+                let key_type_u32 = key_type;
                 Ok(ContractResult::Success((state_u8, key_type_u32)))
             }
             Err(e) => Ok(ContractResult::Error(format!("Contract call failed: {e}"))),

@@ -164,12 +164,13 @@ fn generate_rust_bindings() {
         }
     }
 
-    // Create mod.rs file for the generated bindings
-    let mod_content = contracts
+    // Create mod.rs file for the generated bindings (sorted alphabetically)
+    let mut module_names: Vec<String> = contracts
         .iter()
         .map(|(name, _)| format!("pub mod {}_bindings;", name.to_lowercase()))
-        .collect::<Vec<_>>()
-        .join("\n");
+        .collect();
+    module_names.sort(); // Sort alphabetically to ensure consistent formatting
+    let mod_content = module_names.join("\n");
 
     let mod_file = format!("{bindings_dir}/mod.rs");
     if let Err(e) = fs::write(&mod_file, mod_content) {

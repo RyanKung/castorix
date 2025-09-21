@@ -107,7 +107,6 @@ impl SpamChecker {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
 
     #[test]
     fn test_spam_checker() {

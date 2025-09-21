@@ -85,18 +85,16 @@ async fn handle_custody_import(fid: u64) -> Result<()> {
     println!("📥 Importing ECDSA private key for FID: {fid}");
 
     // Prompt for private key
-    let private_key = crate::encrypted_key_manager::prompt_password(&format!(
-        "Enter ECDSA private key (hex format, 64 characters): "
-    ))?;
+    let private_key = crate::encrypted_key_manager::prompt_password(
+        "Enter ECDSA private key (hex format, 64 characters): ",
+    )?;
 
     // Prompt for password
-    let password = crate::encrypted_key_manager::prompt_password(&format!(
-        "Enter password to encrypt the key: "
-    ))?;
+    let password =
+        crate::encrypted_key_manager::prompt_password("Enter password to encrypt the key: ")?;
 
     // Confirm password
-    let password_confirm =
-        crate::encrypted_key_manager::prompt_password(&format!("Confirm password: "))?;
+    let password_confirm = crate::encrypted_key_manager::prompt_password("Confirm password: ")?;
 
     if password != password_confirm {
         return Err(anyhow::anyhow!(
@@ -135,18 +133,16 @@ async fn handle_custody_from_mnemonic(fid: u64) -> Result<()> {
     println!("🔑 Generating ECDSA key from mnemonic for FID: {fid}");
 
     // Prompt for mnemonic
-    let mnemonic = crate::encrypted_key_manager::prompt_password(&format!(
-        "Enter BIP39 mnemonic phrase (12 or 24 words): "
-    ))?;
+    let mnemonic = crate::encrypted_key_manager::prompt_password(
+        "Enter BIP39 mnemonic phrase (12 or 24 words): ",
+    )?;
 
     // Prompt for password
-    let password = crate::encrypted_key_manager::prompt_password(&format!(
-        "Enter password to encrypt the key: "
-    ))?;
+    let password =
+        crate::encrypted_key_manager::prompt_password("Enter password to encrypt the key: ")?;
 
     // Confirm password
-    let password_confirm =
-        crate::encrypted_key_manager::prompt_password(&format!("Confirm password: "))?;
+    let password_confirm = crate::encrypted_key_manager::prompt_password("Confirm password: ")?;
 
     if password != password_confirm {
         return Err(anyhow::anyhow!(
@@ -249,9 +245,9 @@ async fn handle_custody_delete(fid: u64) -> Result<()> {
     println!("   File: {}", custody_key_file);
 
     // Confirm deletion
-    let confirm = crate::encrypted_eth_key_manager::prompt_password(&format!(
-        "Are you sure you want to delete this key? Type 'DELETE' to confirm: "
-    ))?;
+    let confirm = crate::encrypted_eth_key_manager::prompt_password(
+        "Are you sure you want to delete this key? Type 'DELETE' to confirm: ",
+    )?;
 
     if confirm != "DELETE" {
         println!("❌ Deletion cancelled");

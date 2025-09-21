@@ -144,7 +144,7 @@ impl EncryptedEthKeyManager {
         let wallet =
             ethers::signers::MnemonicBuilder::<ethers::signers::coins_bip39::English>::default()
                 .phrase(&*cleaned_phrase)
-                .derivation_path(&derivation_path)
+                .derivation_path(derivation_path)
                 .map_err(|e| {
                     anyhow::anyhow!(
                         "Failed to create wallet from mnemonic with derivation path {}: {}",

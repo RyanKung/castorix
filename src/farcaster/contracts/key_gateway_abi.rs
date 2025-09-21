@@ -83,6 +83,7 @@ impl KeyGatewayAbi {
     }
 
     /// Add a key for another address (authorized method)
+    #[allow(clippy::too_many_arguments)]
     pub async fn add_for(
         &self,
         fid_owner: Address,
@@ -119,6 +120,7 @@ impl KeyGatewayAbi {
     }
 
     /// Add a key for another address using raw transaction (for third-party payment)
+    #[allow(clippy::too_many_arguments)]
     pub async fn add_for_raw(
         &self,
         provider: &ethers::providers::Provider<ethers::providers::Http>,

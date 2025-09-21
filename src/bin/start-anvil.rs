@@ -12,8 +12,9 @@ fn main() {
         env::var("ETH_OP_RPC_URL").unwrap_or_else(|_| "https://rpc.ankr.com/optimism".to_string());
 
     // Start Anvil with fork configuration
+    #[allow(clippy::zombie_processes)]
     let output = Command::new("anvil")
-        .args(&[
+        .args([
             "--host",
             "127.0.0.1",
             "--port",

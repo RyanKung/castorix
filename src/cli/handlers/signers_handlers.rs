@@ -158,7 +158,7 @@ async fn handle_add_signer(
 
     // Determine payment wallet
     let payment_wallet_name = payment_wallet_name.unwrap_or(&wallet_name);
-    if payment_wallet_name != &wallet_name {
+    if payment_wallet_name != wallet_name {
         println!("💰 Using payment wallet: {payment_wallet_name}");
         println!("   (Third-party gas payment enabled)");
     } else {
@@ -274,7 +274,7 @@ async fn handle_add_signer(
         println!("   • The signer would be permanently associated with FID {fid}");
         println!("   • This action cannot be easily undone");
 
-        if payment_wallet_name != &wallet_name {
+        if payment_wallet_name != wallet_name {
             println!("   • Third-party gas payment enabled");
             println!("   • Custody wallet: {wallet_name} (for authorization)");
             println!("   • Payment wallet: {payment_wallet_name} (for gas fees)");
@@ -367,7 +367,7 @@ async fn handle_add_signer(
     println!("   • The signer will be permanently associated with FID {fid}");
     println!("   • This action cannot be easily undone");
 
-    if payment_wallet_name != &wallet_name {
+    if payment_wallet_name != wallet_name {
         println!("   • Third-party gas payment enabled");
         println!("   • Custody wallet: {wallet_name} (for authorization)");
         println!("   • Payment wallet: {payment_wallet_name} (for gas fees)");
@@ -678,7 +678,7 @@ async fn handle_del_signer(
 
     // Determine payment wallet
     let payment_wallet_name = payment_wallet_name.unwrap_or(&wallet_name);
-    if payment_wallet_name != &wallet_name {
+    if payment_wallet_name != wallet_name {
         println!("💰 Using payment wallet: {payment_wallet_name}");
         println!("   (Third-party gas payment enabled)");
     } else {
@@ -804,7 +804,7 @@ async fn handle_del_signer(
         println!("   • This action cannot be easily undone");
         println!("   • Signer to remove: {}", signer_to_remove.key);
 
-        if payment_wallet_name != &wallet_name {
+        if payment_wallet_name != wallet_name {
             println!("   • Third-party gas payment enabled");
             println!("   • Custody wallet: {wallet_name} (for authorization)");
             println!("   • Payment wallet: {payment_wallet_name} (for gas fees)");
@@ -854,7 +854,7 @@ async fn handle_del_signer(
     println!("   • This action cannot be easily undone");
     println!("   • Signer to remove: {}", signer_to_remove.key);
 
-    if payment_wallet_name != &wallet_name {
+    if payment_wallet_name != wallet_name {
         println!("   • Third-party gas payment enabled");
         println!("   • Custody wallet: {wallet_name} (for authorization)");
         println!("   • Payment wallet: {payment_wallet_name} (for gas fees)");
@@ -1045,6 +1045,7 @@ async fn create_signer_add_signature(
 }
 
 /// Create EIP-712 typed data for Add operation
+#[allow(clippy::too_many_arguments)]
 fn create_add_typed_data(
     fid_owner: ethers::types::Address,
     key_type: u32,
@@ -1361,15 +1362,14 @@ async fn handle_signers_import(fid: u64) -> Result<()> {
         hex::encode(decrypted_key)
     } else {
         // No legacy key found, prompt for manual input
-        crate::encrypted_key_manager::prompt_password(&format!(
-            "Enter Ed25519 private key (hex format, 64 characters): "
-        ))?
+        crate::encrypted_key_manager::prompt_password(
+            "Enter Ed25519 private key (hex format, 64 characters): ",
+        )?
     };
 
     // Prompt for password
-    let password = crate::encrypted_key_manager::prompt_password(&format!(
-        "Enter password to encrypt the key: "
-    ))?;
+    let password =
+        crate::encrypted_key_manager::prompt_password("Enter password to encrypt the key: ")?;
 
     // Create the encrypted Ed25519 key manager
     let mut encrypted_manager =
@@ -1507,8 +1507,8 @@ async fn handle_signers_list() -> Result<()> {
         match ed25519_manager.list_keys_with_info("") {
             Ok(key_infos) => {
                 println!(
-                    "\n{:<4} {:<8} {:<66} {:<20} {}",
-                    "#", "FID", "Public Key", "Created", "Status"
+                    "\n{:<4} {:<8} {:<66} {:<20} Status",
+                    "#", "FID", "Public Key", "Created"
                 );
                 println!("{}", "-".repeat(110));
 

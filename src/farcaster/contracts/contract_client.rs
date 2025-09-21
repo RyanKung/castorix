@@ -424,7 +424,7 @@ impl FarcasterContractClient {
                 log.topics.len(),
                 log.data.len()
             );
-            if log.topics.len() > 0 {
+            if !log.topics.is_empty() {
                 println!("   Topic 0: {}", log.topics[0]);
             }
 
@@ -543,7 +543,6 @@ impl FarcasterContractClient {
     }
 
     /// Wait for transaction confirmation to ensure nonce is updated
-
     /// Register a signer key for the current wallet's FID (requires wallet)
     pub async fn register_signer_key(
         &self,
@@ -772,6 +771,7 @@ impl FarcasterContractClient {
     }
 
     /// Register a signer key with pre-generated metadata (for third-party registration)
+    #[allow(clippy::too_many_arguments)]
     pub async fn register_signer_key_with_metadata(
         &self,
         fid_owner_address: ethers::types::Address,
@@ -863,6 +863,7 @@ impl FarcasterContractClient {
     }
 
     /// Submit signer registration with pre-generated signatures (for third-party gas payment)
+    #[allow(clippy::too_many_arguments)]
     pub async fn submit_signer_registration_with_signatures(
         &self,
         fid_owner_address: ethers::types::Address,
@@ -949,7 +950,7 @@ impl FarcasterContractClient {
 
     /// Get the custody address for a FID
     async fn get_fid_custody(&self, fid: u64) -> Result<Option<Address>> {
-        match self.id_registry.custody_of(fid.into()).await? {
+        match self.id_registry.custody_of(fid).await? {
             ContractResult::Success(custody) => Ok(Some(custody)),
             ContractResult::Error(_) => Ok(None),
         }
@@ -1154,6 +1155,7 @@ impl FarcasterContractClient {
     }
 
     /// Create EIP-712 typed data for Add operation
+    #[allow(clippy::too_many_arguments)]
     fn create_add_typed_data(
         &self,
         fid_owner: ethers::types::Address,

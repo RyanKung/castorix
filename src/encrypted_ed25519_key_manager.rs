@@ -501,10 +501,10 @@ mod tests {
         // Generate a test key
         let signing_key = SigningKey::generate(&mut rand::thread_rng());
         let private_key_bytes = signing_key.to_bytes();
-        let private_key_hex = hex::encode(&private_key_bytes);
+        let private_key_hex = hex::encode(private_key_bytes);
 
         // Test different hex formats
-        let formats = vec![
+        let formats = [
             private_key_hex.clone(),          // Pure hex
             format!("0x{}", private_key_hex), // With 0x prefix
         ];
@@ -623,7 +623,7 @@ mod tests {
 
         // Test wrong length hex (not 32 or 64 bytes)
         let short_hex = "1234567890abcdef"; // 16 bytes
-        let result = manager.import_and_encrypt(fid, &short_hex, password).await;
+        let result = manager.import_and_encrypt(fid, short_hex, password).await;
         assert!(result.is_err());
     }
 }
