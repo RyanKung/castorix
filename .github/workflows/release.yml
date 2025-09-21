@@ -1,0 +1,130 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main  # Triggers on every push to main branch
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+          override: true
+
+      - name: Cache cargo registry
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cache cargo index
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cache cargo build
+        uses: actions/cache@v3
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Run clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Build project
+        run: cargo build --release --all-features
+
+      - name: Run tests
+        run: cargo test --release --all-features
+
+  release:
+    name: Create Release
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Build release binary
+        run: cargo build --release
+
+      - name: Extract commit info
+        id: get_commit_info
+        run: |
+          echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+          echo "FULL_SHA=${GITHUB_SHA}" >> $GITHUB_OUTPUT
+          echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: build-${{ steps.get_commit_info.outputs.SHORT_SHA }}
+          release_name: Build ${{ steps.get_commit_info.outputs.SHORT_SHA }}
+          body: |
+            ## Build Information
+            
+            - **Commit**: ${{ steps.get_commit_info.outputs.FULL_SHA }}
+            - **Short SHA**: ${{ steps.get_commit_info.outputs.SHORT_SHA }}
+            - **Branch**: ${{ steps.get_commit_info.outputs.BRANCH_NAME }}
+            - **Build Date**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+            
+            ## Quality Checks ✅
+            
+            - Build verification ✅
+            - Clippy linting ✅
+            - Code formatting ✅
+            
+            ## Download
+            
+            Download the binary for Linux x86_64 below.
+            
+            ## Installation from Source
+            
+            ```bash
+            git clone https://github.com/RyanKung/castorix.git
+            cd castorix
+            git checkout ${{ steps.get_commit_info.outputs.FULL_SHA }}
+            cargo build --release
+            ```
+          draft: false
+          prerelease: true
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./target/release/castorix
+          asset_name: castorix-${{ steps.get_commit_info.outputs.SHORT_SHA }}-linux-x86_64
+          asset_content_type: application/octet-stream
+
