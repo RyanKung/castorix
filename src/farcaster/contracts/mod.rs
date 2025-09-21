@@ -24,7 +24,6 @@ pub mod storage_registry_abi;
 #[cfg(not(doctest))]
 pub mod generated;
 
-
 // Re-export main types and clients
 pub use contract_client::FarcasterContractClient;
 pub use types::*;

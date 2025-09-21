@@ -183,7 +183,7 @@ async fn test_network_connectivity() -> Result<()> {
     println!("📋 Network Information:");
     println!("   Chain ID: {}", chain_id);
     println!("   Block number: {}", block_number);
-        println!("   RPC URL: http://127.0.0.1:8545");
+    println!("   RPC URL: http://127.0.0.1:8545");
 
     // Test balance
     let balance = client.balance().await?;
