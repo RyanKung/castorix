@@ -3,7 +3,7 @@ name: Build and Release
 on:
   push:
     branches:
-      - main  # Triggers on every push to main branch
+      - master  # Triggers on every push to master branch
 
 env:
   CARGO_TERM_COLOR: always
