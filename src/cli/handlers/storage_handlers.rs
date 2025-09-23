@@ -260,13 +260,9 @@ async fn handle_storage_rent(
             custody_wallet.address()
         );
         println!("   Using custody wallet for both authorization and payment");
-        contract_client
-            .rent_storage(fid, units as u64)
-            .await?
+        contract_client.rent_storage(fid, units as u64).await?
     } else {
-        contract_client
-            .rent_storage(fid, units as u64)
-            .await?
+        contract_client.rent_storage(fid, units as u64).await?
     };
 
     match result {
