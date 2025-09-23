@@ -1,4 +1,3 @@
-use std::env;
 use std::process::Command;
 
 fn main() {
@@ -7,9 +6,8 @@ fn main() {
     // Load environment variables from .env file if it exists
     dotenv::dotenv().ok();
 
-    // Get the Optimism RPC URL from environment
-    let fork_url =
-        env::var("ETH_OP_RPC_URL").unwrap_or_else(|_| "https://rpc.ankr.com/optimism".to_string());
+    // Get the Optimism RPC URL from consts
+    let fork_url = castorix::consts::get_config().eth_op_rpc_url().to_string();
 
     // Start Anvil with fork configuration
     #[allow(clippy::zombie_processes)]

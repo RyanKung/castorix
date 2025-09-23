@@ -21,6 +21,7 @@ use castorix::{
         types::{HubCommands, KeyCommands},
         Cli, CliHandler,
     },
+    consts,
     ens_proof::EnsProof,
     core::{
         client::hub_client::FarcasterClient,
@@ -52,27 +53,19 @@ async fn main() -> Result<()> {
                         &KeyManager::from_private_key(
                             "0000000000000000000000000000000000000000000000000000000000000001",
                         )?,
+                        cli.path.as_deref(),
                     )
                     .await?;
                 }
                 _ => {
-                    // For other commands, try to load from environment
-                    match KeyManager::from_env("PRIVATE_KEY") {
-                        Ok(key_manager) => {
-                            CliHandler::handle_key_command(action, &key_manager).await?;
-                        }
-                        Err(_) => {
-                            println!("❌ No private key found in environment variables.");
-                            println!("💡 Use 'castorix key generate-encrypted <name>' to create an encrypted key, or");
-                            println!("   set PRIVATE_KEY environment variable for legacy mode.");
-                        }
-                    }
+                    println!("❌ Key command requires a wallet name.");
+                    println!("💡 Use 'castorix key generate-encrypted <name>' to create an encrypted key, or");
+                    println!("   use 'castorix key load <key-name>' to load an existing encrypted key.");
                 }
             }
         }
         Commands::Hub { action } => {
-            let hub_url = std::env::var("FARCASTER_HUB_URL")
-                .unwrap_or_else(|_| "https://hub-api.neynar.com".to_string());
+            let hub_url = crate::consts::get_config().farcaster_hub_url().to_string();
 
             // For read-only operations, we don't need a key manager
             match action {
@@ -96,22 +89,8 @@ async fn main() -> Result<()> {
                     CliHandler::handle_hub_command(action, &hub_client).await?;
                 }
                 _ => {
-                    // For write operations, we need a key manager
-                    match KeyManager::from_env("PRIVATE_KEY") {
-                        Ok(key_manager) => {
-                            let hub_client =
-                                FarcasterClient::with_key_manager(hub_url, key_manager);
-                            CliHandler::handle_hub_command(action, &hub_client).await?;
-                        }
-                        Err(_) => {
-                            println!("❌ No private key found in environment variables.");
-                            println!("💡 Please either:");
-                            println!(
-                                "   1. Set PRIVATE_KEY environment variable for legacy mode, or"
-                            );
-                            println!("   2. Use 'castorix key load <key-name>' to load an encrypted key first");
-                        }
-                    }
+                    println!("❌ Hub command requires a wallet.");
+                    println!("💡 Please use 'castorix key load <key-name>' to load an encrypted key first");
                 }
             }
         }
@@ -119,14 +98,12 @@ async fn main() -> Result<()> {
             CliHandler::handle_custody_command(action).await?;
         }
         Commands::Signers { action } => {
-            let hub_url = std::env::var("FARCASTER_HUB_URL")
-                .unwrap_or_else(|_| "https://hub-api.neynar.com".to_string());
+            let hub_url = crate::consts::get_config().farcaster_hub_url().to_string();
             let hub_client = FarcasterClient::read_only(hub_url);
             CliHandler::handle_signers_command(action, &hub_client).await?;
         }
         Commands::Ens { action } => {
-            let rpc_url = std::env::var("ETH_RPC_URL")
-                .unwrap_or_else(|_| "https://eth-mainnet.g.alchemy.com/v2/demo".to_string());
+            let rpc_url = consts::get_config().eth_rpc_url().to_string();
 
             // Create a dummy key manager for ENS operations
             let dummy_key = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
@@ -136,6 +113,12 @@ async fn main() -> Result<()> {
             } else {
                 println!("❌ Failed to create key manager for ENS operations");
             }
+        }
+        Commands::Fid { action } => {
+            CliHandler::handle_fid_command(action).await?;
+        }
+        Commands::Storage { action } => {
+            CliHandler::handle_storage_command(action, cli.path.as_deref()).await?;
         }
     }
 

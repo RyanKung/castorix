@@ -9,25 +9,40 @@ fn main() {
         setup_test_environment();
     }
 
-    // Generate protobuf code from Snapchain's proto files
+    // Generate protobuf code from proto files
     let out_dir = "src/message";
 
     let proto_files = [
-        "snapchain/src/proto/message.proto",
-        "snapchain/src/proto/username_proof.proto",
+        "proto/snapchain/username_proof.proto",
+        "proto/snapchain/message.proto",
     ];
+
+    // Create output directory
+    if let Err(e) = fs::create_dir_all(out_dir) {
+        println!("cargo:warning=Failed to create protobuf output directory: {e}");
+        return;
+    }
 
     let mut codegen = protobuf_codegen_pure::Codegen::new();
     codegen.out_dir(out_dir);
-    codegen.include("snapchain/src/proto");
+    codegen.include("proto/snapchain");
 
     for proto_file in &proto_files {
         if Path::new(proto_file).exists() {
+            println!("cargo:info=Adding proto file: {}", proto_file);
             codegen.input(proto_file);
+        } else {
+            println!("cargo:warning=Proto file not found: {}", proto_file);
         }
     }
 
-    codegen.run().expect("protobuf codegen failed");
+    match codegen.run() {
+        Ok(_) => println!("cargo:info=Successfully generated protobuf code"),
+        Err(e) => {
+            println!("cargo:warning=Protobuf codegen failed: {}", e);
+            // Don't fail the build, just warn
+        }
+    }
 
     // Compile Solidity contracts and generate ABIs
     compile_farcaster_contracts();

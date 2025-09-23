@@ -102,11 +102,7 @@ impl FarcasterClient {
     /// # Returns
     /// * `Result<Self>` - The FarcasterClient instance or an error
     pub fn from_env() -> Result<Self> {
-        let key_manager = KeyManager::from_env("PRIVATE_KEY")?;
-        let hub_url = std::env::var("FARCASTER_HUB_URL")
-            .unwrap_or_else(|_| "https://hub-api.neynar.com".to_string());
-
-        Ok(Self::with_key_manager(hub_url, key_manager))
+        Err(anyhow::anyhow!("Hub client requires a wallet name. Use FarcasterClient::with_key_manager() instead."))
     }
 
     /// Create a new Farcaster client without authentication (read-only operations)
@@ -1051,18 +1047,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_farcaster_client_from_env() {
-        // Set test environment variables
-        std::env::set_var(
-            "PRIVATE_KEY",
-            "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-        );
-        std::env::set_var("FARCASTER_HUB_URL", "https://hub-api.neynar.com");
-
+        // Test that from_env now returns an error (environment variables are no longer allowed)
         let result = FarcasterClient::from_env();
-        assert!(result.is_ok());
-
-        // Clean up
-        std::env::remove_var("PRIVATE_KEY");
-        std::env::remove_var("FARCASTER_HUB_URL");
+        assert!(result.is_err());
     }
 }

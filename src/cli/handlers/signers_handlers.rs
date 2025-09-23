@@ -33,6 +33,7 @@ pub async fn handle_signers_command(
             wallet,
             payment_wallet,
             dry_run,
+            yes,
         } => {
             handle_add_signer(
                 hub_client,
@@ -40,6 +41,7 @@ pub async fn handle_signers_command(
                 wallet.as_deref(),
                 payment_wallet.as_deref(),
                 dry_run,
+                yes,
             )
             .await?;
         }
@@ -132,6 +134,7 @@ async fn handle_add_signer(
     wallet_name: Option<&str>,
     payment_wallet_name: Option<&str>,
     dry_run: bool,
+    yes: bool,
 ) -> Result<()> {
     println!("➕ Adding signer for FID: {fid}");
 
@@ -375,18 +378,22 @@ async fn handle_add_signer(
         println!("   • Using custody wallet for both authorization and gas payment");
     }
 
-    // Ask for user confirmation
-    print!("\n❓ Do you want to proceed with the on-chain registration? (yes/no): ");
-    use std::io::{self, Write};
-    io::stdout().flush()?;
+    // Ask for user confirmation (skip if --yes is provided)
+    if !yes {
+        print!("\n❓ Do you want to proceed with the on-chain registration? (yes/no): ");
+        use std::io::{self, Write};
+        io::stdout().flush()?;
 
-    let mut confirmation = String::new();
-    io::stdin().read_line(&mut confirmation)?;
-    let confirmation = confirmation.trim().to_lowercase();
+        let mut confirmation = String::new();
+        io::stdin().read_line(&mut confirmation)?;
+        let confirmation = confirmation.trim().to_lowercase();
 
-    if confirmation != "yes" && confirmation != "y" {
-        println!("❌ Operation cancelled by user");
-        return Ok(());
+        if confirmation != "yes" && confirmation != "y" {
+            println!("❌ Operation cancelled by user");
+            return Ok(());
+        }
+    } else {
+        println!("\n✅ Auto-confirmed with --yes flag");
     }
 
     println!("✅ Proceeding with on-chain registration...");
@@ -1526,8 +1533,7 @@ async fn handle_signers_list() -> Result<()> {
                 for (fid, keys) in fid_groups {
                     // Check if this FID has registered signers on-chain
                     // Try local hub first, fallback to Neynar if not available
-                    let hub_url = std::env::var("FARCASTER_HUB_URL")
-                        .unwrap_or_else(|_| "http://localhost:2283".to_string());
+                    let hub_url = crate::consts::get_config().farcaster_hub_url().to_string();
                     let hub_client = FarcasterClient::new(hub_url, None);
                     let registered_status = match hub_client.get_signers(fid).await {
                         Ok(signers) => {

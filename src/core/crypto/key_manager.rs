@@ -4,7 +4,6 @@ use ethers::{
     prelude::*,
     signers::{LocalWallet, Signer},
 };
-use std::env;
 
 /// Private key management system that loads keys from environment variables
 #[derive(Clone)]
@@ -32,12 +31,8 @@ impl KeyManager {
     ///     Err(e) => println!("Failed to create KeyManager: {}", e),
     /// }
     /// ```
-    pub fn from_env(env_key: &str) -> Result<Self> {
-        let private_key = env::var(env_key).with_context(|| {
-            format!("Failed to read private key from environment variable: {env_key}")
-        })?;
-
-        Self::from_private_key(&private_key)
+    pub fn from_env(_env_key: &str) -> Result<Self> {
+        Err(anyhow::anyhow!("Environment variable access is not allowed. Use KeyManager::from_private_key() or encrypted key loading instead."))
     }
 
     /// Create a new KeyManager from a private key string

@@ -36,7 +36,7 @@ message MessageData {
     UserDataBody user_data_body = 12;
     // SignerRemoveBody signer_remove_body = 13; // Deprecated
     LinkBody link_body = 14;
-    UserNameProof username_proof_body = 15;
+    username_proof.UserNameProof username_proof_body = 15;
     FrameActionBody frame_action_body = 16;
 
     // Compaction messages

@@ -46,18 +46,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_ens_proof_from_env() {
-        // Set test environment variables
-        std::env::set_var(
-            "PRIVATE_KEY",
-            "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-        );
-        std::env::set_var("ETH_RPC_URL", "https://eth-mainnet.g.alchemy.com/v2/test");
-
+        // Test that from_env now returns an error (environment variables are no longer allowed)
         let result = EnsProof::from_env();
-        assert!(result.is_ok());
-
-        // Clean up
-        std::env::remove_var("PRIVATE_KEY");
-        std::env::remove_var("ETH_RPC_URL");
+        assert!(result.is_err());
     }
 }

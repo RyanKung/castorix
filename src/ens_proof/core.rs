@@ -34,10 +34,7 @@ impl EnsProof {
     /// # Returns
     /// * `Result<Self>` - The EnsProof instance or an error
     pub fn from_env() -> Result<Self> {
-        let key_manager = KeyManager::from_env("PRIVATE_KEY")?;
-        let rpc_url = std::env::var("ETH_RPC_URL")
-            .with_context(|| "Failed to read ETH_RPC_URL from environment variables")?;
-        Ok(Self::new(key_manager, rpc_url))
+        Err(anyhow::anyhow!("ENS proof requires a wallet name. Use EnsProof::new() instead."))
     }
 
     /// Resolve ENS domain to address

@@ -150,15 +150,14 @@ impl EnsProof {
         dotenv::dotenv().ok();
 
         // Use appropriate RPC URL based on domain type
+        let config = crate::consts::get_config();
         let (rpc_url, chain_name) = if domain.ends_with(".base.eth") {
             // For Base subdomains, use Base chain RPC
-            let base_rpc = std::env::var("ETH_BASE_RPC_URL")
-                .or_else(|_| std::env::var("ETH_RPC_URL"))
-                .unwrap_or_else(|_| self.rpc_url.clone());
+            let base_rpc = config.eth_base_rpc_url().to_string();
             (base_rpc, "Base")
         } else {
             // For regular ENS domains, use ETH_RPC_URL
-            let eth_rpc = std::env::var("ETH_RPC_URL").unwrap_or_else(|_| self.rpc_url.clone());
+            let eth_rpc = config.eth_rpc_url().to_string();
             (eth_rpc, "Ethereum")
         };
 

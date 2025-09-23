@@ -21,6 +21,7 @@ Key Features:
   • 📡 Farcaster Hub Integration - Submit proofs and interact with Farcaster
   • 🏷️  Key Aliases - Organize keys with friendly names and descriptions
   • 🔄 Key Management - Rename, update, and manage multiple keys
+  • 📁 Custom Storage Path - Specify custom directory for storing encrypted keys
 
 Examples:
   # Generate a new encrypted key
@@ -38,9 +39,17 @@ Examples:
   # Create an ENS proof (using specific encrypted wallet)
   castorix ens create ryankung.base.eth 460432 --wallet-name my-wallet
   
+  # Use custom storage path
+  castorix --path /custom/path key generate-encrypted my-wallet "My Wallet"
+  
 For more information, visit: https://github.com/your-repo/castorix
 "#)]
 pub struct Cli {
+    /// Custom path for storing encrypted keys and configuration files
+    /// If not specified, uses the default system directory (~/.castorix/)
+    #[arg(long, global = true, value_name = "PATH")]
+    pub path: Option<String>,
+
     #[command(subcommand)]
     pub command: Commands,
 }
@@ -88,6 +97,22 @@ pub enum Commands {
     Signers {
         #[command(subcommand)]
         action: SignersCommands,
+    },
+    /// 🆔 FID registration and management
+    ///
+    /// Register new Farcaster IDs (FIDs) and manage existing ones.
+    /// This includes checking registration prices and listing owned FIDs.
+    Fid {
+        #[command(subcommand)]
+        action: FidCommands,
+    },
+    /// 🏠 Storage rental and management
+    ///
+    /// Rent and manage storage units for Farcaster IDs.
+    /// This allows FIDs to store more messages, casts, and other data.
+    Storage {
+        #[command(subcommand)]
+        action: StorageCommands,
     },
 }
 
