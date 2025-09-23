@@ -169,9 +169,11 @@ Custody wallets live in `~/.castorix/custody/` and power signer registration wor
 `--dry-run` previews the Key Gateway transaction and still stores the generated signer encrypted under `~/.castorix/ed25519/`.
 
 ### 🧪 Miscellaneous helpers
-- `cargo start-op-node` / `cargo stop-node` — spin up or tear down an Optimism-forking Anvil instance
-- `cargo start-base-node` / `cargo stop-node` — spin up or tear down a Base-forking Anvil instance
-- `cargo start-base-node-fast` — start Base Anvil in fast mode (latest block, 1s block time) for testing
+- `cargo start-node op` — start Optimism Anvil node (port 8545, chain ID 10)
+- `cargo start-node base` — start Base Anvil node (port 8546, chain ID 8453)
+- `cargo start-node op --fast` — start Optimism node in fast mode (1s block time)
+- `cargo start-node base --fast` — start Base node in fast mode (1s block time)
+- `cargo stop-node` — stop all Anvil processes
 
 ## ✅ Running Tests
 
@@ -188,8 +190,10 @@ cargo test --bin castorix            # Run binary unit tests only
 
 ```bash
 # Start local Anvil node (required for integration tests)
-cargo start-op-node                  # launches an Optimism Anvil fork (requires foundry)
-cargo start-base-node                # launches a Base Anvil fork (requires foundry)
+cargo start-node op                  # launches an Optimism Anvil fork (requires foundry)
+cargo start-node base                # launches a Base Anvil fork (requires foundry)
+cargo start-node op --fast           # fast mode for testing (1s block time)
+cargo start-node base --fast         # fast mode for testing (1s block time)
 
 # Run all tests (unit + integration)
 cargo test

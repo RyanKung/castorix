@@ -96,12 +96,18 @@ async fn start_local_anvil() -> Option<std::process::Child> {
         .args([
             "--fork-url",
             "https://optimism-mainnet.g.alchemy.com/v2/demo",
+            "--fork-block-number",
+            "latest",
             "--port",
             "8545",
             "--host",
             "0.0.0.0",
             "--block-time",
             "1",
+            "--retries",
+            "3",
+            "--timeout",
+            "10000",
         ])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
