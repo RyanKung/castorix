@@ -1,6 +1,6 @@
 use crate::cli::types::SignersCommands;
 use crate::farcaster::contracts::types::ContractResult;
-use crate::farcaster_client::FarcasterClient;
+use crate::core::client::hub_client::FarcasterClient;
 use aes_gcm::aead::{Aead, KeyInit};
 use aes_gcm::{Aes256Gcm, Key, Nonce};
 use anyhow::Result;
@@ -960,7 +960,7 @@ async fn handle_del_signer(
 
 /// Create a FarcasterContractClient with the specified wallet
 async fn create_contract_client_with_wallet(
-    key_manager: crate::key_manager::KeyManager,
+    key_manager: crate::core::crypto::key_manager::KeyManager,
 ) -> Result<crate::farcaster::contracts::contract_client::FarcasterContractClient> {
     // Get the wallet from the key manager
     let wallet = key_manager.wallet();

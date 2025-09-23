@@ -14,7 +14,7 @@ impl CliHandler {
     /// Handle key management commands (legacy)
     pub async fn handle_key_command(
         command: KeyCommands,
-        key_manager: &crate::key_manager::KeyManager,
+        key_manager: &crate::core::crypto::key_manager::KeyManager,
     ) -> Result<()> {
         crate::cli::handlers::key_handlers::core::handle_key_command(command, key_manager).await
     }
@@ -35,7 +35,7 @@ impl CliHandler {
     /// Handle Farcaster Hub commands
     pub async fn handle_hub_command(
         command: HubCommands,
-        hub_client: &crate::farcaster_client::FarcasterClient,
+        hub_client: &crate::core::client::hub_client::FarcasterClient,
     ) -> Result<()> {
         hub_handlers::handle_hub_command(command, hub_client).await
     }
@@ -48,7 +48,7 @@ impl CliHandler {
     /// Handle signer management commands
     pub async fn handle_signers_command(
         command: SignersCommands,
-        hub_client: &crate::farcaster_client::FarcasterClient,
+        hub_client: &crate::core::client::hub_client::FarcasterClient,
     ) -> Result<()> {
         signers_handlers::handle_signers_command(command, hub_client).await
     }

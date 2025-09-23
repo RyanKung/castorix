@@ -1,7 +1,7 @@
 use crate::{
     encrypted_key_manager::EncryptedKeyManager,
-    key_manager::KeyManager,
-    username_proof::{UserNameProof, UserNameType},
+    core::crypto::key_manager::KeyManager,
+    core::protocol::username_proof::{UserNameProof, UserNameType},
 };
 use anyhow::{Context, Result};
 use ethers::{prelude::*, types::Address};

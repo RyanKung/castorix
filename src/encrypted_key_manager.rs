@@ -1,4 +1,4 @@
-use crate::key_manager::KeyManager;
+use crate::core::crypto::key_manager::KeyManager;
 use aes_gcm::aead::{Aead, AeadCore, KeyInit};
 use aes_gcm::{Aes256Gcm, Key, Nonce};
 use anyhow::{Context, Result};

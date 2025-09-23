@@ -125,15 +125,38 @@ Custody wallets live in `~/.castorix/custody/` and power signer registration wor
 - `cargo start-node` / `cargo stop-node` — spin up or tear down an Optimism-forking Anvil instance
 
 ## ✅ Running Tests
-Most integration suites expect a local Optimism fork on `http://127.0.0.1:8545` plus `RUNNING_TESTS=1`.
+
+### Unit Tests
+Unit tests don't require external dependencies and can be run directly:
 
 ```bash
+cargo test --lib                     # Run library unit tests only
+cargo test --bin castorix            # Run binary unit tests only
+```
+
+### Integration Tests
+**Important**: Integration tests require a local Anvil node running on `http://127.0.0.1:8545`. You must start the node before running integration tests:
+
+```bash
+# Start local Anvil node (required for integration tests)
 cargo start-node                     # launches an Anvil fork (requires foundry)
+
+# Run all tests (unit + integration)
 RUNNING_TESTS=1 cargo test
+
+# Or run only integration tests
+RUNNING_TESTS=1 cargo test --test farcaster_integration_test
+
+# Stop the node when done
 cargo stop-node
 ```
 
-Some tests lean on external RPCs or datasets; skip them if prerequisites aren’t ready.
+### Test Types
+- **Unit tests** (`cargo test --lib`): Test individual modules and functions
+- **Integration tests** (`cargo test --test *`): Test end-to-end workflows with blockchain interactions
+- **Binary tests** (`cargo test --bin castorix`): Test CLI functionality
+
+Some integration tests lean on external RPCs or datasets; skip them if prerequisites aren't ready.
 
 ## 🪐 Snapchain crate
 The `snapchain/` directory contains a Rust implementation of the Snapchain data layer. Check `snapchain/README.md` for build docs. Castorix CLI doesn’t require it unless you’re hacking on the node itself.

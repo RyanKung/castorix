@@ -4,7 +4,7 @@ use anyhow::{Context, Result};
 /// Handle key management commands (legacy)
 pub async fn handle_key_command(
     command: KeyCommands,
-    key_manager: &crate::key_manager::KeyManager,
+    key_manager: &crate::core::crypto::key_manager::KeyManager,
 ) -> Result<()> {
     match command {
         KeyCommands::Info => {

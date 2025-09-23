@@ -22,8 +22,10 @@ use castorix::{
         Cli, CliHandler,
     },
     ens_proof::EnsProof,
-    farcaster_client::FarcasterClient,
-    key_manager::{init_env, KeyManager},
+    core::{
+        client::hub_client::FarcasterClient,
+        crypto::key_manager::{init_env, KeyManager},
+    },
 };
 
 #[tokio::main]

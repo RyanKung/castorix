@@ -12,6 +12,11 @@ keywords = ["farcaster", "ethereum", "blockchain", "social", "protocol"]
 categories = ["web-programming", "network-programming", "cryptography"]
 authors = ["Your Name <your.email@example.com>"]
 
+# Library configuration
+[lib]
+name = "castorix"
+path = "src/lib.rs"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]

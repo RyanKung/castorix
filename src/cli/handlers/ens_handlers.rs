@@ -155,7 +155,7 @@ pub async fn handle_ens_command(
             let proof_data: serde_json::Value = serde_json::from_str(&proof_content)?;
 
             // Create UserNameProof from JSON
-            let mut proof = crate::username_proof::UserNameProof::new();
+            let mut proof = crate::core::protocol::username_proof::UserNameProof::new();
             proof.set_timestamp(proof_data["timestamp"].as_u64().unwrap_or(0));
             proof.set_name(
                 proof_data["name"]

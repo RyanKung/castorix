@@ -1,7 +1,7 @@
-use crate::{
-    key_manager::KeyManager,
-    message::{FarcasterNetwork, HashScheme, Message, MessageData, MessageType, SignatureScheme},
-    username_proof::{UserNameProof, UserNameType},
+use crate::core::{
+    crypto::key_manager::KeyManager,
+    protocol::message::{FarcasterNetwork, HashScheme, Message, MessageData, MessageType, SignatureScheme},
+    protocol::username_proof::{UserNameProof, UserNameType},
 };
 use anyhow::{Context, Result};
 use chrono::Utc;

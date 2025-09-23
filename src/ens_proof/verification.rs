@@ -1,5 +1,5 @@
 use super::core::EnsProof;
-use crate::username_proof::UserNameProof;
+use crate::core::protocol::username_proof::UserNameProof;
 use anyhow::{Context, Result};
 use ethers::{prelude::*, types::Address};
 use std::str::FromStr;
