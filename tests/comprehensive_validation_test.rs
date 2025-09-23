@@ -1,11 +1,10 @@
-use std::env;
 use std::fs;
 use std::process::{Command, Stdio};
 use std::thread;
 use std::time::Duration;
 
 mod test_consts;
-use test_consts::{setup_local_test_env, should_skip_rpc_tests};
+use test_consts::setup_local_test_env;
 
 /// Comprehensive validation test for Farcaster CLI
 ///
