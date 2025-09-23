@@ -53,6 +53,9 @@ cargo build                              # build the CLI and library
 
 # Optional: install a global binary
 cargo install --path .
+
+# Optional: install pre-commit hook for automatic formatting and linting
+./scripts/install-pre-commit-hook.sh
 ```
 
 During development call commands with `cargo run -- <subcommand>`. After installing globally, just run `castorix <subcommand>`.
@@ -239,6 +242,23 @@ We love patches! Please read our development guidelines:
 - **Environment Variables**: Only `src/consts.rs` and `tests/test_consts.rs` can access environment variables
 - **Error Handling**: Tests must use `panic!` for failures, no warnings without panics
 - **Code Quality**: All code must pass `cargo check` and `cargo test` without warnings
+
+### Pre-commit Hook
+A pre-commit hook is available to automatically format and lint code before commits:
+
+```bash
+# Install the pre-commit hook
+./scripts/install-pre-commit-hook.sh
+
+# The hook will run:
+# - cargo +nightly fmt (format code)
+# - cargo clippy --fix (auto-fix clippy issues)
+# - Check for multi-import statements
+# - Check for TODO/FIXME comments
+# - Run quick unit tests
+```
+
+To bypass the hook temporarily: `git commit --no-verify -m "your message"`
 
 See [RULES.md](RULES.md) and [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 

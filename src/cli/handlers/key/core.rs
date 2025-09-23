@@ -1,4 +1,5 @@
-use anyhow::{Result, Context};
+use anyhow::Context;
+use anyhow::Result;
 use crate::cli::types::KeyCommands;
 
 /// Handle key management commands (legacy)

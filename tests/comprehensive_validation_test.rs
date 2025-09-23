@@ -346,7 +346,7 @@ fn run_cli_command(test_data_dir: &str, args: &[&str]) -> std::process::Output {
 /// Start local Anvil node
 async fn start_local_anvil() -> Option<std::process::Child> {
     let output = Command::new("cargo")
-        .args(["run", "--bin", "start-anvil"])
+        .args(["run", "--bin", "start-node"])
         .output();
 
     match output {
@@ -369,7 +369,7 @@ async fn start_local_anvil() -> Option<std::process::Child> {
             }
         }
         Err(e) => {
-            println!("❌ Failed to execute start-anvil command: {}", e);
+            println!("❌ Failed to execute start-node command: {}", e);
             None
         }
     }

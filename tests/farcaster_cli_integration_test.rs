@@ -113,7 +113,7 @@ async fn test_cli_integration_workflow() {
 /// Start local Anvil node
 async fn start_local_anvil() -> Option<std::process::Child> {
     let output = Command::new("cargo")
-        .args(["run", "--bin", "start-anvil"])
+        .args(["run", "--bin", "start-node"])
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
         .spawn();

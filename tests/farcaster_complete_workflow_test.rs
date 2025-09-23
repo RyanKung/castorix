@@ -96,7 +96,7 @@ async fn test_complete_farcaster_workflow() {
 /// Start local Anvil node
 async fn start_local_anvil() -> Option<std::process::Child> {
     let output = Command::new("cargo")
-        .args(["run", "--bin", "start-anvil"])
+        .args(["run", "--bin", "start-node"])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn();

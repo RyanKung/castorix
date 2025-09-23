@@ -300,7 +300,8 @@ async fn handle_hub_key_from_mnemonic(fid: u64) -> Result<()> {
         println!("⚠️  ECDSA key already exists for FID: {}", fid);
         
         print!("\nDo you want to replace the existing key? (y/N): ");
-        use std::io::{self, Write};
+        use std::io;
+        use std::io::Write;
         io::stdout().flush()?;
         
         let mut input = String::new();

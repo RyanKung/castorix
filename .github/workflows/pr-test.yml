@@ -69,7 +69,7 @@ jobs:
       - name: Check code formatting
         run: |
           echo "🔍 Checking code formatting..."
-          cargo fmt --all -- --check
+          cargo +nightly fmt --all -- --check
           echo "✅ Code formatting check passed"
 
       - name: Run clippy linting

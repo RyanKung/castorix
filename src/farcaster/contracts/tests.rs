@@ -198,7 +198,8 @@ mod tests {
     /// Test contract wrapper creation
     #[test]
     fn test_contract_wrapper_creation() {
-        use ethers::providers::{Provider, Http};
+        use ethers::providers::Http;
+        use ethers::providers::Provider;
         
         let provider = Provider::<Http>::try_from("https://optimism-mainnet.infura.io/v3/test")
             .expect("Failed to create provider");
@@ -218,7 +219,8 @@ mod tests {
     /// Test contract wrapper address access
     #[test]
     fn test_contract_wrapper_address_access() {
-        use ethers::providers::{Provider, Http};
+        use ethers::providers::Http;
+        use ethers::providers::Provider;
         
         let provider = Provider::<Http>::try_from("https://optimism-mainnet.infura.io/v3/test")
             .expect("Failed to create provider");
