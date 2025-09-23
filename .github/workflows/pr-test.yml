@@ -60,6 +60,12 @@ jobs:
             git submodule update --init --recursive contracts || echo "Warning: Failed to initialize contracts submodule"
           fi
 
+      - name: Build project first (to generate required files)
+        run: |
+          echo "🔨 Building project to generate required files..."
+          cargo build --all-features
+          echo "✅ Build completed"
+
       - name: Check code formatting
         run: |
           echo "🔍 Checking code formatting..."
@@ -84,11 +90,6 @@ jobs:
           fi
           echo "✅ Import formatting check passed"
 
-      - name: Build project
-        run: |
-          echo "🔨 Building project..."
-          cargo build --all-features --verbose
-          echo "✅ Build successful"
 
       - name: Run unit tests
         run: |

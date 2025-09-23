@@ -46,14 +46,15 @@ jobs:
             git submodule update --init --recursive contracts || echo "Warning: Failed to initialize contracts submodule"
           fi
 
+      - name: Build project first (to generate required files)
+        run: cargo build --all-features
+
       - name: Check formatting
         run: cargo fmt --all -- --check
 
       - name: Run clippy
         run: cargo clippy --all-targets --all-features
 
-      - name: Build project
-        run: cargo build --all-features
 
       - name: Run unit tests
         run: cargo test --lib

@@ -192,6 +192,19 @@ fn generate_rust_bindings() {
         println!("cargo:warning=Failed to create mod.rs: {e}");
     }
 
+    // Create a dummy generated.rs file if it doesn't exist (for compatibility)
+    let generated_rs_file = format!("{bindings_dir}/generated.rs");
+    if !Path::new(&generated_rs_file).exists() {
+        let dummy_content = r#"// Dummy generated.rs file for compatibility
+// This file is created when the actual generated files are not available
+
+pub mod dummy;
+"#;
+        if let Err(e) = fs::write(&generated_rs_file, dummy_content) {
+            println!("cargo:warning=Failed to create dummy generated.rs: {e}");
+        }
+    }
+
     // Tell Cargo to rerun if ABI files change
     println!("cargo:rerun-if-changed={abi_dir}");
 }
