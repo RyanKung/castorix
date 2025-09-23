@@ -169,7 +169,8 @@ Custody wallets live in `~/.castorix/custody/` and power signer registration wor
 `--dry-run` previews the Key Gateway transaction and still stores the generated signer encrypted under `~/.castorix/ed25519/`.
 
 ### 🧪 Miscellaneous helpers
-- `cargo start-node` / `cargo stop-node` — spin up or tear down an Optimism-forking Anvil instance
+- `cargo start-op-node` / `cargo stop-node` — spin up or tear down an Optimism-forking Anvil instance
+- `cargo start-base-node` / `cargo stop-node` — spin up or tear down a Base-forking Anvil instance
 
 ## ✅ Running Tests
 
@@ -186,7 +187,8 @@ cargo test --bin castorix            # Run binary unit tests only
 
 ```bash
 # Start local Anvil node (required for integration tests)
-cargo start-node                     # launches an Anvil fork (requires foundry)
+cargo start-op-node                  # launches an Optimism Anvil fork (requires foundry)
+cargo start-base-node                # launches a Base Anvil fork (requires foundry)
 
 # Run all tests (unit + integration)
 cargo test

@@ -9,7 +9,16 @@ pub fn setup_local_test_env() {
     // Set local Anvil RPC URLs for testing
     env::set_var("ETH_OP_RPC_URL", "http://127.0.0.1:8545");
     env::set_var("ETH_RPC_URL", "http://127.0.0.1:8545");
-    env::set_var("ETH_BASE_RPC_URL", "http://127.0.0.1:8545");
+    env::set_var("ETH_BASE_RPC_URL", "http://127.0.0.1:8546");
+    env::set_var("FARCASTER_HUB_URL", "http://192.168.1.192:3381");
+}
+
+/// Set up local test environment for Base Anvil node
+pub fn setup_local_base_test_env() {
+    // Set local Base Anvil RPC URLs for testing
+    env::set_var("ETH_OP_RPC_URL", "http://127.0.0.1:8545");
+    env::set_var("ETH_RPC_URL", "http://127.0.0.1:8545");
+    env::set_var("ETH_BASE_RPC_URL", "http://127.0.0.1:8546");
     env::set_var("FARCASTER_HUB_URL", "http://192.168.1.192:3381");
 }
 
