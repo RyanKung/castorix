@@ -428,13 +428,13 @@ pub enum EnsCommands {
         domain: String,
     },
 
-    /// 📝 Create username proof for ENS domain
+    /// 📝 Generate username proof for ENS domain
     ///
     /// Generate a signed proof linking your ENS domain to your Farcaster ID.
     /// This proof can be submitted to Farcaster to verify domain ownership.
     ///
-    /// Example: castorix ens create mydomain.eth 12345 --wallet-name my-wallet
-    Create {
+    /// Example: castorix ens proof mydomain.eth 12345 --wallet-name my-wallet
+    Proof {
         /// ENS domain name
         domain: String,
         /// Farcaster ID (your FID)

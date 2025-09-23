@@ -116,22 +116,22 @@ pub async fn handle_ens_command(
                 Err(e) => println!("❌ Failed to verify ownership: {e}"),
             }
         }
-        EnsCommands::Create {
+        EnsCommands::Proof {
             domain,
             fid,
             wallet_name,
         } => {
             if let Some(wallet_name) = &wallet_name {
-                println!("📝 Creating username proof for domain: {domain} (FID: {fid}) using wallet: {wallet_name}");
+                println!("📝 Generating username proof for domain: {domain} (FID: {fid}) using wallet: {wallet_name}");
             } else {
-                println!("📝 Creating username proof for domain: {domain} (FID: {fid})");
+                println!("📝 Generating username proof for domain: {domain} (FID: {fid})");
             }
             match ens_proof
                 .create_ens_proof_with_wallet(&domain, fid, wallet_name.as_deref())
                 .await
             {
                 Ok(proof) => {
-                    println!("✅ Username proof created successfully!");
+                    println!("✅ Username proof generated successfully!");
                     match ens_proof.serialize_proof(&proof) {
                         Ok(json) => {
                             println!("📄 Proof JSON:");

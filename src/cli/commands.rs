@@ -41,11 +41,11 @@ Examples:
   # List all your keys
   castorix key list
   
-  # Create an ENS proof (using default key)
-  castorix ens create vitalik.eth 12345
+  # Generate an ENS proof (using default key)
+  castorix ens proof vitalik.eth 12345
   
-  # Create an ENS proof (using specific encrypted wallet)
-  castorix ens create ryankung.base.eth 460432 --wallet-name my-wallet
+  # Generate an ENS proof (using specific encrypted wallet)
+  castorix ens proof ryankung.base.eth 460432 --wallet-name my-wallet
   
   # Use custom storage path
   castorix --path /custom/path key generate-encrypted my-wallet "My Wallet"
@@ -74,7 +74,7 @@ pub enum Commands {
     },
     /// 🌐 ENS domain proof operations
     ///
-    /// Create and verify ENS domain proofs for Farcaster integration.
+    /// Generate and verify ENS domain proofs for Farcaster integration.
     /// Link your ENS domains to your Farcaster identity.
     ///
     /// Use --wallet-name to select specific encrypted wallets for signing.

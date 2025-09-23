@@ -18,7 +18,7 @@ mod tests {
             "https://eth-mainnet.g.alchemy.com/v2/test".to_string(),
         );
 
-        // Test proof creation (this will fail domain verification but tests the structure)
+        // Test proof generation (this will fail domain verification but tests the structure)
         let result = ens_proof.create_ens_proof("test.eth", 123).await;
         // We expect this to fail due to domain verification, but the structure should be correct
         assert!(result.is_err());
