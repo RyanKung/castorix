@@ -3,4 +3,9 @@
 //! This module provides functionality for interacting with Farcaster smart contracts
 
 // Re-export the existing farcaster contracts module
-pub use crate::farcaster::contracts::*;
+pub use crate::farcaster::contracts::{
+    FarcasterContractClient,
+    ContractAddresses,
+    ContractResult,
+    FidInfo,
+};

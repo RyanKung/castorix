@@ -1,4 +1,12 @@
-use crate::cli::types::*;
+use crate::cli::types::{
+    KeyCommands,
+    EnsCommands,
+    HubCommands,
+    CustodyCommands,
+    SignersCommands,
+    FidCommands,
+    StorageCommands,
+};
 use clap::{Parser, Subcommand};
 
 /// Castorix - Farcaster ENS Domain Proof Tool

@@ -3,7 +3,7 @@ pub mod core;
 pub mod query;
 pub mod verification;
 
-pub use core::*;
+pub use core::EnsProof;
 
 #[cfg(test)]
 mod tests {

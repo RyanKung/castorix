@@ -5,7 +5,10 @@ use std::time::Duration;
 use std::fs;
 
 mod test_consts;
-use test_consts::*;
+use test_consts::{
+    setup_local_test_env,
+    should_skip_rpc_tests,
+};
 
 /// Comprehensive validation test for Farcaster CLI
 /// 
