@@ -93,7 +93,7 @@ async fn test_complete_base_workflow() {
 /// Start local Base Anvil node for testing
 async fn start_local_base_anvil() -> Option<std::process::Child> {
     let output = Command::new("cargo")
-        .args(&["start-base-node"])
+        .args(&["start-base-node-fast"])
         .output();
 
     match output {

@@ -24,7 +24,7 @@ impl Config {
                 "https://eth-mainnet.g.alchemy.com/v2/your_api_key_here".to_string()
             }),
             eth_base_rpc_url: env::var("ETH_BASE_RPC_URL")
-                .unwrap_or_else(|_| "https://mainnet.base.org".to_string()),
+                .unwrap_or_else(|_| "https://base-mainnet.g.alchemy.com/v2/demo".to_string()),
             eth_op_rpc_url: env::var("ETH_OP_RPC_URL")
                 .unwrap_or_else(|_| "https://www.optimism.io/".to_string()),
             farcaster_hub_url: env::var("FARCASTER_HUB_URL")
@@ -41,7 +41,7 @@ impl Config {
                 "https://eth-mainnet.g.alchemy.com/v2/your_api_key_here".to_string()
             }),
             eth_base_rpc_url: env::var("ETH_BASE_RPC_URL")
-                .unwrap_or_else(|_| "https://mainnet.base.org".to_string()),
+                .unwrap_or_else(|_| "https://base-mainnet.g.alchemy.com/v2/demo".to_string()),
             eth_op_rpc_url: env::var("ETH_OP_RPC_URL")
                 .unwrap_or_else(|_| "https://www.optimism.io/".to_string()),
             farcaster_hub_url: env::var("FARCASTER_HUB_URL")
@@ -170,7 +170,7 @@ pub mod env_vars {
 /// Default values for environment variables
 pub mod defaults {
     pub const ETH_RPC_URL: &str = "https://eth-mainnet.g.alchemy.com/v2/your_api_key_here";
-    pub const ETH_BASE_RPC_URL: &str = "https://mainnet.base.org";
+    pub const ETH_BASE_RPC_URL: &str = "https://base-mainnet.g.alchemy.com/v2/demo";
     pub const ETH_OP_RPC_URL: &str = "https://www.optimism.io/";
     pub const FARCASTER_HUB_URL: &str = "http://192.168.1.192:3381";
 }

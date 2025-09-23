@@ -171,6 +171,7 @@ Custody wallets live in `~/.castorix/custody/` and power signer registration wor
 ### 🧪 Miscellaneous helpers
 - `cargo start-op-node` / `cargo stop-node` — spin up or tear down an Optimism-forking Anvil instance
 - `cargo start-base-node` / `cargo stop-node` — spin up or tear down a Base-forking Anvil instance
+- `cargo start-base-node-fast` — start Base Anvil in fast mode (latest block, 1s block time) for testing
 
 ## ✅ Running Tests
 
