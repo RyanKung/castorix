@@ -1,6 +1,6 @@
 use crate::cli::types::SignersCommands;
-use crate::farcaster::contracts::types::ContractResult;
 use crate::core::client::hub_client::FarcasterClient;
+use crate::farcaster::contracts::types::ContractResult;
 use aes_gcm::aead::{Aead, KeyInit};
 use aes_gcm::{Aes256Gcm, Key, Nonce};
 use anyhow::Result;

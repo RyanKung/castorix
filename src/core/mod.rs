@@ -9,15 +9,15 @@
 //! - Contracts: Smart contract interactions
 
 pub mod client;
+pub mod contracts;
 pub mod crypto;
 pub mod protocol;
 pub mod types;
 pub mod utils;
-pub mod contracts;
 
 // Re-exports for convenience
 pub use client::hub_client::FarcasterClient;
 pub use crypto::key_manager::KeyManager;
 pub use protocol::message::{Message, MessageData, MessageType};
-pub use protocol::username_proof::{UserNameProof, UserNameType};
 pub use protocol::spam_checker::SpamChecker;
+pub use protocol::username_proof::{UserNameProof, UserNameType};

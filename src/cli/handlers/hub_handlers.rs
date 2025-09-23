@@ -56,7 +56,9 @@ pub async fn handle_hub_command(
             println!("🌐 Getting ENS domains with proofs for FID: {fid}");
             // Create a dummy EnsProof for the API call
             let dummy_key = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
-            if let Ok(key_manager) = crate::core::crypto::key_manager::KeyManager::from_private_key(dummy_key) {
+            if let Ok(key_manager) =
+                crate::core::crypto::key_manager::KeyManager::from_private_key(dummy_key)
+            {
                 let ens_proof = crate::ens_proof::EnsProof::new(
                     key_manager,
                     "https://eth-mainnet.g.alchemy.com/v2/dummy".to_string(),
@@ -192,8 +194,9 @@ async fn handle_submit_proof(
     Ok(())
 }
 
-
-async fn handle_hub_info(hub_client: &crate::core::client::hub_client::FarcasterClient) -> Result<()> {
+async fn handle_hub_info(
+    hub_client: &crate::core::client::hub_client::FarcasterClient,
+) -> Result<()> {
     println!("📊 Getting Hub information and sync status...");
 
     // Get Hub info from the API
@@ -560,15 +563,16 @@ async fn handle_spam_check(fids: Vec<u64>) -> Result<()> {
     println!("🚫 Checking spam status for FIDs: {:?}", fids);
 
     // Load spam checker
-    let spam_checker =
-        match crate::core::protocol::spam_checker::SpamChecker::load_from_file("labels/labels/spam.jsonl") {
-            Ok(checker) => checker,
-            Err(e) => {
-                println!("❌ Failed to load spam labels: {e}");
-                println!("💡 Make sure the labels submodule is properly initialized");
-                return Ok(());
-            }
-        };
+    let spam_checker = match crate::core::protocol::spam_checker::SpamChecker::load_from_file(
+        "labels/labels/spam.jsonl",
+    ) {
+        Ok(checker) => checker,
+        Err(e) => {
+            println!("❌ Failed to load spam labels: {e}");
+            println!("💡 Make sure the labels submodule is properly initialized");
+            return Ok(());
+        }
+    };
 
     // Get statistics
     let (total, spam_count, non_spam_count) = spam_checker.get_stats();
@@ -600,19 +604,22 @@ async fn handle_spam_check(fids: Vec<u64>) -> Result<()> {
     Ok(())
 }
 
-async fn handle_spam_stat(hub_client: &crate::core::client::hub_client::FarcasterClient) -> Result<()> {
+async fn handle_spam_stat(
+    hub_client: &crate::core::client::hub_client::FarcasterClient,
+) -> Result<()> {
     println!("📊 Getting comprehensive spam statistics...");
 
     // Load spam checker
-    let spam_checker =
-        match crate::core::protocol::spam_checker::SpamChecker::load_from_file("labels/labels/spam.jsonl") {
-            Ok(checker) => checker,
-            Err(e) => {
-                println!("❌ Failed to load spam labels: {e}");
-                println!("💡 Make sure the labels submodule is properly initialized");
-                return Ok(());
-            }
-        };
+    let spam_checker = match crate::core::protocol::spam_checker::SpamChecker::load_from_file(
+        "labels/labels/spam.jsonl",
+    ) {
+        Ok(checker) => checker,
+        Err(e) => {
+            println!("❌ Failed to load spam labels: {e}");
+            println!("💡 Make sure the labels submodule is properly initialized");
+            return Ok(());
+        }
+    };
 
     // Get spam statistics
     let (total_labels, spam_count, non_spam_count) = spam_checker.get_stats();

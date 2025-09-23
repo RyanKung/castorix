@@ -1,5 +1,5 @@
 use anyhow::Result;
-use castorix::farcaster::contracts::types::ContractResult;
+use castorix::farcaster::contracts::types::{ContractResult, ContractAddresses};
 use castorix::farcaster::contracts::FarcasterContractClient;
 use ed25519_dalek::{Signer as Ed25519Signer, SigningKey, Verifier as Ed25519Verifier};
 use ethers::{

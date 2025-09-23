@@ -26,8 +26,4 @@ pub mod generated;
 
 // Re-export main types and clients
 pub use contract_client::FarcasterContractClient;
-pub use types::{
-    ContractAddresses,
-    ContractResult,
-    FidInfo,
-};
+pub use types::{ContractAddresses, ContractResult, FidInfo};

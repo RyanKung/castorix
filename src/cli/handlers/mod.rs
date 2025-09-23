@@ -7,14 +7,8 @@ pub mod signers_handlers;
 pub mod storage_handlers;
 
 use crate::cli::types::{
-    FidCommands,
-    StorageCommands,
-    SignersCommands,
-    KeyCommands,
-    HubKeyCommands,
-    EnsCommands,
-    HubCommands,
-    CustodyCommands,
+    CustodyCommands, EnsCommands, FidCommands, HubCommands, HubKeyCommands, KeyCommands,
+    SignersCommands, StorageCommands,
 };
 use anyhow::Result;
 
@@ -28,7 +22,12 @@ impl CliHandler {
         key_manager: &crate::core::crypto::key_manager::KeyManager,
         storage_path: Option<&str>,
     ) -> Result<()> {
-        crate::cli::handlers::key_handlers::core::handle_key_command(command, key_manager, storage_path).await
+        crate::cli::handlers::key_handlers::core::handle_key_command(
+            command,
+            key_manager,
+            storage_path,
+        )
+        .await
     }
 
     /// Handle Hub Ed25519 key management commands
@@ -71,7 +70,10 @@ impl CliHandler {
     }
 
     /// Handle storage rental and management commands
-    pub async fn handle_storage_command(command: StorageCommands, storage_path: Option<&str>) -> Result<()> {
+    pub async fn handle_storage_command(
+        command: StorageCommands,
+        storage_path: Option<&str>,
+    ) -> Result<()> {
         storage_handlers::handle_storage_command(command, storage_path).await
     }
 }

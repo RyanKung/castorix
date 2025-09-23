@@ -1,6 +1,8 @@
 use crate::core::{
     crypto::key_manager::KeyManager,
-    protocol::message::{FarcasterNetwork, HashScheme, Message, MessageData, MessageType, SignatureScheme},
+    protocol::message::{
+        FarcasterNetwork, HashScheme, Message, MessageData, MessageType, SignatureScheme,
+    },
     protocol::username_proof::{UserNameProof, UserNameType},
 };
 use anyhow::{Context, Result};
@@ -102,7 +104,9 @@ impl FarcasterClient {
     /// # Returns
     /// * `Result<Self>` - The FarcasterClient instance or an error
     pub fn from_env() -> Result<Self> {
-        Err(anyhow::anyhow!("Hub client requires a wallet name. Use FarcasterClient::with_key_manager() instead."))
+        Err(anyhow::anyhow!(
+            "Hub client requires a wallet name. Use FarcasterClient::with_key_manager() instead."
+        ))
     }
 
     /// Create a new Farcaster client without authentication (read-only operations)

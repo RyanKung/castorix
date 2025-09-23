@@ -1,7 +1,6 @@
 /// Test-specific configuration module
 /// This module is the ONLY place allowed to use env::set_var in tests
 /// It sets up local test environment variables for RPC URLs
-
 use std::env;
 
 /// Set up local test environment for Anvil node
@@ -25,14 +24,20 @@ pub fn setup_local_base_test_env() {
 /// Set up placeholder URLs for configuration validation testing
 pub fn setup_placeholder_test_env() {
     env::set_var("ETH_OP_RPC_URL", "https://www.optimism.io/");
-    env::set_var("ETH_RPC_URL", "https://eth-mainnet.g.alchemy.com/v2/your_api_key_here");
+    env::set_var(
+        "ETH_RPC_URL",
+        "https://eth-mainnet.g.alchemy.com/v2/your_api_key_here",
+    );
     env::set_var("ETH_BASE_RPC_URL", "https://mainnet.base.org");
     env::set_var("FARCASTER_HUB_URL", "http://192.168.1.192:3381");
 }
 
 /// Set up demo API URLs for simple testing
 pub fn setup_demo_test_env() {
-    env::set_var("ETH_OP_RPC_URL", "https://optimism-mainnet.g.alchemy.com/v2/demo");
+    env::set_var(
+        "ETH_OP_RPC_URL",
+        "https://optimism-mainnet.g.alchemy.com/v2/demo",
+    );
     env::set_var("ETH_RPC_URL", "https://eth-mainnet.g.alchemy.com/v2/demo");
     env::set_var("ETH_BASE_RPC_URL", "https://mainnet.base.org");
     env::set_var("FARCASTER_HUB_URL", "https://hub-api.neynar.com");

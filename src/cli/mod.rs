@@ -5,11 +5,6 @@ pub mod types;
 pub use commands::{Cli, Commands};
 pub use handlers::CliHandler;
 pub use types::{
-    FidCommands,
+    CustodyCommands, EnsCommands, FidCommands, HubCommands, KeyCommands, SignersCommands,
     StorageCommands,
-    SignersCommands,
-    HubCommands,
-    KeyCommands,
-    CustodyCommands,
-    EnsCommands,
 };

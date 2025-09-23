@@ -1,10 +1,5 @@
 use crate::cli::types::{
-    KeyCommands,
-    EnsCommands,
-    HubCommands,
-    CustodyCommands,
-    SignersCommands,
-    FidCommands,
+    CustodyCommands, EnsCommands, FidCommands, HubCommands, KeyCommands, SignersCommands,
     StorageCommands,
 };
 use clap::{Parser, Subcommand};

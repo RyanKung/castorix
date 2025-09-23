@@ -47,7 +47,7 @@ async fn handle_fid_register(
     // Get RPC URL from configuration (Farcaster contracts are on Optimism)
     let config = crate::consts::get_config();
     let rpc_url = config.eth_op_rpc_url().to_string();
-    
+
     // Check if using placeholder values
     if rpc_url.contains("your_api_key_here") || rpc_url == "https://www.optimism.io/" {
         println!("⚠️  Configuration Warning:");
@@ -64,7 +64,7 @@ async fn handle_fid_register(
     let private_key = if let Some(name) = wallet_name {
         // Load from encrypted storage
         use crate::encrypted_key_manager::{prompt_password, EncryptedKeyManager};
-        
+
         let mut manager = EncryptedKeyManager::default_config();
         if !manager.key_exists(&name) {
             println!("❌ Wallet '{name}' not found!");
@@ -77,7 +77,13 @@ async fn handle_fid_register(
             Ok(_) => {
                 let wallet_address = manager.address().unwrap();
                 println!("✅ Wallet loaded: {wallet_address}");
-                manager.key_manager().unwrap().wallet().signer().to_bytes().to_vec()
+                manager
+                    .key_manager()
+                    .unwrap()
+                    .wallet()
+                    .signer()
+                    .to_bytes()
+                    .to_vec()
             }
             Err(e) => {
                 println!("❌ Failed to load wallet: {e}");
@@ -96,7 +102,8 @@ async fn handle_fid_register(
 
     // Get recovery address
     let recovery_address = if let Some(recovery_addr) = recovery {
-        recovery_addr.parse::<Address>()
+        recovery_addr
+            .parse::<Address>()
             .with_context(|| "Invalid recovery address format")?
     } else {
         // Default to same as registration wallet
@@ -122,7 +129,10 @@ async fn handle_fid_register(
 
     if extra_storage > 0 {
         let storage_price = contract_client.get_storage_price(extra_storage).await?;
-        println!("   Extra Storage Price ({extra_storage} units): {} ETH", format_ether(storage_price));
+        println!(
+            "   Extra Storage Price ({extra_storage} units): {} ETH",
+            format_ether(storage_price)
+        );
         let total_price = price + storage_price;
         println!("   Total Price: {} ETH", format_ether(total_price));
     }
@@ -168,7 +178,9 @@ async fn handle_fid_register(
     // Register FID
     let result = if extra_storage > 0 {
         println!("🚀 Registering FID with {extra_storage} extra storage units...");
-        contract_client.register_fid_with_storage(recovery_address, extra_storage).await?
+        contract_client
+            .register_fid_with_storage(recovery_address, extra_storage)
+            .await?
     } else {
         println!("🚀 Registering FID...");
         contract_client.register_fid(recovery_address).await?
@@ -187,7 +199,7 @@ async fn handle_fid_register(
             return Err(anyhow::anyhow!("FID registration failed: {}", e));
         }
     }
-    
+
     Ok(())
 }
 
@@ -198,7 +210,7 @@ async fn handle_fid_price(extra_storage: u64) -> Result<()> {
     // Get RPC URL from configuration (Farcaster contracts are on Optimism)
     let config = crate::consts::get_config();
     let rpc_url = config.eth_op_rpc_url().to_string();
-    
+
     // Check if using placeholder values
     if rpc_url.contains("your_api_key_here") || rpc_url == "https://www.optimism.io/" {
         println!("⚠️  Configuration Warning:");
@@ -217,24 +229,36 @@ async fn handle_fid_price(extra_storage: u64) -> Result<()> {
     // Get registration price
     println!("🔍 Querying current registration prices...");
     let base_price = contract_client.get_registration_price().await?;
-    println!("   Base Registration Price: {} ETH", format_ether(base_price));
+    println!(
+        "   Base Registration Price: {} ETH",
+        format_ether(base_price)
+    );
 
     let mut total_price = base_price;
-    
+
     if extra_storage > 0 {
         let storage_price = contract_client.get_storage_price(extra_storage).await?;
-        println!("   Extra Storage Price ({extra_storage} units): {} ETH", format_ether(storage_price));
+        println!(
+            "   Extra Storage Price ({extra_storage} units): {} ETH",
+            format_ether(storage_price)
+        );
         total_price += storage_price;
     }
 
     println!("\n📊 Price Summary:");
     println!("   Base Registration: {} ETH", format_ether(base_price));
     if extra_storage > 0 {
-        println!("   Extra Storage ({extra_storage} units): {} ETH", format_ether(total_price - base_price));
+        println!(
+            "   Extra Storage ({extra_storage} units): {} ETH",
+            format_ether(total_price - base_price)
+        );
     }
-    println!("   Total Registration Cost: {} ETH", format_ether(total_price));
+    println!(
+        "   Total Registration Cost: {} ETH",
+        format_ether(total_price)
+    );
     println!("   Estimated Gas Fees: ~0.002-0.005 ETH (varies with network)");
-    
+
     Ok(())
 }
 
@@ -249,7 +273,7 @@ async fn handle_fid_list(wallet_name: Option<String>) -> Result<()> {
     let wallet_address = if let Some(name) = wallet_name {
         // Load from encrypted storage
         use crate::encrypted_key_manager::{prompt_password, EncryptedKeyManager};
-        
+
         let mut manager = EncryptedKeyManager::default_config();
         if !manager.key_exists(&name) {
             println!("❌ Wallet '{name}' not found!");
@@ -286,9 +310,9 @@ async fn handle_fid_list(wallet_name: Option<String>) -> Result<()> {
         ContractResult::Success(fid) => {
             if fid > 0 {
                 println!("✅ Found FID: {}", fid);
-                
+
                 // Get additional FID information
-                let fid_info = contract_client.get_fid_info(fid.into()).await?;
+                let fid_info = contract_client.get_fid_info(fid).await?;
                 println!("\n📋 FID Information:");
                 println!("   FID: {}", fid);
                 println!("   Custody Address: {}", fid_info.custody);
@@ -304,6 +328,6 @@ async fn handle_fid_list(wallet_name: Option<String>) -> Result<()> {
             return Err(anyhow::anyhow!("Failed to query FID: {}", e));
         }
     }
-    
+
     Ok(())
 }

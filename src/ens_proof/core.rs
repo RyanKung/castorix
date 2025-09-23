@@ -1,7 +1,7 @@
 use crate::{
-    encrypted_key_manager::EncryptedKeyManager,
     core::crypto::key_manager::KeyManager,
     core::protocol::username_proof::{UserNameProof, UserNameType},
+    encrypted_key_manager::EncryptedKeyManager,
 };
 use anyhow::{Context, Result};
 use ethers::{prelude::*, types::Address};
@@ -34,7 +34,9 @@ impl EnsProof {
     /// # Returns
     /// * `Result<Self>` - The EnsProof instance or an error
     pub fn from_env() -> Result<Self> {
-        Err(anyhow::anyhow!("ENS proof requires a wallet name. Use EnsProof::new() instead."))
+        Err(anyhow::anyhow!(
+            "ENS proof requires a wallet name. Use EnsProof::new() instead."
+        ))
     }
 
     /// Resolve ENS domain to address

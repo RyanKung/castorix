@@ -171,8 +171,10 @@ async fn handle_custody_from_mnemonic(fid: u64) -> Result<()> {
 
     // Create Farcaster client to get custody address from Hub API
     let config = crate::consts::get_config();
-    let hub_client =
-        crate::core::client::hub_client::FarcasterClient::new(config.farcaster_hub_url.clone(), None);
+    let hub_client = crate::core::client::hub_client::FarcasterClient::new(
+        config.farcaster_hub_url.clone(),
+        None,
+    );
 
     // Get custody address from Hub API
     let actual_custody_address = hub_client

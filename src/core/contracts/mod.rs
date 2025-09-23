@@ -4,8 +4,5 @@
 
 // Re-export the existing farcaster contracts module
 pub use crate::farcaster::contracts::{
-    FarcasterContractClient,
-    ContractAddresses,
-    ContractResult,
-    FidInfo,
+    ContractAddresses, ContractResult, FarcasterContractClient, FidInfo,
 };

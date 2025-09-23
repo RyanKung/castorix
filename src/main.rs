@@ -22,11 +22,11 @@ use castorix::{
         Cli, CliHandler,
     },
     consts,
-    ens_proof::EnsProof,
     core::{
         client::hub_client::FarcasterClient,
         crypto::key_manager::{init_env, KeyManager},
     },
+    ens_proof::EnsProof,
 };
 
 #[tokio::main]
@@ -60,7 +60,9 @@ async fn main() -> Result<()> {
                 _ => {
                     println!("❌ Key command requires a wallet name.");
                     println!("💡 Use 'castorix key generate-encrypted <name>' to create an encrypted key, or");
-                    println!("   use 'castorix key load <key-name>' to load an existing encrypted key.");
+                    println!(
+                        "   use 'castorix key load <key-name>' to load an existing encrypted key."
+                    );
                 }
             }
         }

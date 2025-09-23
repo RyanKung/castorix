@@ -1,5 +1,5 @@
-use std::process::Command;
 use clap::{Parser, Subcommand};
+use std::process::Command;
 
 #[derive(Parser)]
 #[command(name = "start-node")]
@@ -50,17 +50,28 @@ fn start_op_node(fast: bool) {
 
     // Build Anvil arguments
     let mut args = vec![
-        "--host", "127.0.0.1",
-        "--port", "8545",
-        "--accounts", "10",
-        "--balance", "10000",
-        "--gas-limit", "30000000",
-        "--gas-price", "1000000000",
-        "--chain-id", "10", // Optimism mainnet chain ID
-        "--fork-url", &fork_url,
-        "--fork-block-number", "latest", // Always start from latest block
-        "--retries", "3",
-        "--timeout", "10000",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8545",
+        "--accounts",
+        "10",
+        "--balance",
+        "10000",
+        "--gas-limit",
+        "30000000",
+        "--gas-price",
+        "1000000000",
+        "--chain-id",
+        "10", // Optimism mainnet chain ID
+        "--fork-url",
+        &fork_url,
+        "--fork-block-number",
+        "latest", // Always start from latest block
+        "--retries",
+        "3",
+        "--timeout",
+        "10000",
     ];
 
     // Add fast mode options
@@ -94,21 +105,34 @@ fn start_base_node(fast: bool) {
     }
 
     // Get the Base RPC URL from consts
-    let fork_url = castorix::consts::get_config().eth_base_rpc_url().to_string();
+    let fork_url = castorix::consts::get_config()
+        .eth_base_rpc_url()
+        .to_string();
 
     // Build Anvil arguments
     let mut args = vec![
-        "--host", "127.0.0.1",
-        "--port", "8546", // Different port for Base to avoid conflicts
-        "--accounts", "10",
-        "--balance", "10000",
-        "--gas-limit", "30000000",
-        "--gas-price", "1000000000",
-        "--chain-id", "8453", // Base mainnet chain ID
-        "--fork-url", &fork_url,
-        "--fork-block-number", "latest", // Always start from latest block
-        "--retries", "3",
-        "--timeout", "10000",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8546", // Different port for Base to avoid conflicts
+        "--accounts",
+        "10",
+        "--balance",
+        "10000",
+        "--gas-limit",
+        "30000000",
+        "--gas-price",
+        "1000000000",
+        "--chain-id",
+        "8453", // Base mainnet chain ID
+        "--fork-url",
+        &fork_url,
+        "--fork-block-number",
+        "latest", // Always start from latest block
+        "--retries",
+        "3",
+        "--timeout",
+        "10000",
     ];
 
     // Add fast mode options

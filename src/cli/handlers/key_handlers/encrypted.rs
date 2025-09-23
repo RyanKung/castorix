@@ -186,7 +186,11 @@ pub async fn handle_delete_key(key_name: String, storage_path: Option<&str>) -> 
     Ok(())
 }
 
-pub async fn handle_rename_key(old_name: String, new_name: String, storage_path: Option<&str>) -> Result<()> {
+pub async fn handle_rename_key(
+    old_name: String,
+    new_name: String,
+    storage_path: Option<&str>,
+) -> Result<()> {
     use crate::encrypted_key_manager::{prompt_password, EncryptedKeyManager};
 
     println!("🔄 Renaming encrypted key: {old_name} → {new_name}");
@@ -214,7 +218,11 @@ pub async fn handle_rename_key(old_name: String, new_name: String, storage_path:
     Ok(())
 }
 
-pub async fn handle_update_alias(key_name: String, new_alias: String, storage_path: Option<&str>) -> Result<()> {
+pub async fn handle_update_alias(
+    key_name: String,
+    new_alias: String,
+    storage_path: Option<&str>,
+) -> Result<()> {
     use crate::encrypted_key_manager::{prompt_password, EncryptedKeyManager};
 
     println!("🏷️  Updating alias for key: {key_name}");

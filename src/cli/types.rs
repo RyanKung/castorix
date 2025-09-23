@@ -504,7 +504,6 @@ pub enum HubCommands {
         wallet_name: Option<String>,
     },
 
-
     /// 🔗 Submit Ethereum address verification
     ///
     /// Submit a verification to link your Ethereum address to your Farcaster account.

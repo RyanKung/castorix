@@ -3,13 +3,10 @@ use std::thread;
 use std::time::Duration;
 
 mod test_consts;
-use test_consts::{
-    setup_local_test_env,
-    should_skip_rpc_tests,
-};
+use test_consts::{setup_local_test_env, should_skip_rpc_tests};
 
 /// Complete ENS workflow integration test
-/// 
+///
 /// This test covers the full ENS workflow:
 /// 1. Start local Anvil node
 /// 2. Generate encrypted private key
@@ -128,7 +125,16 @@ async fn start_local_anvil() -> Option<std::process::Child> {
 /// Verify that Anvil is running
 async fn verify_anvil_running() -> bool {
     let output = Command::new("curl")
-        .args(["-s", "-X", "POST", "-H", "Content-Type: application/json", "-d", r#"{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}"#, "http://127.0.0.1:8545"])
+        .args([
+            "-s",
+            "-X",
+            "POST",
+            "-H",
+            "Content-Type: application/json",
+            "-d",
+            r#"{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}"#,
+            "http://127.0.0.1:8545",
+        ])
         .output();
 
     match output {
@@ -154,9 +160,14 @@ async fn test_generate_encrypted_key(test_data_dir: &str, wallet_name: &str) {
     // Generate encrypted key with predefined inputs
     let output = Command::new("cargo")
         .args(&[
-            "run", "--bin", "castorix", "--",
-            "--path", test_data_dir,
-            "key", "generate-encrypted"
+            "run",
+            "--bin",
+            "castorix",
+            "--",
+            "--path",
+            test_data_dir,
+            "key",
+            "generate-encrypted",
         ])
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
@@ -179,9 +190,18 @@ async fn test_generate_encrypted_key(test_data_dir: &str, wallet_name: &str) {
                     if output.status.success() {
                         let stdout = String::from_utf8_lossy(&output.stdout);
                         println!("   ✅ Encrypted key generated successfully");
-                        println!("   📝 Output: {}", stdout.lines().find(|l| l.contains("Address:") || l.contains("saved")).unwrap_or("N/A"));
-                        assert!(stdout.contains("Address:") || stdout.contains("saved"), 
-                               "Key generation should show address or success message: {}", stdout);
+                        println!(
+                            "   📝 Output: {}",
+                            stdout
+                                .lines()
+                                .find(|l| l.contains("Address:") || l.contains("saved"))
+                                .unwrap_or("N/A")
+                        );
+                        assert!(
+                            stdout.contains("Address:") || stdout.contains("saved"),
+                            "Key generation should show address or success message: {}",
+                            stdout
+                        );
                     } else {
                         let stderr = String::from_utf8_lossy(&output.stderr);
                         panic!("Key generation failed with stderr: {}", stderr);
@@ -204,9 +224,15 @@ async fn test_ens_resolution(test_data_dir: &str, domain: &str) {
 
     let output = Command::new("cargo")
         .args(&[
-            "run", "--bin", "castorix", "--",
-            "--path", test_data_dir,
-            "ens", "resolve", domain
+            "run",
+            "--bin",
+            "castorix",
+            "--",
+            "--path",
+            test_data_dir,
+            "ens",
+            "resolve",
+            domain,
         ])
         .output();
 
@@ -215,10 +241,21 @@ async fn test_ens_resolution(test_data_dir: &str, domain: &str) {
             if output.status.success() {
                 let stdout = String::from_utf8_lossy(&output.stdout);
                 println!("   ✅ ENS resolution successful");
-                println!("   📝 Result: {}", stdout.lines().find(|l| l.contains("Address:") || l.contains("0x")).unwrap_or("N/A"));
+                println!(
+                    "   📝 Result: {}",
+                    stdout
+                        .lines()
+                        .find(|l| l.contains("Address:") || l.contains("0x"))
+                        .unwrap_or("N/A")
+                );
                 // Note: Resolution might fail on local Anvil, but the command should still work
-                assert!(stdout.contains("Address:") || stdout.contains("Error:") || stdout.contains("Failed"),
-                       "ENS resolution should show address or error: {}", stdout);
+                assert!(
+                    stdout.contains("Address:")
+                        || stdout.contains("Error:")
+                        || stdout.contains("Failed"),
+                    "ENS resolution should show address or error: {}",
+                    stdout
+                );
             } else {
                 let stderr = String::from_utf8_lossy(&output.stderr);
                 panic!("ENS resolution failed with stderr: {}", stderr);
@@ -236,9 +273,15 @@ async fn test_ens_verification(test_data_dir: &str, domain: &str) {
 
     let output = Command::new("cargo")
         .args(&[
-            "run", "--bin", "castorix", "--",
-            "--path", test_data_dir,
-            "ens", "verify", domain
+            "run",
+            "--bin",
+            "castorix",
+            "--",
+            "--path",
+            test_data_dir,
+            "ens",
+            "verify",
+            domain,
         ])
         .output();
 
@@ -247,10 +290,21 @@ async fn test_ens_verification(test_data_dir: &str, domain: &str) {
             if output.status.success() {
                 let stdout = String::from_utf8_lossy(&output.stdout);
                 println!("   ✅ ENS verification completed");
-                println!("   📝 Result: {}", stdout.lines().find(|l| l.contains("Owner:") || l.contains("Error:")).unwrap_or("N/A"));
+                println!(
+                    "   📝 Result: {}",
+                    stdout
+                        .lines()
+                        .find(|l| l.contains("Owner:") || l.contains("Error:"))
+                        .unwrap_or("N/A")
+                );
                 // Note: Verification might fail on local Anvil, but the command should still work
-                assert!(stdout.contains("Owner:") || stdout.contains("Error:") || stdout.contains("Failed"),
-                       "ENS verification should show owner or error: {}", stdout);
+                assert!(
+                    stdout.contains("Owner:")
+                        || stdout.contains("Error:")
+                        || stdout.contains("Failed"),
+                    "ENS verification should show owner or error: {}",
+                    stdout
+                );
             } else {
                 let stderr = String::from_utf8_lossy(&output.stderr);
                 panic!("ENS verification failed with stderr: {}", stderr);
@@ -268,10 +322,18 @@ async fn test_proof_generation(test_data_dir: &str, domain: &str, fid: u64, wall
 
     let output = Command::new("cargo")
         .args(&[
-            "run", "--bin", "castorix", "--",
-            "--path", test_data_dir,
-            "ens", "proof", domain, &fid.to_string(),
-            "--wallet-name", wallet_name
+            "run",
+            "--bin",
+            "castorix",
+            "--",
+            "--path",
+            test_data_dir,
+            "ens",
+            "proof",
+            domain,
+            &fid.to_string(),
+            "--wallet-name",
+            wallet_name,
         ])
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
@@ -294,14 +356,23 @@ async fn test_proof_generation(test_data_dir: &str, domain: &str, fid: u64, wall
                     if output.status.success() {
                         let stdout = String::from_utf8_lossy(&output.stdout);
                         println!("   ✅ Username proof generated successfully");
-                        println!("   📝 Result: {}", stdout.lines().find(|l| l.contains("Proof JSON:") || l.contains("saved")).unwrap_or("N/A"));
-                        
+                        println!(
+                            "   📝 Result: {}",
+                            stdout
+                                .lines()
+                                .find(|l| l.contains("Proof JSON:") || l.contains("saved"))
+                                .unwrap_or("N/A")
+                        );
+
                         // Check if proof file was created
                         let proof_file = format!("proof_{}_{}.json", domain.replace(".", "_"), fid);
                         if std::path::Path::new(&proof_file).exists() {
                             println!("   📄 Proof file created: {}", proof_file);
-                            assert!(stdout.contains("Proof JSON:") || stdout.contains("saved"),
-                                   "Proof generation should show JSON or success message: {}", stdout);
+                            assert!(
+                                stdout.contains("Proof JSON:") || stdout.contains("saved"),
+                                "Proof generation should show JSON or success message: {}",
+                                stdout
+                            );
                         } else {
                             // Proof generation might fail due to domain verification, but should still work
                             println!("   ⚠️ Proof file not created (expected for test domain)");
@@ -309,7 +380,10 @@ async fn test_proof_generation(test_data_dir: &str, domain: &str, fid: u64, wall
                     } else {
                         let stderr = String::from_utf8_lossy(&output.stderr);
                         // Proof generation might fail due to domain verification, which is expected
-                        if stderr.contains("domain") || stderr.contains("verification") || stderr.contains("owner") {
+                        if stderr.contains("domain")
+                            || stderr.contains("verification")
+                            || stderr.contains("owner")
+                        {
                             println!("   ⚠️ Proof generation failed due to domain verification (expected): {}", stderr.lines().next().unwrap_or("Unknown error"));
                         } else {
                             panic!("Proof generation failed with unexpected error: {}", stderr);
@@ -332,7 +406,7 @@ async fn test_proof_verification(test_data_dir: &str, domain: &str, fid: u64) {
     println!("   🔍 Testing proof verification...");
 
     let proof_file = format!("proof_{}_{}.json", domain.replace(".", "_"), fid);
-    
+
     // Check if proof file exists
     if !std::path::Path::new(&proof_file).exists() {
         println!("   ⚠️ Proof file does not exist, skipping verification test");
@@ -341,9 +415,15 @@ async fn test_proof_verification(test_data_dir: &str, domain: &str, fid: u64) {
 
     let output = Command::new("cargo")
         .args(&[
-            "run", "--bin", "castorix", "--",
-            "--path", test_data_dir,
-            "ens", "verify-proof", &proof_file
+            "run",
+            "--bin",
+            "castorix",
+            "--",
+            "--path",
+            test_data_dir,
+            "ens",
+            "verify-proof",
+            &proof_file,
         ])
         .output();
 
@@ -352,9 +432,18 @@ async fn test_proof_verification(test_data_dir: &str, domain: &str, fid: u64) {
             if output.status.success() {
                 let stdout = String::from_utf8_lossy(&output.stdout);
                 println!("   ✅ Proof verification successful");
-                println!("   📝 Result: {}", stdout.lines().find(|l| l.contains("Valid") || l.contains("Invalid")).unwrap_or("N/A"));
-                assert!(stdout.contains("Valid") || stdout.contains("Invalid"),
-                       "Proof verification should show validity: {}", stdout);
+                println!(
+                    "   📝 Result: {}",
+                    stdout
+                        .lines()
+                        .find(|l| l.contains("Valid") || l.contains("Invalid"))
+                        .unwrap_or("N/A")
+                );
+                assert!(
+                    stdout.contains("Valid") || stdout.contains("Invalid"),
+                    "Proof verification should show validity: {}",
+                    stdout
+                );
             } else {
                 let stderr = String::from_utf8_lossy(&output.stderr);
                 panic!("Proof verification failed with stderr: {}", stderr);
@@ -375,9 +464,15 @@ async fn test_ens_domains_query(test_data_dir: &str) {
 
     let output = Command::new("cargo")
         .args(&[
-            "run", "--bin", "castorix", "--",
-            "--path", test_data_dir,
-            "ens", "domains", test_address
+            "run",
+            "--bin",
+            "castorix",
+            "--",
+            "--path",
+            test_data_dir,
+            "ens",
+            "domains",
+            test_address,
         ])
         .output();
 
@@ -386,10 +481,21 @@ async fn test_ens_domains_query(test_data_dir: &str) {
             if output.status.success() {
                 let stdout = String::from_utf8_lossy(&output.stdout);
                 println!("   ✅ ENS domains query successful");
-                println!("   📝 Result: {}", stdout.lines().find(|l| l.contains("domains") || l.contains("Found")).unwrap_or("N/A"));
+                println!(
+                    "   📝 Result: {}",
+                    stdout
+                        .lines()
+                        .find(|l| l.contains("domains") || l.contains("Found"))
+                        .unwrap_or("N/A")
+                );
                 // Note: Query might return empty results on local Anvil, but the command should still work
-                assert!(stdout.contains("domains") || stdout.contains("Found") || stdout.contains("No domains"),
-                       "ENS domains query should show results or no domains: {}", stdout);
+                assert!(
+                    stdout.contains("domains")
+                        || stdout.contains("Found")
+                        || stdout.contains("No domains"),
+                    "ENS domains query should show results or no domains: {}",
+                    stdout
+                );
             } else {
                 let stderr = String::from_utf8_lossy(&output.stderr);
                 panic!("ENS domains query failed with stderr: {}", stderr);
@@ -452,28 +558,35 @@ async fn test_ens_help_commands() {
         (vec!["ens", "resolve", "--help"], "ENS resolve help"),
         (vec!["ens", "domains", "--help"], "ENS domains help"),
         (vec!["ens", "proof", "--help"], "ENS proof help"),
-        (vec!["ens", "verify-proof", "--help"], "ENS verify-proof help"),
+        (
+            vec!["ens", "verify-proof", "--help"],
+            "ENS verify-proof help",
+        ),
     ];
 
     for (args, description) in help_commands {
         let mut cmd_args = vec!["run", "--bin", "castorix", "--"];
         cmd_args.extend_from_slice(&args);
 
-        let output = Command::new("cargo")
-            .args(&cmd_args)
-            .output();
+        let output = Command::new("cargo").args(&cmd_args).output();
 
         match output {
             Ok(output) => {
                 if output.status.success() {
                     let stdout = String::from_utf8_lossy(&output.stdout);
-                    if stdout.contains("Usage:") || stdout.contains("Commands:") || stdout.contains("Arguments:") {
+                    if stdout.contains("Usage:")
+                        || stdout.contains("Commands:")
+                        || stdout.contains("Arguments:")
+                    {
                         println!("   ✅ {} help working", description);
                     } else {
                         panic!("{} help command failed", description);
                     }
                 } else {
-                    panic!("{} help command failed with non-zero exit code", description);
+                    panic!(
+                        "{} help command failed with non-zero exit code",
+                        description
+                    );
                 }
             }
             Err(e) => {

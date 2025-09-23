@@ -1,5 +1,5 @@
 use crate::cli::types::StorageCommands;
-use crate::encrypted_key_manager::{EncryptedKeyManager, prompt_password};
+use crate::encrypted_key_manager::{prompt_password, EncryptedKeyManager};
 use crate::farcaster::contracts::{
     contract_client::FarcasterContractClient,
     types::{ContractAddresses, ContractResult},
@@ -13,7 +13,10 @@ use ethers::{
 };
 
 /// Handle storage rental and management commands
-pub async fn handle_storage_command(command: StorageCommands, storage_path: Option<&str>) -> Result<()> {
+pub async fn handle_storage_command(
+    command: StorageCommands,
+    storage_path: Option<&str>,
+) -> Result<()> {
     match command {
         StorageCommands::Rent {
             fid,
@@ -23,7 +26,16 @@ pub async fn handle_storage_command(command: StorageCommands, storage_path: Opti
             dry_run,
             yes,
         } => {
-            handle_storage_rent(fid, units, wallet, payment_wallet, dry_run, yes, storage_path).await?;
+            handle_storage_rent(
+                fid,
+                units,
+                wallet,
+                payment_wallet,
+                dry_run,
+                yes,
+                storage_path,
+            )
+            .await?;
         }
         StorageCommands::Price { fid, units } => {
             handle_storage_price(fid, units).await?;
@@ -50,7 +62,7 @@ async fn handle_storage_rent(
     // Get RPC URL from configuration (Farcaster contracts are on Optimism)
     let config = crate::consts::get_config();
     let rpc_url = config.eth_op_rpc_url().to_string();
-    
+
     // Check if using placeholder values
     if rpc_url.contains("your_api_key_here") || rpc_url == "https://www.optimism.io/" {
         println!("⚠️  Configuration Warning:");
@@ -67,7 +79,7 @@ async fn handle_storage_rent(
     let private_key = if let Some(name) = wallet_name {
         // Load from encrypted storage
         use crate::encrypted_key_manager::{prompt_password, EncryptedKeyManager};
-        
+
         let mut manager = if let Some(path) = storage_path {
             EncryptedKeyManager::new(path)
         } else {
@@ -84,7 +96,13 @@ async fn handle_storage_rent(
             Ok(_) => {
                 let wallet_address = manager.address().unwrap();
                 println!("✅ Wallet loaded: {wallet_address}");
-                manager.key_manager().unwrap().wallet().signer().to_bytes().to_vec()
+                manager
+                    .key_manager()
+                    .unwrap()
+                    .wallet()
+                    .signer()
+                    .to_bytes()
+                    .to_vec()
             }
             Err(e) => {
                 println!("❌ Failed to load wallet: {e}");
@@ -94,16 +112,19 @@ async fn handle_storage_rent(
     } else {
         // Try to auto-detect custody wallet for the FID
         println!("🔍 Auto-detecting custody wallet for FID {fid}...");
-        
+
         // First, get the custody address for the FID
-        let contract_client = FarcasterContractClient::new(rpc_url.clone(), ContractAddresses::default())?;
-        let fid_info = contract_client.get_fid_info(fid.into()).await?;
+        let contract_client =
+            FarcasterContractClient::new(rpc_url.clone(), ContractAddresses::default())?;
+        let fid_info = contract_client.get_fid_info(fid).await?;
         let custody_address = fid_info.custody;
-        
+
         println!("   FID {fid} custody address: {custody_address}");
-        
+
         println!("❌ No wallet specified and no matching wallet found!");
-        println!("💡 Please use 'castorix storage rent {fid} --units {units} --wallet <wallet-name>'");
+        println!(
+            "💡 Please use 'castorix storage rent {fid} --units {units} --wallet <wallet-name>'"
+        );
         return Ok(());
     };
 
@@ -125,12 +146,19 @@ async fn handle_storage_rent(
             return Ok(());
         }
 
-        let password = prompt_password(&format!("Enter password for payment wallet '{payment_wallet_name}': "))?;
-        match manager.load_and_decrypt(&password, &payment_wallet_name).await {
+        let password = prompt_password(&format!(
+            "Enter password for payment wallet '{payment_wallet_name}': "
+        ))?;
+        match manager
+            .load_and_decrypt(&password, &payment_wallet_name)
+            .await
+        {
             Ok(_) => {
                 let payment_address = manager.address().unwrap();
                 println!("✅ Payment wallet loaded: {payment_address}");
-                LocalWallet::from_bytes(&manager.key_manager().unwrap().wallet().signer().to_bytes())?
+                LocalWallet::from_bytes(
+                    &manager.key_manager().unwrap().wallet().signer().to_bytes(),
+                )?
             }
             Err(e) => {
                 println!("❌ Failed to load payment wallet: {e}");
@@ -150,7 +178,10 @@ async fn handle_storage_rent(
     if payment_wallet.address() != custody_wallet.address() {
         println!("   Payment Wallet: {}", payment_wallet.address());
     } else {
-        println!("   Payment Wallet: {} (same as custody)", payment_wallet.address());
+        println!(
+            "   Payment Wallet: {} (same as custody)",
+            payment_wallet.address()
+        );
     }
 
     // Create contract client with custody wallet (for authorization)
@@ -182,10 +213,19 @@ async fn handle_storage_rent(
     println!("   • The operation will consume gas fees and storage rental cost");
     println!("   • This action cannot be undone");
     if payment_wallet.address() != custody_wallet.address() {
-        println!("   • Custody wallet {} will authorize the transaction", custody_wallet.address());
-        println!("   • Payment wallet {} will pay for gas and storage rental", payment_wallet.address());
+        println!(
+            "   • Custody wallet {} will authorize the transaction",
+            custody_wallet.address()
+        );
+        println!(
+            "   • Payment wallet {} will pay for gas and storage rental",
+            payment_wallet.address()
+        );
     } else {
-        println!("   • Wallet {} will both authorize and pay for the transaction", payment_wallet.address());
+        println!(
+            "   • Wallet {} will both authorize and pay for the transaction",
+            payment_wallet.address()
+        );
     }
     println!("   • Make sure you have sufficient ETH for gas and storage rental");
 
@@ -214,14 +254,21 @@ async fn handle_storage_rent(
     // For now, we'll use the custody wallet for both authorization and payment
     // TODO: Implement separate payment wallet support in FarcasterContractClient
     let result = if payment_wallet.address() != custody_wallet.address() {
-        println!("⚠️  Note: Payment wallet {} differs from custody wallet {}", 
-                 payment_wallet.address(), custody_wallet.address());
+        println!(
+            "⚠️  Note: Payment wallet {} differs from custody wallet {}",
+            payment_wallet.address(),
+            custody_wallet.address()
+        );
         println!("   Using custody wallet for both authorization and payment");
-        contract_client.rent_storage(fid.into(), units as u64).await?
+        contract_client
+            .rent_storage(fid, units as u64)
+            .await?
     } else {
-        contract_client.rent_storage(fid.into(), units as u64).await?
+        contract_client
+            .rent_storage(fid, units as u64)
+            .await?
     };
-    
+
     match result {
         ContractResult::Success(overpayment) => {
             println!("✅ Storage rental successful!");
@@ -234,7 +281,7 @@ async fn handle_storage_rent(
             return Err(anyhow::anyhow!("Storage rental failed: {}", e));
         }
     }
-    
+
     Ok(())
 }
 
@@ -245,7 +292,7 @@ async fn handle_storage_price(fid: u64, units: u32) -> Result<()> {
     // Get RPC URL from configuration (Farcaster contracts are on Optimism)
     let config = crate::consts::get_config();
     let rpc_url = config.eth_op_rpc_url().to_string();
-    
+
     // Check if using placeholder values
     if rpc_url.contains("your_api_key_here") || rpc_url == "https://www.optimism.io/" {
         println!("⚠️  Configuration Warning:");
@@ -264,13 +311,13 @@ async fn handle_storage_price(fid: u64, units: u32) -> Result<()> {
     // Get storage rental price
     println!("🔍 Querying current storage rental prices...");
     let price = contract_client.get_storage_price(units as u64).await?;
-    
+
     println!("\n📊 Storage Rental Price:");
     println!("   FID: {fid}");
     println!("   Storage Units: {units}");
     println!("   Rental Price: {} ETH", format_ether(price));
     println!("   Estimated Gas Fees: ~0.002-0.005 ETH (varies with network)");
-    
+
     Ok(())
 }
 
@@ -281,7 +328,7 @@ async fn handle_storage_usage(fid: u64) -> Result<()> {
     // Get RPC URL from configuration (Farcaster contracts are on Optimism)
     let config = crate::consts::get_config();
     let rpc_url = config.eth_op_rpc_url().to_string();
-    
+
     // Check if using placeholder values
     if rpc_url.contains("your_api_key_here") || rpc_url == "https://www.optimism.io/" {
         println!("⚠️  Configuration Warning:");
@@ -299,19 +346,19 @@ async fn handle_storage_usage(fid: u64) -> Result<()> {
 
     // Get FID information
     println!("🔍 Querying FID information...");
-    let fid_info = contract_client.get_fid_info(fid.into()).await?;
-    
+    let fid_info = contract_client.get_fid_info(fid).await?;
+
     println!("\n📋 FID Information:");
     println!("   FID: {fid}");
     println!("   Custody Address: {}", fid_info.custody);
     println!("   Recovery Address: {}", fid_info.recovery);
     // Note: registration_time is not available in FidInfo struct
-    
+
     // Try to get basic FID information from hub
     let hub_url = crate::consts::get_config().farcaster_hub_url().to_string();
-    
+
     let hub_client = crate::core::client::hub_client::FarcasterClient::read_only(hub_url);
-    
+
     match hub_client.get_user(fid).await {
         Ok(_user) => {
             println!("\n👤 Hub Information:");
@@ -326,7 +373,7 @@ async fn handle_storage_usage(fid: u64) -> Result<()> {
             println!("💡 This might be because the FID doesn't exist or the hub is unavailable");
         }
     }
-    
+
     println!("\n📊 Storage Information:");
     println!("   FID: {fid}");
     println!("   Current Usage: Not available (requires Hub API)");
@@ -334,6 +381,6 @@ async fn handle_storage_usage(fid: u64) -> Result<()> {
     println!("   Available Storage: Not available (requires Hub API)");
     println!("\n💡 Storage usage information is typically provided by the Farcaster Hub");
     println!("   Use 'castorix hub stats {fid}' for detailed storage statistics");
-    
+
     Ok(())
 }
