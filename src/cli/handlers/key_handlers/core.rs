@@ -1,5 +1,7 @@
+use anyhow::Context;
+use anyhow::Result;
+
 use crate::cli::types::KeyCommands;
-use anyhow::{Context, Result};
 
 /// Handle key management commands (legacy)
 pub async fn handle_key_command(

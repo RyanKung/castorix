@@ -1,7 +1,9 @@
 use std::process::Command;
 
 mod test_consts;
-use test_consts::{setup_demo_test_env, setup_placeholder_test_env, should_skip_rpc_tests};
+use test_consts::setup_demo_test_env;
+use test_consts::setup_placeholder_test_env;
+use test_consts::should_skip_rpc_tests;
 
 /// Simple CLI test that doesn't require building
 /// Tests the CLI functionality using cargo run

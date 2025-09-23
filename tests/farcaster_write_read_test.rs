@@ -1,11 +1,17 @@
+use std::str::FromStr;
+
 use anyhow::Result;
 use castorix::farcaster::contracts::FarcasterContractClient;
-use ethers::{
-    providers::{Http, Middleware, Provider},
-    signers::{LocalWallet, Signer},
-    types::{Address, TransactionReceipt, TransactionRequest, H256, U256},
-};
-use std::str::FromStr;
+use ethers::providers::Http;
+use ethers::providers::Middleware;
+use ethers::providers::Provider;
+use ethers::signers::LocalWallet;
+use ethers::signers::Signer;
+use ethers::types::Address;
+use ethers::types::TransactionReceipt;
+use ethers::types::TransactionRequest;
+use ethers::types::H256;
+use ethers::types::U256;
 
 /// Test configuration for write-read operations
 #[derive(Debug, Clone)]
@@ -27,9 +33,7 @@ impl WriteReadTestConfig {
                 println!("✅ Network connection successful! Chain ID: {}", chain_id);
             }
             Err(e) => {
-                println!("⚠️  Network connection failed: {}", e);
-                println!("   This may be due to proxy interference (Surge)");
-                println!("   Tests will continue but may fail...");
+                panic!("❌ Network connection failed: {}. This may be due to proxy interference (Surge). Tests cannot continue.", e);
             }
         }
 
@@ -321,7 +325,7 @@ impl WriteReadTestClient {
         // Just verify both calls completed (ContractResult doesn't implement PartialEq)
         println!("   Initial total supply result: {:?}", initial_total_supply);
         println!("   Final total supply result: {:?}", final_total_supply);
-        println!("⚠️  Contract calls may return errors on local Anvil (this is expected)");
+        // Note: Contract calls may return errors on local Anvil (this is expected)
 
         println!("✅ Contract call write-read test completed successfully!");
 

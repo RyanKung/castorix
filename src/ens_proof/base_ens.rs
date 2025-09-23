@@ -1,9 +1,15 @@
-use super::core::EnsProof;
-use anyhow::Result;
-use ethers::providers::{Http, Middleware, Provider};
-use ethers::types::transaction::eip2718::TypedTransaction;
-use ethers::types::{Address, TransactionRequest, H160};
 use std::str::FromStr;
+
+use anyhow::Result;
+use ethers::providers::Http;
+use ethers::providers::Middleware;
+use ethers::providers::Provider;
+use ethers::types::transaction::eip2718::TypedTransaction;
+use ethers::types::Address;
+use ethers::types::TransactionRequest;
+use ethers::types::H160;
+
+use super::core::EnsProof;
 
 impl EnsProof {
     /// Check if a specific Base subdomain exists and get its owner
@@ -298,7 +304,8 @@ impl EnsProof {
     /// # Returns
     /// * `Result<[u8; 32]>` - The namehash as a 32-byte array
     fn calculate_namehash(&self, domain: &str) -> Result<[u8; 32]> {
-        use tiny_keccak::{Hasher, Keccak};
+        use tiny_keccak::Hasher;
+        use tiny_keccak::Keccak;
 
         // Split domain into labels
         let labels: Vec<&str> = domain.split('.').collect();

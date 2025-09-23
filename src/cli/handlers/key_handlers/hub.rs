@@ -1,5 +1,6 @@
-use crate::cli::types::HubKeyCommands;
 use anyhow::Result;
+
+use crate::cli::types::HubKeyCommands;
 
 /// Handle Hub key management commands
 pub async fn handle_hub_key_command(command: HubKeyCommands) -> Result<()> {
@@ -36,7 +37,10 @@ async fn handle_hub_key_import(fid: u64) -> Result<()> {
         println!("⚠️  ECDSA key already exists for FID: {fid}");
 
         print!("\nDo you want to replace the existing key? (y/N): ");
-        use std::io::{self, Write};
+        use std::io::Write;
+        use std::io::{
+            self,
+        };
         io::stdout().flush()?;
 
         let mut input = String::new();
@@ -172,7 +176,10 @@ async fn handle_hub_key_from_mnemonic(fid: u64) -> Result<()> {
         println!("⚠️  ECDSA key already exists for FID: {fid}");
 
         print!("\nDo you want to replace the existing key? (y/N): ");
-        use std::io::{self, Write};
+        use std::io::Write;
+        use std::io::{
+            self,
+        };
         io::stdout().flush()?;
 
         let mut input = String::new();
@@ -256,7 +263,10 @@ async fn handle_hub_key_delete(fid: u64) -> Result<()> {
 
     // Confirm deletion
     print!("\n⚠️  Are you sure you want to delete this key? (y/N): ");
-    use std::io::{self, Write};
+    use std::io::Write;
+    use std::io::{
+        self,
+    };
     io::stdout().flush()?;
 
     let mut input = String::new();

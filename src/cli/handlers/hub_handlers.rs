@@ -1,5 +1,6 @@
-use crate::cli::types::HubCommands;
 use anyhow::Result;
+
+use crate::cli::types::HubCommands;
 
 /// Handle Farcaster Hub commands
 pub async fn handle_hub_command(

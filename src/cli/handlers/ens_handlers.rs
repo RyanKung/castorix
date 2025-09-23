@@ -1,5 +1,6 @@
-use crate::cli::types::EnsCommands;
 use anyhow::Result;
+
+use crate::cli::types::EnsCommands;
 
 /// Handle ENS commands
 pub async fn handle_ens_command(

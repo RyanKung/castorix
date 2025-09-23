@@ -15,19 +15,16 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 use anyhow::Result;
-use castorix::{
-    cli::{
-        commands::Commands,
-        types::{HubCommands, KeyCommands},
-        Cli, CliHandler,
-    },
-    consts,
-    core::{
-        client::hub_client::FarcasterClient,
-        crypto::key_manager::{init_env, KeyManager},
-    },
-    ens_proof::EnsProof,
-};
+use castorix::cli::commands::Commands;
+use castorix::cli::types::HubCommands;
+use castorix::cli::types::KeyCommands;
+use castorix::cli::Cli;
+use castorix::cli::CliHandler;
+use castorix::consts;
+use castorix::core::client::hub_client::FarcasterClient;
+use castorix::core::crypto::key_manager::init_env;
+use castorix::core::crypto::key_manager::KeyManager;
+use castorix::ens_proof::EnsProof;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -130,7 +127,8 @@ async fn main() -> Result<()> {
 #[cfg(test)]
 mod tests {
     use ed25519_dalek::SigningKey;
-    use ethers::signers::{LocalWallet, Signer};
+    use ethers::signers::LocalWallet;
+    use ethers::signers::Signer;
 
     #[test]
     fn test_ecdsa_to_ed25519_conversion() {

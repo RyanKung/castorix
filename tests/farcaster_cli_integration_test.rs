@@ -3,7 +3,8 @@ use std::thread;
 use std::time::Duration;
 
 mod test_consts;
-use test_consts::{setup_local_test_env, setup_placeholder_test_env};
+use test_consts::setup_local_test_env;
+use test_consts::setup_placeholder_test_env;
 
 /// Simplified CLI integration test using pre-built binary
 ///
@@ -186,29 +187,31 @@ where
                         println!("   📝 Output: {}", first_line);
                     }
                 } else {
-                    println!("   ⚠️  {} completed but output unexpected", description);
-                    if !stdout.is_empty() {
-                        println!(
-                            "   📝 Output: {}",
+                    panic!(
+                        "❌ {} completed but output unexpected. Output: {}",
+                        description,
+                        if !stdout.is_empty() {
                             stdout.lines().take(2).collect::<Vec<_>>().join(" ")
-                        );
-                    }
-                }
-            } else {
-                println!(
-                    "   ⚠️  {} failed with status: {}",
-                    description, output.status
-                );
-                if !stderr.is_empty() {
-                    println!(
-                        "   📝 Error: {}",
-                        stderr.lines().take(2).collect::<Vec<_>>().join(" ")
+                        } else {
+                            "(empty)".to_string()
+                        }
                     );
                 }
+            } else {
+                panic!(
+                    "❌ {} failed with status: {}. Error: {}",
+                    description,
+                    output.status,
+                    if !stderr.is_empty() {
+                        stderr.lines().take(2).collect::<Vec<_>>().join(" ")
+                    } else {
+                        "(no error output)".to_string()
+                    }
+                );
             }
         }
         Err(e) => {
-            println!("   ❌ {} command failed: {}", description, e);
+            panic!("❌ {} command failed: {}", description, e);
         }
     }
 }
@@ -239,11 +242,14 @@ async fn test_environment_configuration() {
             if stdout.contains("Configuration Warning") || stdout.contains("placeholder") {
                 println!("   ✅ Configuration validation working correctly");
             } else {
-                println!("   ⚠️  Configuration validation may not be working");
+                panic!(
+                    "❌ Configuration validation may not be working. Output: {}",
+                    stdout
+                );
             }
         }
         Err(e) => {
-            println!("   ❌ Configuration validation test failed: {}", e);
+            panic!("❌ Configuration validation test failed: {}", e);
         }
     }
 
@@ -277,14 +283,11 @@ async fn test_cli_argument_parsing() {
                         println!("   📝 First line: {}", first_line);
                     }
                 } else {
-                    println!(
-                        "   ⚠️  {} failed with status: {}",
-                        description, output.status
-                    );
+                    panic!("❌ {} failed with status: {}", description, output.status);
                 }
             }
             Err(e) => {
-                println!("   ❌ {} test failed: {}", description, e);
+                panic!("❌ {} test failed: {}", description, e);
             }
         }
     }

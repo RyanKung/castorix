@@ -1,15 +1,25 @@
-use aes_gcm::aead::Aead;
-use aes_gcm::{Aes256Gcm, Key, KeyInit, Nonce};
-use anyhow::{Context, Result};
-use argon2::password_hash::{rand_core::OsRng, SaltString};
-use argon2::{Argon2, PasswordHasher};
-use base64::{engine::general_purpose, Engine as _};
-use bs58;
-use ed25519_dalek::{SigningKey, VerifyingKey};
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
+
+use aes_gcm::aead::Aead;
+use aes_gcm::Aes256Gcm;
+use aes_gcm::Key;
+use aes_gcm::KeyInit;
+use aes_gcm::Nonce;
+use anyhow::Context;
+use anyhow::Result;
+use argon2::password_hash::rand_core::OsRng;
+use argon2::password_hash::SaltString;
+use argon2::Argon2;
+use argon2::PasswordHasher;
+use base64::engine::general_purpose;
+use base64::Engine as _;
+use bs58;
+use ed25519_dalek::SigningKey;
+use ed25519_dalek::VerifyingKey;
+use serde::Deserialize;
+use serde::Serialize;
 
 /// Encrypted Ed25519 key manager for secure storage
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -386,8 +396,12 @@ impl Default for EncryptedEd25519KeyManager {
 
 /// Prompt for password input
 pub fn prompt_password(prompt: &str) -> Result<String> {
+    use std::io::Write;
+    use std::io::{
+        self,
+    };
+
     use rpassword::read_password;
-    use std::io::{self, Write};
 
     print!("{prompt}");
     io::stdout().flush()?;
@@ -436,7 +450,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_encryption_decryption_roundtrip() {
-        use ed25519_dalek::{Signer, Verifier};
+        use ed25519_dalek::Signer;
+        use ed25519_dalek::Verifier;
 
         let mut manager = EncryptedEd25519KeyManager::new();
         let fid = 789;
@@ -523,7 +538,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_file_save_load() {
-        use ed25519_dalek::{Signer, Verifier};
+        use ed25519_dalek::Signer;
+        use ed25519_dalek::Verifier;
         use tempfile::tempdir;
 
         let temp_dir = tempdir().unwrap();

@@ -1,11 +1,14 @@
-use crate::{
-    core::crypto::key_manager::KeyManager,
-    core::protocol::username_proof::{UserNameProof, UserNameType},
-    encrypted_key_manager::EncryptedKeyManager,
-};
-use anyhow::{Context, Result};
-use ethers::{prelude::*, types::Address};
 use std::str::FromStr;
+
+use anyhow::Context;
+use anyhow::Result;
+use ethers::prelude::*;
+use ethers::types::Address;
+
+use crate::core::crypto::key_manager::KeyManager;
+use crate::core::protocol::username_proof::UserNameProof;
+use crate::core::protocol::username_proof::UserNameType;
+use crate::encrypted_key_manager::EncryptedKeyManager;
 
 /// ENS domain proof implementation
 pub struct EnsProof {

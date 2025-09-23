@@ -3,11 +3,10 @@ use ed25519_dalek::SigningKey;
 use ethers::types::Address;
 use rand::rngs::OsRng;
 
-use crate::farcaster::contracts::{
-    contract_client::FarcasterContractClient,
-    types::SecurityTestResult,
-    types::{ContractResult, Fid},
-};
+use crate::farcaster::contracts::contract_client::FarcasterContractClient;
+use crate::farcaster::contracts::types::ContractResult;
+use crate::farcaster::contracts::types::Fid;
+use crate::farcaster::contracts::types::SecurityTestResult;
 
 impl FarcasterContractClient {
     /// Test unauthorized key operations (security check)

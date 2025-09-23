@@ -1,3 +1,5 @@
 pub mod contracts;
 
-pub use contracts::{ContractAddresses, ContractResult, FarcasterContractClient};
+pub use contracts::ContractAddresses;
+pub use contracts::ContractResult;
+pub use contracts::FarcasterContractClient;

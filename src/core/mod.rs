@@ -18,6 +18,9 @@ pub mod utils;
 // Re-exports for convenience
 pub use client::hub_client::FarcasterClient;
 pub use crypto::key_manager::KeyManager;
-pub use protocol::message::{Message, MessageData, MessageType};
+pub use protocol::message::Message;
+pub use protocol::message::MessageData;
+pub use protocol::message::MessageType;
 pub use protocol::spam_checker::SpamChecker;
-pub use protocol::username_proof::{UserNameProof, UserNameType};
+pub use protocol::username_proof::UserNameProof;
+pub use protocol::username_proof::UserNameType;

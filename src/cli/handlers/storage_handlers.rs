@@ -1,16 +1,17 @@
-use crate::cli::types::StorageCommands;
-use crate::encrypted_key_manager::{prompt_password, EncryptedKeyManager};
-use crate::farcaster::contracts::{
-    contract_client::FarcasterContractClient,
-    types::{ContractAddresses, ContractResult},
-};
 use anyhow::Result;
-use ethers::{
-    middleware::Middleware,
-    providers::{Http, Provider},
-    signers::{LocalWallet, Signer},
-    utils::format_ether,
-};
+use ethers::middleware::Middleware;
+use ethers::providers::Http;
+use ethers::providers::Provider;
+use ethers::signers::LocalWallet;
+use ethers::signers::Signer;
+use ethers::utils::format_ether;
+
+use crate::cli::types::StorageCommands;
+use crate::encrypted_key_manager::prompt_password;
+use crate::encrypted_key_manager::EncryptedKeyManager;
+use crate::farcaster::contracts::contract_client::FarcasterContractClient;
+use crate::farcaster::contracts::types::ContractAddresses;
+use crate::farcaster::contracts::types::ContractResult;
 
 /// Handle storage rental and management commands
 pub async fn handle_storage_command(
@@ -78,7 +79,8 @@ async fn handle_storage_rent(
     // Load custody wallet for the FID
     let private_key = if let Some(name) = wallet_name {
         // Load from encrypted storage
-        use crate::encrypted_key_manager::{prompt_password, EncryptedKeyManager};
+        use crate::encrypted_key_manager::prompt_password;
+        use crate::encrypted_key_manager::EncryptedKeyManager;
 
         let mut manager = if let Some(path) = storage_path {
             EncryptedKeyManager::new(path)
@@ -232,7 +234,10 @@ async fn handle_storage_rent(
     // Ask for user confirmation (skip if --yes is provided)
     if !yes {
         print!("\n❓ Do you want to proceed with storage rental? (yes/no): ");
-        use std::io::{self, Write};
+        use std::io::Write;
+        use std::io::{
+            self,
+        };
         io::stdout().flush()?;
 
         let mut confirmation = String::new();

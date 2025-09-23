@@ -6,11 +6,16 @@ pub mod key_handlers;
 pub mod signers_handlers;
 pub mod storage_handlers;
 
-use crate::cli::types::{
-    CustodyCommands, EnsCommands, FidCommands, HubCommands, HubKeyCommands, KeyCommands,
-    SignersCommands, StorageCommands,
-};
 use anyhow::Result;
+
+use crate::cli::types::CustodyCommands;
+use crate::cli::types::EnsCommands;
+use crate::cli::types::FidCommands;
+use crate::cli::types::HubCommands;
+use crate::cli::types::HubKeyCommands;
+use crate::cli::types::KeyCommands;
+use crate::cli::types::SignersCommands;
+use crate::cli::types::StorageCommands;
 
 /// CLI command handler
 pub struct CliHandler;

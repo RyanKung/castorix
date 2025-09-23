@@ -1,28 +1,33 @@
-use anyhow::Result;
-use ethers::{
-    middleware::Middleware,
-    middleware::SignerMiddleware,
-    providers::{Http, Provider},
-    signers::{LocalWallet, Signer},
-    types::{Address, TransactionRequest, H256, U256},
-};
-use hex;
 use std::str::FromStr;
 use std::sync::Arc;
 use std::sync::OnceLock;
 
-use crate::farcaster::contracts::{
-    bundler_abi::BundlerAbi,
-    id_gateway_abi::IdGatewayAbi,
-    id_registry_abi::IdRegistryAbi,
-    key_gateway_abi::KeyGatewayAbi,
-    key_registry_abi::KeyRegistryAbi,
-    nonce_manager::NonceRegistry,
-    signed_key_request_validator_abi::SignedKeyRequestValidatorAbi,
-    storage_registry_abi::StorageRegistryAbi,
-    types::{ContractAddresses, ContractResult, Fid},
-    types::{FidInfo, NetworkStatus},
-};
+use anyhow::Result;
+use ethers::middleware::Middleware;
+use ethers::middleware::SignerMiddleware;
+use ethers::providers::Http;
+use ethers::providers::Provider;
+use ethers::signers::LocalWallet;
+use ethers::signers::Signer;
+use ethers::types::Address;
+use ethers::types::TransactionRequest;
+use ethers::types::H256;
+use ethers::types::U256;
+use hex;
+
+use crate::farcaster::contracts::bundler_abi::BundlerAbi;
+use crate::farcaster::contracts::id_gateway_abi::IdGatewayAbi;
+use crate::farcaster::contracts::id_registry_abi::IdRegistryAbi;
+use crate::farcaster::contracts::key_gateway_abi::KeyGatewayAbi;
+use crate::farcaster::contracts::key_registry_abi::KeyRegistryAbi;
+use crate::farcaster::contracts::nonce_manager::NonceRegistry;
+use crate::farcaster::contracts::signed_key_request_validator_abi::SignedKeyRequestValidatorAbi;
+use crate::farcaster::contracts::storage_registry_abi::StorageRegistryAbi;
+use crate::farcaster::contracts::types::ContractAddresses;
+use crate::farcaster::contracts::types::ContractResult;
+use crate::farcaster::contracts::types::Fid;
+use crate::farcaster::contracts::types::FidInfo;
+use crate::farcaster::contracts::types::NetworkStatus;
 
 // Global nonce registry shared across all FarcasterContractClient instances
 static GLOBAL_NONCE_REGISTRY: OnceLock<Arc<tokio::sync::Mutex<NonceRegistry>>> = OnceLock::new();
@@ -1044,8 +1049,10 @@ impl FarcasterContractClient {
         deadline: u64,
         signature: Vec<u8>,
     ) -> Result<Vec<u8>> {
+        use ethers::types::Bytes;
+        use ethers::types::U256;
+
         use crate::farcaster::contracts::generated::signedkeyrequestvalidator_bindings::SignedKeyRequestMetadata;
-        use ethers::types::{Bytes, U256};
 
         // Create the metadata struct with the provided signature
         let metadata_struct = SignedKeyRequestMetadata {
@@ -1074,8 +1081,11 @@ impl FarcasterContractClient {
         validator_address: ethers::types::Address,
         chain_id: u64,
     ) -> Result<ethers::types::transaction::eip712::TypedData> {
-        use ethers::types::transaction::eip712::{EIP712Domain, Eip712DomainType, TypedData};
         use std::collections::BTreeMap;
+
+        use ethers::types::transaction::eip712::EIP712Domain;
+        use ethers::types::transaction::eip712::Eip712DomainType;
+        use ethers::types::transaction::eip712::TypedData;
 
         // Create domain separator
         let domain = EIP712Domain {
@@ -1168,8 +1178,11 @@ impl FarcasterContractClient {
         key_gateway_address: ethers::types::Address,
         chain_id: u64,
     ) -> Result<ethers::types::transaction::eip712::TypedData> {
-        use ethers::types::transaction::eip712::{EIP712Domain, Eip712DomainType, TypedData};
         use std::collections::BTreeMap;
+
+        use ethers::types::transaction::eip712::EIP712Domain;
+        use ethers::types::transaction::eip712::Eip712DomainType;
+        use ethers::types::transaction::eip712::TypedData;
 
         // Domain separator for Farcaster KeyGateway
         let domain = EIP712Domain {

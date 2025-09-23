@@ -1,5 +1,6 @@
-use crate::cli::types::CustodyCommands;
 use anyhow::Result;
+
+use crate::cli::types::CustodyCommands;
 
 /// Handle custody commands
 pub async fn handle_custody_command(command: CustodyCommands) -> Result<()> {

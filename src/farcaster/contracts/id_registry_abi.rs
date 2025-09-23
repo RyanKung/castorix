@@ -5,15 +5,15 @@
 
 #![cfg(not(doctest))]
 
-use crate::farcaster::contracts::{
-    generated::idregistry_bindings::IdRegistry as IdRegistryContract,
-    types::{ContractResult, Fid, RecoveryAddress},
-};
 use anyhow::Result;
-use ethers::{
-    providers::{Http, Provider},
-    types::Address,
-};
+use ethers::providers::Http;
+use ethers::providers::Provider;
+use ethers::types::Address;
+
+use crate::farcaster::contracts::generated::idregistry_bindings::IdRegistry as IdRegistryContract;
+use crate::farcaster::contracts::types::ContractResult;
+use crate::farcaster::contracts::types::Fid;
+use crate::farcaster::contracts::types::RecoveryAddress;
 
 /// ABI-based IdRegistry contract wrapper
 #[derive(Clone)]
@@ -187,8 +187,10 @@ impl IdRegistryAbi {
 
 #[cfg(test)]
 mod tests {
+    use ethers::providers::Http;
+    use ethers::providers::Provider;
+
     use super::*;
-    use ethers::providers::{Http, Provider};
 
     #[tokio::test]
     async fn test_id_registry_abi_creation() {

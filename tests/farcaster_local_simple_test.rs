@@ -1,11 +1,17 @@
 use anyhow::Result;
-use ed25519_dalek::{Signer as Ed25519Signer, SigningKey, Verifier as Ed25519Verifier};
-use ethers::{
-    providers::{Http, Middleware, Provider},
-    signers::{LocalWallet, Signer},
-    types::{transaction::eip2718::TypedTransaction, Address, TransactionRequest, U256},
-    utils::parse_ether,
-};
+use ed25519_dalek::Signer as Ed25519Signer;
+use ed25519_dalek::SigningKey;
+use ed25519_dalek::Verifier as Ed25519Verifier;
+use ethers::providers::Http;
+use ethers::providers::Middleware;
+use ethers::providers::Provider;
+use ethers::signers::LocalWallet;
+use ethers::signers::Signer;
+use ethers::types::transaction::eip2718::TypedTransaction;
+use ethers::types::Address;
+use ethers::types::TransactionRequest;
+use ethers::types::U256;
+use ethers::utils::parse_ether;
 use rand::rngs::OsRng;
 
 /// Simple local transaction test configuration

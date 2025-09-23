@@ -1,6 +1,8 @@
 use anyhow::Result;
 use castorix::farcaster::contracts::FarcasterContractClient;
-use ethers::providers::{Http, Middleware, Provider};
+use ethers::providers::Http;
+use ethers::providers::Middleware;
+use ethers::providers::Provider;
 
 /// Test network info retrieval specifically
 #[tokio::test]

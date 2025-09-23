@@ -3,15 +3,18 @@
 //! This module provides a thread-safe nonce manager that ensures
 //! proper nonce sequencing for concurrent transactions.
 
-use anyhow::Result;
-use ethers::{
-    middleware::Middleware,
-    providers::{Http, Provider},
-    types::{Address, U256},
-};
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::AtomicU64;
+use std::sync::atomic::Ordering;
 use std::sync::Arc;
-use tokio::time::{sleep, Duration};
+
+use anyhow::Result;
+use ethers::middleware::Middleware;
+use ethers::providers::Http;
+use ethers::providers::Provider;
+use ethers::types::Address;
+use ethers::types::U256;
+use tokio::time::sleep;
+use tokio::time::Duration;
 
 /// Thread-safe nonce manager for a specific address
 #[derive(Debug, Clone)]

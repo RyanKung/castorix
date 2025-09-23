@@ -1,16 +1,17 @@
+use anyhow::Context;
+use anyhow::Result;
+use ethers::middleware::Middleware;
+use ethers::providers::Http;
+use ethers::providers::Provider;
+use ethers::signers::LocalWallet;
+use ethers::signers::Signer;
+use ethers::types::Address;
+use ethers::utils::format_ether;
+
 use crate::cli::types::FidCommands;
-use crate::farcaster::contracts::{
-    contract_client::FarcasterContractClient,
-    types::{ContractAddresses, ContractResult},
-};
-use anyhow::{Context, Result};
-use ethers::{
-    middleware::Middleware,
-    providers::{Http, Provider},
-    signers::{LocalWallet, Signer},
-    types::Address,
-    utils::format_ether,
-};
+use crate::farcaster::contracts::contract_client::FarcasterContractClient;
+use crate::farcaster::contracts::types::ContractAddresses;
+use crate::farcaster::contracts::types::ContractResult;
 
 /// Handle FID registration and management commands
 pub async fn handle_fid_command(command: FidCommands) -> Result<()> {
@@ -63,7 +64,8 @@ async fn handle_fid_register(
     // Load wallet and get private key
     let private_key = if let Some(name) = wallet_name {
         // Load from encrypted storage
-        use crate::encrypted_key_manager::{prompt_password, EncryptedKeyManager};
+        use crate::encrypted_key_manager::prompt_password;
+        use crate::encrypted_key_manager::EncryptedKeyManager;
 
         let mut manager = EncryptedKeyManager::default_config();
         if !manager.key_exists(&name) {
@@ -158,7 +160,10 @@ async fn handle_fid_register(
     // Ask for user confirmation (skip if --yes is provided)
     if !yes {
         print!("\n❓ Do you want to proceed with FID registration? (yes/no): ");
-        use std::io::{self, Write};
+        use std::io::Write;
+        use std::io::{
+            self,
+        };
         io::stdout().flush()?;
 
         let mut confirmation = String::new();
@@ -272,7 +277,8 @@ async fn handle_fid_list(wallet_name: Option<String>) -> Result<()> {
     // Get wallet address
     let wallet_address = if let Some(name) = wallet_name {
         // Load from encrypted storage
-        use crate::encrypted_key_manager::{prompt_password, EncryptedKeyManager};
+        use crate::encrypted_key_manager::prompt_password;
+        use crate::encrypted_key_manager::EncryptedKeyManager;
 
         let mut manager = EncryptedKeyManager::default_config();
         if !manager.key_exists(&name) {

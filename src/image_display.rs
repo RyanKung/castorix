@@ -1,6 +1,7 @@
+use std::io::Write;
+
 use anyhow::Result;
 use image::GenericImageView;
-use std::io::Write;
 use tempfile::NamedTempFile;
 
 /// Display profile picture in terminal using different methods

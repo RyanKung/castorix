@@ -1,5 +1,7 @@
-use ethers::types::{Address, U256};
-use serde::{Deserialize, Serialize};
+use ethers::types::Address;
+use ethers::types::U256;
+use serde::Deserialize;
+use serde::Serialize;
 
 /// Farcaster contract addresses on Optimism mainnet
 #[derive(Debug, Clone, Serialize, Deserialize)]

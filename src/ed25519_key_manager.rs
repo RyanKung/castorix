@@ -1,9 +1,13 @@
-use anyhow::{Context, Result};
-use ed25519_dalek::{SigningKey, VerifyingKey};
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
+
+use anyhow::Context;
+use anyhow::Result;
+use ed25519_dalek::SigningKey;
+use ed25519_dalek::VerifyingKey;
+use serde::Deserialize;
+use serde::Serialize;
 
 /// Ed25519 key manager for Farcaster message signing
 #[derive(Debug, Clone, Serialize, Deserialize)]

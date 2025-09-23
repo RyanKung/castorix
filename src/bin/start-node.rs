@@ -1,5 +1,7 @@
-use clap::{Parser, Subcommand};
 use std::process::Command;
+
+use clap::Parser;
+use clap::Subcommand;
 
 #[derive(Parser)]
 #[command(name = "start-node")]

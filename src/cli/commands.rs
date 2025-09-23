@@ -1,8 +1,13 @@
-use crate::cli::types::{
-    CustodyCommands, EnsCommands, FidCommands, HubCommands, KeyCommands, SignersCommands,
-    StorageCommands,
-};
-use clap::{Parser, Subcommand};
+use clap::Parser;
+use clap::Subcommand;
+
+use crate::cli::types::CustodyCommands;
+use crate::cli::types::EnsCommands;
+use crate::cli::types::FidCommands;
+use crate::cli::types::HubCommands;
+use crate::cli::types::KeyCommands;
+use crate::cli::types::SignersCommands;
+use crate::cli::types::StorageCommands;
 
 /// Castorix - Farcaster ENS Domain Proof Tool
 /// A comprehensive tool for managing private keys, creating ENS domain proofs, and interacting with Farcaster Hub

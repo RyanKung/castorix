@@ -1,14 +1,20 @@
+use aes_gcm::aead::Aead;
+use aes_gcm::aead::KeyInit;
+use aes_gcm::Aes256Gcm;
+use aes_gcm::Key;
+use aes_gcm::Nonce;
+use anyhow::Result;
+use argon2::password_hash::SaltString;
+use argon2::Argon2;
+use argon2::PasswordHasher;
+use base64::engine::general_purpose;
+use base64::Engine as _;
+use ethers::prelude::Middleware;
+use ethers::signers::Signer;
+
 use crate::cli::types::SignersCommands;
 use crate::core::client::hub_client::FarcasterClient;
 use crate::farcaster::contracts::types::ContractResult;
-use aes_gcm::aead::{Aead, KeyInit};
-use aes_gcm::{Aes256Gcm, Key, Nonce};
-use anyhow::Result;
-use argon2::password_hash::SaltString;
-use argon2::{Argon2, PasswordHasher};
-use base64::{engine::general_purpose, Engine as _};
-use ethers::prelude::Middleware;
-use ethers::signers::Signer;
 
 #[derive(Debug, Clone)]
 struct LocalEd25519Key {
@@ -381,7 +387,10 @@ async fn handle_add_signer(
     // Ask for user confirmation (skip if --yes is provided)
     if !yes {
         print!("\n❓ Do you want to proceed with the on-chain registration? (yes/no): ");
-        use std::io::{self, Write};
+        use std::io::Write;
+        use std::io::{
+            self,
+        };
         io::stdout().flush()?;
 
         let mut confirmation = String::new();
@@ -871,7 +880,10 @@ async fn handle_del_signer(
 
     // Ask for user confirmation
     print!("\n❓ Do you want to proceed with the on-chain removal? (yes/no): ");
-    use std::io::{self, Write};
+    use std::io::Write;
+    use std::io::{
+        self,
+    };
     io::stdout().flush()?;
 
     let mut confirmation = String::new();
@@ -1064,8 +1076,11 @@ fn create_add_typed_data(
     key_gateway_address: ethers::types::Address,
     chain_id: u64,
 ) -> Result<ethers::types::transaction::eip712::TypedData> {
-    use ethers::types::transaction::eip712::{EIP712Domain, Eip712DomainType, TypedData};
     use std::collections::BTreeMap;
+
+    use ethers::types::transaction::eip712::EIP712Domain;
+    use ethers::types::transaction::eip712::Eip712DomainType;
+    use ethers::types::transaction::eip712::TypedData;
 
     // Domain separator for Farcaster KeyGateway
     let domain = EIP712Domain {
@@ -1397,7 +1412,10 @@ async fn handle_signers_import(fid: u64) -> Result<()> {
         println!("⚠️  Ed25519 key already exists for FID: {fid}");
 
         print!("\nDo you want to replace the existing key? (y/N): ");
-        use std::io::{self, Write};
+        use std::io::Write;
+        use std::io::{
+            self,
+        };
         io::stdout().flush()?;
 
         let mut input = String::new();
@@ -1794,7 +1812,10 @@ async fn handle_signers_delete(identifier: &str) -> Result<()> {
 
     // Ask for confirmation with backup verification
     print!("\n❓ Have you backed up this private key? (yes/no): ");
-    use std::io::{self, Write};
+    use std::io::Write;
+    use std::io::{
+        self,
+    };
     io::stdout().flush()?;
 
     let mut backup_confirmation = String::new();

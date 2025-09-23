@@ -1,8 +1,12 @@
+use std::str::FromStr;
+
+use anyhow::Context;
+use anyhow::Result;
+use ethers::prelude::*;
+use ethers::types::Address;
+
 use super::core::EnsProof;
 use crate::core::protocol::username_proof::UserNameProof;
-use anyhow::{Context, Result};
-use ethers::{prelude::*, types::Address};
-use std::str::FromStr;
 
 impl EnsProof {
     /// Verify ENS domain ownership

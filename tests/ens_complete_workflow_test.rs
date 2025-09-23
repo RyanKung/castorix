@@ -1,9 +1,11 @@
-use std::process::{Command, Stdio};
+use std::process::Command;
+use std::process::Stdio;
 use std::thread;
 use std::time::Duration;
 
 mod test_consts;
-use test_consts::{setup_local_test_env, should_skip_rpc_tests};
+use test_consts::setup_local_test_env;
+use test_consts::should_skip_rpc_tests;
 
 /// Complete ENS workflow integration test
 ///

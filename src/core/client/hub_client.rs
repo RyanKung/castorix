@@ -1,16 +1,22 @@
-use crate::core::{
-    crypto::key_manager::KeyManager,
-    protocol::message::{
-        FarcasterNetwork, HashScheme, Message, MessageData, MessageType, SignatureScheme,
-    },
-    protocol::username_proof::{UserNameProof, UserNameType},
-};
-use anyhow::{Context, Result};
+use anyhow::Context;
+use anyhow::Result;
 use chrono::Utc;
-use ed25519_dalek::{Signer as Ed25519Signer, SigningKey};
+use ed25519_dalek::Signer as Ed25519Signer;
+use ed25519_dalek::SigningKey;
 use protobuf::Message as ProtobufMessage;
 use reqwest::Client;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
+
+use crate::core::crypto::key_manager::KeyManager;
+use crate::core::protocol::message::FarcasterNetwork;
+use crate::core::protocol::message::HashScheme;
+use crate::core::protocol::message::Message;
+use crate::core::protocol::message::MessageData;
+use crate::core::protocol::message::MessageType;
+use crate::core::protocol::message::SignatureScheme;
+use crate::core::protocol::username_proof::UserNameProof;
+use crate::core::protocol::username_proof::UserNameType;
 
 /// Farcaster Hub client for submitting messages and proofs
 pub struct FarcasterClient {

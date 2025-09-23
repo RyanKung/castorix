@@ -1,9 +1,9 @@
-use anyhow::{Context, Result};
-use ethers::{
-    core::k256::ecdsa::SigningKey,
-    prelude::*,
-    signers::{LocalWallet, Signer},
-};
+use anyhow::Context;
+use anyhow::Result;
+use ethers::core::k256::ecdsa::SigningKey;
+use ethers::prelude::*;
+use ethers::signers::LocalWallet;
+use ethers::signers::Signer;
 
 /// Private key management system that loads keys from environment variables
 #[derive(Clone)]

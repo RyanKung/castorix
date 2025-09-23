@@ -1,13 +1,15 @@
 use anyhow::Result;
-use ed25519_dalek::{Signer as Ed25519Signer, SigningKey, Verifier};
+use ed25519_dalek::Signer as Ed25519Signer;
+use ed25519_dalek::SigningKey;
+use ed25519_dalek::Verifier;
 use hex;
 use rand::rngs::OsRng;
 
-use crate::farcaster::contracts::{
-    contract_client::FarcasterContractClient,
-    types::{ContractResult, Fid},
-    types::{FidKeysInfo, SignerVerificationResult},
-};
+use crate::farcaster::contracts::contract_client::FarcasterContractClient;
+use crate::farcaster::contracts::types::ContractResult;
+use crate::farcaster::contracts::types::Fid;
+use crate::farcaster::contracts::types::FidKeysInfo;
+use crate::farcaster::contracts::types::SignerVerificationResult;
 
 /// Generate a new Ed25519 key pair
 pub fn generate_ed25519_keypair() -> SigningKey {
