@@ -90,7 +90,7 @@ async fn test_complete_base_workflow() {
 /// Start local Base Anvil node for testing
 async fn start_local_base_anvil() -> Option<std::process::Child> {
     let output = Command::new("cargo")
-        .args(&["start-node", "base", "--fast"])
+        .args(["start-node", "base", "--fast"])
         .output();
 
     match output {
@@ -154,7 +154,7 @@ async fn test_generate_encrypted_key(test_data_dir: &str, wallet_name: &str) {
 
     // Generate encrypted key with predefined inputs
     let output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",
@@ -218,7 +218,7 @@ async fn test_base_ens_resolution(test_data_dir: &str, domain: &str) {
     println!("   🔍 Testing Base ENS domain resolution...");
 
     let output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",
@@ -267,7 +267,7 @@ async fn test_base_ens_verification(test_data_dir: &str, domain: &str) {
     println!("   ✅ Testing Base ENS domain verification...");
 
     let output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",
@@ -321,7 +321,7 @@ async fn test_base_proof_generation(
     println!("   📝 Testing Base username proof generation...");
 
     let output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",
@@ -417,7 +417,7 @@ async fn test_proof_verification(test_data_dir: &str, domain: &str, fid: u64) {
     }
 
     let output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",
@@ -466,7 +466,7 @@ async fn test_base_ens_domains_query(test_data_dir: &str) {
     let test_address = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
 
     let output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",
@@ -522,7 +522,7 @@ async fn test_base_configuration_validation() {
     println!("🔧 Testing Base Configuration Validation...");
 
     // Test that start-node base command works
-    let output = Command::new("cargo").args(&["start-node", "base"]).output();
+    let output = Command::new("cargo").args(["start-node", "base"]).output();
 
     match output {
         Ok(output) => {
@@ -560,7 +560,7 @@ async fn test_base_subdomain_checking() {
 
     // Test base subdomain check
     let output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",

@@ -159,7 +159,7 @@ async fn test_generate_encrypted_key(test_data_dir: &str, wallet_name: &str) {
 
     // Generate encrypted key with predefined inputs
     let output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",
@@ -223,7 +223,7 @@ async fn test_ens_resolution(test_data_dir: &str, domain: &str) {
     println!("   🔍 Testing ENS domain resolution...");
 
     let output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",
@@ -272,7 +272,7 @@ async fn test_ens_verification(test_data_dir: &str, domain: &str) {
     println!("   ✅ Testing ENS domain verification...");
 
     let output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",
@@ -321,7 +321,7 @@ async fn test_proof_generation(test_data_dir: &str, domain: &str, fid: u64, wall
     println!("   📝 Testing username proof generation...");
 
     let output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",
@@ -414,7 +414,7 @@ async fn test_proof_verification(test_data_dir: &str, domain: &str, fid: u64) {
     }
 
     let output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",
@@ -463,7 +463,7 @@ async fn test_ens_domains_query(test_data_dir: &str) {
     let test_address = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
 
     let output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",
@@ -519,7 +519,7 @@ async fn test_ens_configuration_validation() {
     println!("🔧 Testing ENS Configuration Validation...");
 
     let output = Command::new("cargo")
-        .args(&["run", "--bin", "castorix", "--", "ens", "--help"])
+        .args(["run", "--bin", "castorix", "--", "ens", "--help"])
         .output();
 
     match output {

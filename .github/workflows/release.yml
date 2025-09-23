@@ -64,6 +64,27 @@ jobs:
       - name: Run clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
 
+      - name: Run unit tests
+        run: cargo test --lib --verbose
+
+      - name: Run integration tests
+        run: cargo test --test "*" --verbose
+
+      - name: Test CLI help commands
+        run: |
+          cargo run --bin castorix -- --help
+          cargo run --bin castorix -- key --help
+          cargo run --bin castorix -- fid --help
+          cargo run --bin castorix -- storage --help
+          cargo run --bin castorix -- ens --help
+          cargo run --bin castorix -- signers --help
+          cargo run --bin castorix -- hub --help
+
+      - name: Test node startup commands
+        run: |
+          cargo run --bin start-node -- --help
+          cargo run --bin stop-node --help || echo "stop-node help command test completed"
+
   release:
     name: Create Release
     needs: test

@@ -95,7 +95,7 @@ async fn test_complete_farcaster_workflow() {
 /// Start local Anvil node
 async fn start_local_anvil() -> Option<std::process::Child> {
     let output = Command::new("cargo")
-        .args(&["run", "--bin", "start-anvil"])
+        .args(["run", "--bin", "start-anvil"])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn();
@@ -130,14 +130,11 @@ async fn verify_anvil_running() -> bool {
     {
         Ok(response) => {
             if response.status().is_success() {
-                match response.text().await {
-                    Ok(text) => {
-                        if text.contains("result") {
-                            println!("✅ Anvil RPC is responding");
-                            return true;
-                        }
+                if let Ok(text) = response.text().await {
+                    if text.contains("result") {
+                        println!("✅ Anvil RPC is responding");
+                        return true;
                     }
-                    Err(_) => {}
                 }
             }
         }
@@ -160,7 +157,7 @@ async fn test_fid_registration(_wallet_name: &str, _fid: u64) {
     // Test FID price query
     println!("   💰 Testing FID price query...");
     let price_output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",
@@ -201,7 +198,7 @@ async fn test_fid_registration(_wallet_name: &str, _fid: u64) {
     // Test FID registration (real registration) using environment variable
     println!("   🆕 Testing FID registration...");
     let register_output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",
@@ -256,7 +253,7 @@ async fn test_storage_rental(fid: u64) {
     // Test storage price query
     println!("   💰 Testing storage price query...");
     let price_output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",
@@ -300,7 +297,7 @@ async fn test_storage_rental(fid: u64) {
     // Test storage rental (real rental)
     println!("   🏠 Testing storage rental...");
     let rent_output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",
@@ -359,7 +356,7 @@ async fn test_signer_registration(fid: u64) -> String {
 
     // List signers (we'll use this instead of generating)
     let signer_output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",
@@ -414,7 +411,7 @@ async fn test_signer_registration(fid: u64) -> String {
     // Test signer registration (real registration)
     println!("   📝 Testing signer registration...");
     let register_output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",
@@ -472,7 +469,7 @@ async fn test_signer_deletion(fid: u64, signer_key: &str) {
     // Note: No environment variables needed for signer deletion
 
     let delete_output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",
@@ -518,7 +515,7 @@ async fn test_fid_listing() {
     println!("   📋 Testing FID listing...");
 
     let list_output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",
@@ -569,7 +566,7 @@ async fn test_storage_usage(fid: u64) {
     println!("   📊 Testing storage usage query...");
 
     let usage_output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",
@@ -616,7 +613,7 @@ async fn cleanup_test_wallet(wallet_name: &str) {
     println!("   🧹 Cleaning up test wallet...");
 
     let delete_output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",
@@ -653,7 +650,7 @@ async fn test_configuration_validation() {
     setup_placeholder_test_env();
 
     let output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",
@@ -753,7 +750,7 @@ async fn test_storage_rental_with_payment_wallet() {
     // Step 2: Test storage price query
     println!("💰 Testing storage price query...");
     let price_output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",
@@ -795,7 +792,7 @@ async fn test_storage_rental_with_payment_wallet() {
     // Step 3: Test storage rental command structure (will fail due to missing wallets, but validates command parsing)
     println!("🏠 Testing storage rental command structure...");
     let rent_output = Command::new("cargo")
-        .args(&[
+        .args([
             "run",
             "--bin",
             "castorix",

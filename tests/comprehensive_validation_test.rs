@@ -294,7 +294,7 @@ async fn test_cleanup_validation(test_data_dir: &str, wallet_name: &str) {
 
     // Verify directory no longer exists
     assert!(
-        !fs::metadata(test_data_dir).is_ok(),
+        fs::metadata(test_data_dir).is_err(),
         "Test directory should be cleaned up"
     );
 
@@ -346,7 +346,7 @@ fn run_cli_command(test_data_dir: &str, args: &[&str]) -> std::process::Output {
 /// Start local Anvil node
 async fn start_local_anvil() -> Option<std::process::Child> {
     let output = Command::new("cargo")
-        .args(&["run", "--bin", "start-anvil"])
+        .args(["run", "--bin", "start-anvil"])
         .output();
 
     match output {

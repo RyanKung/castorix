@@ -4,6 +4,7 @@
 use std::env;
 
 /// Set up local test environment for Anvil node
+#[allow(dead_code)]
 pub fn setup_local_test_env() {
     // Set local Anvil RPC URLs for testing
     env::set_var("ETH_OP_RPC_URL", "http://127.0.0.1:8545");
@@ -13,6 +14,7 @@ pub fn setup_local_test_env() {
 }
 
 /// Set up local test environment for Base Anvil node
+#[allow(dead_code)]
 pub fn setup_local_base_test_env() {
     // Set local Base Anvil RPC URLs for testing
     env::set_var("ETH_OP_RPC_URL", "http://127.0.0.1:8545");
@@ -22,6 +24,7 @@ pub fn setup_local_base_test_env() {
 }
 
 /// Set up placeholder URLs for configuration validation testing
+#[allow(dead_code)]
 pub fn setup_placeholder_test_env() {
     env::set_var("ETH_OP_RPC_URL", "https://www.optimism.io/");
     env::set_var(
@@ -33,6 +36,7 @@ pub fn setup_placeholder_test_env() {
 }
 
 /// Set up demo API URLs for simple testing
+#[allow(dead_code)]
 pub fn setup_demo_test_env() {
     env::set_var(
         "ETH_OP_RPC_URL",
@@ -44,6 +48,7 @@ pub fn setup_demo_test_env() {
 }
 
 /// Reset environment to default values
+#[allow(dead_code)]
 pub fn reset_test_env() {
     env::remove_var("ETH_OP_RPC_URL");
     env::remove_var("ETH_RPC_URL");
@@ -52,6 +57,7 @@ pub fn reset_test_env() {
 }
 
 /// Check if we should skip RPC tests
+#[allow(dead_code)]
 pub fn should_skip_rpc_tests() -> bool {
     env::var("SKIP_RPC_TESTS").is_ok()
 }

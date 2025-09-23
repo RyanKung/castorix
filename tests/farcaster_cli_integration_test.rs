@@ -113,7 +113,7 @@ async fn test_cli_integration_workflow() {
 /// Start local Anvil node
 async fn start_local_anvil() -> Option<std::process::Child> {
     let output = Command::new("cargo")
-        .args(&["run", "--bin", "start-anvil"])
+        .args(["run", "--bin", "start-anvil"])
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
         .spawn();
@@ -148,14 +148,11 @@ async fn verify_anvil_running() -> bool {
     {
         Ok(response) => {
             if response.status().is_success() {
-                match response.text().await {
-                    Ok(text) => {
-                        if text.contains("result") {
-                            println!("✅ Anvil RPC is responding");
-                            return true;
-                        }
+                if let Ok(text) = response.text().await {
+                    if text.contains("result") {
+                        println!("✅ Anvil RPC is responding");
+                        return true;
                     }
-                    Err(_) => {}
                 }
             }
         }
@@ -234,7 +231,7 @@ async fn test_environment_configuration() {
     setup_placeholder_test_env();
 
     let output = Command::new("./target/debug/castorix")
-        .args(&["fid", "price"])
+        .args(["fid", "price"])
         .output();
 
     match output {
