@@ -12,6 +12,32 @@ keywords = ["farcaster", "ethereum", "blockchain", "social", "protocol"]
 categories = ["web-programming", "network-programming", "cryptography"]
 authors = ["Your Name <your.email@example.com>"]
 
+# Include pre-generated contract bindings in the published package
+include = [
+    "src/**/*.rs",
+    "src/**/*.proto", 
+    "proto/**/*.proto",
+    "README.md",
+    "LICENSE",
+    "Cargo.toml",
+    "build.rs",
+    # Include the generated contract bindings for crates.io
+    "src/farcaster/contracts/generated/**/*.rs",
+]
+
+# Exclude development-only files from the published package
+exclude = [
+    "contracts/**/*",
+    "generated_abis/**/*",
+    "target/**/*",
+    ".github/**/*",
+    "tests/**/*",
+    "*.json",
+    "*.bin",
+    "test_data/**/*",
+    "test_*_data/**/*",
+]
+
 # Library configuration
 [lib]
 name = "castorix"

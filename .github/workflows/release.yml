@@ -56,7 +56,18 @@ jobs:
           fi
 
       - name: Build contracts and generate bindings
-        run: cargo build --release --all-features
+        run: |
+          echo "🔨 Building project with contract bindings..."
+          cargo build --release --all-features
+          echo "✅ Build completed successfully"
+          
+          # Verify generated bindings exist
+          if [ -d "src/farcaster/contracts/generated" ]; then
+            echo "✅ Contract bindings generated successfully"
+            ls -la src/farcaster/contracts/generated/
+          else
+            echo "⚠️ Warning: No contract bindings found"
+          fi
 
       - name: Check formatting
         run: cargo fmt --all -- --check

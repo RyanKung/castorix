@@ -124,14 +124,16 @@ fn compile_farcaster_contracts() {
 }
 
 fn generate_rust_bindings() {
-    let abi_dir = "generated_abis";
-    let bindings_dir = "src/farcaster/contracts/generated";
-
-    // Check if ABI files exist
-    if !Path::new(abi_dir).exists() {
-        println!("cargo:warning=ABI directory not found, skipping Rust binding generation");
+    // Check if we're in a development environment with contracts available
+    let is_dev_env = Path::new("contracts").exists() && Path::new("generated_abis").exists();
+    
+    if !is_dev_env {
+        println!("cargo:info=Development contracts not found, using pre-generated bindings");
         return;
     }
+
+    let abi_dir = "generated_abis";
+    let bindings_dir = "src/farcaster/contracts/generated";
 
     // Create bindings directory
     if let Err(e) = fs::create_dir_all(bindings_dir) {
@@ -157,6 +159,8 @@ fn generate_rust_bindings() {
         ("RecoveryProxy", "RecoveryProxy.sol/RecoveryProxy.json"),
     ];
 
+    let mut generated_modules = Vec::new();
+
     for (contract_name, abi_path) in &contracts {
         let abi_file = format!("{abi_dir}/{abi_path}");
         if Path::new(&abi_file).exists() {
@@ -169,7 +173,10 @@ fn generate_rust_bindings() {
 
             // Use ethers abigen macro to generate bindings
             match generate_contract_bindings(contract_name, &abi_file, &binding_file) {
-                Ok(_) => println!("cargo:info=Successfully generated bindings for {contract_name}"),
+                Ok(_) => {
+                    println!("cargo:info=Successfully generated bindings for {contract_name}");
+                    generated_modules.push(format!("pub mod {}_bindings;", contract_name.to_lowercase()));
+                }
                 Err(e) => {
                     println!("cargo:warning=Failed to generate bindings for {contract_name}: {e}")
                 }
@@ -180,29 +187,12 @@ fn generate_rust_bindings() {
     }
 
     // Create mod.rs file for the generated bindings (sorted alphabetically)
-    let mut module_names: Vec<String> = contracts
-        .iter()
-        .map(|(name, _)| format!("pub mod {}_bindings;", name.to_lowercase()))
-        .collect();
-    module_names.sort(); // Sort alphabetically to ensure consistent formatting
-    let mod_content = module_names.join("\n") + "\n"; // Add trailing newline
+    generated_modules.sort();
+    let mod_content = generated_modules.join("\n") + "\n"; // Add trailing newline
 
     let mod_file = format!("{bindings_dir}/mod.rs");
     if let Err(e) = fs::write(&mod_file, mod_content) {
         println!("cargo:warning=Failed to create mod.rs: {e}");
-    }
-
-    // Create a dummy generated.rs file if it doesn't exist (for compatibility)
-    let generated_rs_file = format!("{bindings_dir}/generated.rs");
-    if !Path::new(&generated_rs_file).exists() {
-        let dummy_content = r#"// Dummy generated.rs file for compatibility
-// This file is created when the actual generated files are not available
-
-pub mod dummy;
-"#;
-        if let Err(e) = fs::write(&generated_rs_file, dummy_content) {
-            println!("cargo:warning=Failed to create dummy generated.rs: {e}");
-        }
     }
 
     // Tell Cargo to rerun if ABI files change
