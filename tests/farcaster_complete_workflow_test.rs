@@ -3,6 +3,9 @@ use std::process::{Command, Stdio};
 use std::thread;
 use std::time::Duration;
 
+mod test_consts;
+use test_consts::*;
+
 /// Complete Farcaster workflow integration test
 /// 
 /// This test covers the full workflow:
@@ -39,10 +42,8 @@ async fn test_complete_farcaster_workflow() {
     }
     println!("✅ Anvil is running");
     
-    // Set environment variables for local testing
-    env::set_var("ETH_OP_RPC_URL", "http://127.0.0.1:8545");
-    env::set_var("ETH_RPC_URL", "http://127.0.0.1:8545");
-    env::set_var("FARCASTER_HUB_URL", "http://192.168.1.192:3381");
+    // Set up local test environment
+    setup_local_test_env();
     
     // We'll generate a temporary private key for this workflow
     // No need to set PRIVATE_KEY environment variable
@@ -489,7 +490,7 @@ async fn test_configuration_validation() {
     println!("🔧 Testing Configuration Validation...");
     
     // Test with placeholder values
-    env::set_var("ETH_OP_RPC_URL", "https://www.optimism.io/");
+    setup_placeholder_test_env();
     
     let output = Command::new("cargo")
         .args(&["run", "--bin", "castorix", "--", "--path", "./test_data", "fid", "price"])
@@ -573,10 +574,8 @@ async fn test_storage_rental_with_payment_wallet() {
     // Give Anvil time to start
     thread::sleep(Duration::from_secs(3));
 
-    // Set environment variables for local testing
-    env::set_var("ETH_OP_RPC_URL", "http://127.0.0.1:8545");
-    env::set_var("ETH_RPC_URL", "http://127.0.0.1:8545");
-    env::set_var("FARCASTER_HUB_URL", "http://192.168.1.192:3381");
+    // Set up local test environment
+    setup_local_test_env();
 
     let test_fid = 999999;
     let _custody_private_key = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"; // Anvil account #0

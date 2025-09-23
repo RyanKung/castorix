@@ -4,6 +4,9 @@ use std::thread;
 use std::time::Duration;
 use std::fs;
 
+mod test_consts;
+use test_consts::*;
+
 /// Comprehensive validation test for Farcaster CLI
 /// 
 /// This test performs strict cross-validation of all CLI operations:
@@ -31,9 +34,8 @@ async fn test_comprehensive_cli_validation() {
     // Clean up any existing test data
     cleanup_test_directory(test_data_dir);
     
-    // Set up test environment
-    env::set_var("ETH_OP_RPC_URL", "http://127.0.0.1:8545");
-    env::set_var("ETH_RPC_URL", "http://127.0.0.1:8545");
+    // Set up local test environment
+    setup_local_test_env();
     
     // Start local Anvil node
     println!("📡 Starting local Anvil node...");

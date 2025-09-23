@@ -1,22 +1,22 @@
-use std::env;
 use std::process::Command;
+
+mod test_consts;
+use test_consts::*;
 
 /// Simple CLI test that doesn't require building
 /// Tests the CLI functionality using cargo run
 #[tokio::test]
 async fn test_simple_cli_functionality() {
     // Skip if no RPC tests should run
-    if env::var("SKIP_RPC_TESTS").is_ok() {
+    if should_skip_rpc_tests() {
         println!("Skipping RPC tests");
         return;
     }
 
     println!("🚀 Starting Simple CLI Test");
     
-    // Set environment variables for testing
-    env::set_var("ETH_OP_RPC_URL", "https://optimism-mainnet.g.alchemy.com/v2/demo");
-    env::set_var("ETH_RPC_URL", "https://eth-mainnet.g.alchemy.com/v2/demo");
-    env::set_var("FARCASTER_HUB_URL", "https://hub-api.neynar.com");
+    // Set up demo test environment
+    setup_demo_test_env();
     
     let test_fid = 460432; // Use a known test FID
     
@@ -46,15 +46,15 @@ async fn test_simple_cli_functionality() {
     
     // Test 4: Configuration validation
     println!("\n🔧 Testing Configuration Validation...");
-    env::set_var("ETH_OP_RPC_URL", "https://www.optimism.io/");
+    // Temporarily set placeholder configuration for validation test
+    setup_placeholder_test_env();
     test_cargo_command(
         &["fid", "price"],
         "Configuration validation",
         |output| output.contains("Warning") || output.contains("placeholder") || output.contains("ETH"),
     ).await;
-    
-    // Reset configuration
-    env::set_var("ETH_OP_RPC_URL", "https://optimism-mainnet.g.alchemy.com/v2/demo");
+    // Reset back to demo configuration
+    setup_demo_test_env();
     
     // Test 5: FID price query (should work with demo API)
     println!("\n💰 Testing FID Price Query...");
@@ -123,13 +123,7 @@ async fn test_cargo_command<F>(
                     println!("   📝 Output: {}", first_line);
                 }
             } else {
-                println!("   ⚠️  {} completed but output unexpected", description);
-                if !stdout.is_empty() {
-                    println!("   📝 Stdout: {}", stdout.lines().take(2).collect::<Vec<_>>().join(" "));
-                }
-                if !stderr.is_empty() {
-                    println!("   📝 Stderr: {}", stderr.lines().take(2).collect::<Vec<_>>().join(" "));
-                }
+                panic!("{} completed but output unexpected: stdout={} stderr={}", description, stdout, stderr);
             }
         }
         Err(e) => {
@@ -195,7 +189,7 @@ async fn test_environment_configuration() {
     println!("🔧 Testing Environment Configuration...");
     
     // Test with placeholder values
-    env::set_var("ETH_OP_RPC_URL", "https://www.optimism.io/");
+    setup_placeholder_test_env();
     
     let cmd_args = vec!["run", "--bin", "castorix", "--", "fid", "price"];
     let output = Command::new("cargo")
@@ -227,5 +221,5 @@ async fn test_environment_configuration() {
     }
     
     // Reset configuration
-    env::set_var("ETH_OP_RPC_URL", "https://optimism-mainnet.g.alchemy.com/v2/demo");
+    setup_demo_test_env();
 }

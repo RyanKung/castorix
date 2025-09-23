@@ -3,6 +3,9 @@ use std::process::Command;
 use std::thread;
 use std::time::Duration;
 
+mod test_consts;
+use test_consts::*;
+
 /// Simplified CLI integration test using pre-built binary
 /// 
 /// This test covers the CLI workflow without rebuilding:
@@ -36,10 +39,8 @@ async fn test_cli_integration_workflow() {
     }
     println!("✅ Anvil is running");
     
-    // Set environment variables for local testing
-    env::set_var("ETH_OP_RPC_URL", "http://127.0.0.1:8545");
-    env::set_var("ETH_RPC_URL", "http://127.0.0.1:8545");
-    env::set_var("FARCASTER_HUB_URL", "http://192.168.1.192:3381");
+    // Set up local test environment
+    setup_local_test_env();
     
     let test_fid = 460432; // Use a known test FID
     
@@ -97,7 +98,7 @@ async fn test_cli_integration_workflow() {
     
     // Step 7: Test configuration validation
     println!("\n🔧 Testing Configuration Validation...");
-    env::set_var("ETH_OP_RPC_URL", "https://www.optimism.io/");
+    setup_placeholder_test_env();
     test_command(
         &["fid", "price"],
         "Configuration validation",
@@ -105,7 +106,7 @@ async fn test_cli_integration_workflow() {
     ).await;
     
     // Reset configuration
-    env::set_var("ETH_OP_RPC_URL", "http://127.0.0.1:8545");
+    setup_local_test_env();
     
     // Clean up
     cleanup_anvil(anvil_handle).await;
@@ -230,7 +231,7 @@ async fn test_environment_configuration() {
     println!("🔧 Testing Environment Configuration...");
     
     // Test with placeholder values
-    env::set_var("ETH_OP_RPC_URL", "https://www.optimism.io/");
+    setup_placeholder_test_env();
     
     let output = Command::new("./target/debug/castorix")
         .args(&["fid", "price"])
@@ -251,7 +252,7 @@ async fn test_environment_configuration() {
     }
     
     // Reset configuration
-    env::set_var("ETH_OP_RPC_URL", "http://127.0.0.1:8545");
+    setup_local_test_env();
 }
 
 /// Test CLI argument parsing
