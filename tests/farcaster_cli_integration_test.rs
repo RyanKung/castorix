@@ -4,7 +4,7 @@ use std::thread;
 use std::time::Duration;
 
 mod test_consts;
-use test_consts::{setup_local_test_env, setup_placeholder_test_env};
+use test_consts::{setup_local_test_env, setup_placeholder_test_env, should_skip_rpc_tests};
 
 /// Simplified CLI integration test using pre-built binary
 ///
@@ -18,7 +18,7 @@ use test_consts::{setup_local_test_env, setup_placeholder_test_env};
 #[tokio::test]
 async fn test_cli_integration_workflow() {
     // Skip if no RPC tests should run
-    if env::var("SKIP_RPC_TESTS").is_ok() {
+    if test_consts::should_skip_rpc_tests() {
         println!("Skipping RPC tests");
         return;
     }

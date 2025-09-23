@@ -126,7 +126,6 @@ fn compile_farcaster_contracts() {
 fn generate_rust_bindings() {
     // Check if we're in a development environment with contracts available
     let is_dev_env = Path::new("contracts").exists() && Path::new("generated_abis").exists();
-    
     if !is_dev_env {
         println!("cargo:info=Development contracts not found, using pre-generated bindings");
         return;
@@ -175,7 +174,10 @@ fn generate_rust_bindings() {
             match generate_contract_bindings(contract_name, &abi_file, &binding_file) {
                 Ok(_) => {
                     println!("cargo:info=Successfully generated bindings for {contract_name}");
-                    generated_modules.push(format!("pub mod {}_bindings;", contract_name.to_lowercase()));
+                    generated_modules.push(format!(
+                        "pub mod {}_bindings;",
+                        contract_name.to_lowercase()
+                    ));
                 }
                 Err(e) => {
                     println!("cargo:warning=Failed to generate bindings for {contract_name}: {e}")

@@ -64,7 +64,7 @@ async fn handle_storage_rent(
     let rpc_url = config.eth_op_rpc_url().to_string();
 
     // Check if using placeholder values
-    if rpc_url.contains("your_api_key_here") || rpc_url == "https://www.optimism.io/" {
+    if rpc_url.contains("your_api_key_here") || rpc_url == "https://mainnet.optimism.io" {
         println!("⚠️  Configuration Warning:");
         println!("   ETH_OP_RPC_URL contains placeholder value: {}", rpc_url);
         println!("   Please set up your configuration:");
@@ -290,7 +290,7 @@ async fn handle_storage_price(fid: u64, units: u32) -> Result<()> {
     let rpc_url = config.eth_op_rpc_url().to_string();
 
     // Check if using placeholder values
-    if rpc_url.contains("your_api_key_here") || rpc_url == "https://www.optimism.io/" {
+    if rpc_url.contains("your_api_key_here") || rpc_url == "https://mainnet.optimism.io" {
         println!("⚠️  Configuration Warning:");
         println!("   ETH_OP_RPC_URL contains placeholder value: {}", rpc_url);
         println!("   Please set up your configuration:");
@@ -326,7 +326,7 @@ async fn handle_storage_usage(fid: u64) -> Result<()> {
     let rpc_url = config.eth_op_rpc_url().to_string();
 
     // Check if using placeholder values
-    if rpc_url.contains("your_api_key_here") || rpc_url == "https://www.optimism.io/" {
+    if rpc_url.contains("your_api_key_here") || rpc_url == "https://mainnet.optimism.io" {
         println!("⚠️  Configuration Warning:");
         println!("   ETH_OP_RPC_URL contains placeholder value: {}", rpc_url);
         println!("   Please set up your configuration:");
