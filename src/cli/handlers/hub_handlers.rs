@@ -32,12 +32,6 @@ pub async fn handle_hub_command(
         } => {
             handle_submit_proof(hub_client, proof_file, fid, wallet_name).await?;
         }
-        HubCommands::SubmitProofEip712 {
-            proof_file,
-            wallet_name,
-        } => {
-            handle_submit_proof_eip712(hub_client, proof_file, wallet_name).await?;
-        }
         HubCommands::VerifyEth { fid: _, address: _ } => {
             println!("❌ Ethereum verification not yet implemented with new protobuf structure");
             println!("💡 This feature will be re-implemented in a future update");
@@ -198,69 +192,6 @@ async fn handle_submit_proof(
     Ok(())
 }
 
-async fn handle_submit_proof_eip712(
-    hub_client: &crate::core::client::hub_client::FarcasterClient,
-    proof_file: String,
-    wallet_name: String,
-) -> Result<()> {
-    println!("📤 Submitting username proof with EIP-712 signature from file: {proof_file}");
-    println!("🔑 Using wallet: {wallet_name}");
-
-    let proof_content = std::fs::read_to_string(&proof_file)?;
-    let proof_data: serde_json::Value = serde_json::from_str(&proof_content)?;
-
-    // Create UserNameProof from JSON
-    let mut proof = crate::core::protocol::username_proof::UserNameProof::new();
-    proof.set_timestamp(proof_data["timestamp"].as_u64().unwrap_or(0));
-    proof.set_name(
-        proof_data["name"]
-            .as_str()
-            .unwrap_or("")
-            .as_bytes()
-            .to_vec(),
-    );
-    proof.set_owner(hex::decode(proof_data["owner"].as_str().unwrap_or(""))?);
-    proof.set_signature(hex::decode(proof_data["signature"].as_str().unwrap_or(""))?);
-    proof.set_fid(proof_data["fid"].as_u64().unwrap_or(0));
-
-    // Load encrypted key manager and decrypt the key
-    let mut encrypted_manager = crate::encrypted_key_manager::EncryptedKeyManager::default_config();
-
-    // Prompt for password
-    let password = crate::encrypted_key_manager::prompt_password(&format!(
-        "Enter password for wallet '{wallet_name}': "
-    ))?;
-
-    // Load and decrypt the key
-    encrypted_manager
-        .load_and_decrypt(&password, &wallet_name)
-        .await?;
-
-    // Get the decrypted key manager
-    let key_manager = encrypted_manager
-        .key_manager()
-        .ok_or_else(|| anyhow::anyhow!("Failed to load key manager for wallet: {}", wallet_name))?
-        .clone();
-
-    // Create FarcasterClient with the specified wallet
-    let client = crate::core::client::hub_client::FarcasterClient::new(
-        hub_client.hub_url().to_string(),
-        Some(key_manager),
-    );
-
-    // Submit using EIP-712 signature
-    let result = client.submit_username_proof_with_eip712(&proof).await;
-
-    match result {
-        Ok(response) => {
-            println!("✅ Username proof submitted successfully with EIP-712 signature!");
-            println!("📋 Response: {response:?}");
-        }
-        Err(e) => println!("❌ Failed to submit username proof: {e}"),
-    }
-
-    Ok(())
-}
 
 async fn handle_hub_info(hub_client: &crate::core::client::hub_client::FarcasterClient) -> Result<()> {
     println!("📊 Getting Hub information and sync status...");

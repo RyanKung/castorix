@@ -504,20 +504,6 @@ pub enum HubCommands {
         wallet_name: Option<String>,
     },
 
-    /// 📤 Submit a username proof to Farcaster Hub using EIP-712 signature
-    ///
-    /// Submit a username proof to the Farcaster Hub for verification.
-    /// The proof will be signed using EIP-712 signature with the Ethereum private key.
-    /// Requires specifying a wallet name for the Ethereum private key.
-    ///
-    /// Example: castorix hub submit-proof-eip712 ./proof.json --wallet-name my-wallet
-    SubmitProofEip712 {
-        /// Path to proof JSON file
-        proof_file: String,
-        /// Wallet name for encrypted Ethereum private key (required)
-        #[arg(long)]
-        wallet_name: String,
-    },
 
     /// 🔗 Submit Ethereum address verification
     ///
