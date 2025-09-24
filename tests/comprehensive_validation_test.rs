@@ -345,31 +345,30 @@ fn run_cli_command(test_data_dir: &str, args: &[&str]) -> std::process::Output {
 
 /// Start local Anvil node
 async fn start_local_anvil() -> Option<std::process::Child> {
-    let output = Command::new("cargo")
-        .args(["run", "--bin", "start-node"])
-        .output();
+    // Try to start anvil directly with proper configuration
+    let output = Command::new("anvil")
+        .args([
+            "--host", "127.0.0.1",
+            "--port", "8545",
+            "--accounts", "10",
+            "--balance", "10000",
+            "--gas-limit", "30000000",
+            "--gas-price", "1000000000",
+            "--chain-id", "10",
+            "--block-time", "1",
+            "--silent"
+        ])
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn();
 
     match output {
-        Ok(output) => {
-            if output.status.success() {
-                println!("✅ Anvil node started successfully");
-                Some(
-                    std::process::Command::new("anvil")
-                        .stdout(Stdio::null())
-                        .stderr(Stdio::null())
-                        .spawn()
-                        .expect("Failed to start Anvil"),
-                )
-            } else {
-                println!(
-                    "❌ Failed to start Anvil: {}",
-                    String::from_utf8_lossy(&output.stderr)
-                );
-                None
-            }
+        Ok(child) => {
+            println!("✅ Anvil process started with PID: {:?}", child.id());
+            Some(child)
         }
         Err(e) => {
-            println!("❌ Failed to execute start-node command: {}", e);
+            println!("❌ Failed to start Anvil: {}", e);
             None
         }
     }

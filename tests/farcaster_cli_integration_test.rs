@@ -137,8 +137,9 @@ async fn test_cli_integration_workflow() {
 
 /// Start local Anvil node
 async fn start_local_anvil() -> Option<std::process::Child> {
+    // First try to start using our start-node binary
     let output = Command::new("cargo")
-        .args(["run", "--bin", "start-node"])
+        .args(["run", "--bin", "start-node", "op", "--fast"])
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
         .spawn();
@@ -149,8 +150,36 @@ async fn start_local_anvil() -> Option<std::process::Child> {
             Some(child)
         }
         Err(e) => {
-            println!("❌ Failed to start Anvil: {}", e);
-            None
+            println!("❌ Failed to start Anvil via start-node: {}", e);
+            
+            // Fallback: try to start anvil directly
+            println!("🔄 Trying direct anvil startup...");
+            let direct_output = Command::new("anvil")
+                .args([
+                    "--host", "127.0.0.1",
+                    "--port", "8545",
+                    "--accounts", "10",
+                    "--balance", "10000",
+                    "--gas-limit", "30000000",
+                    "--gas-price", "1000000000",
+                    "--chain-id", "10",
+                    "--block-time", "1",
+                    "--silent"
+                ])
+                .stdout(std::process::Stdio::piped())
+                .stderr(std::process::Stdio::piped())
+                .spawn();
+            
+            match direct_output {
+                Ok(child) => {
+                    println!("✅ Anvil started directly with PID: {:?}", child.id());
+                    Some(child)
+                }
+                Err(e) => {
+                    println!("❌ Failed to start Anvil directly: {}", e);
+                    None
+                }
+            }
         }
     }
 }
