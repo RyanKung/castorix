@@ -54,8 +54,10 @@ async fn test_cli_integration_workflow() {
     println!("📡 Starting local Anvil node...");
     let anvil_handle = start_local_anvil().await;
 
-    // Give Anvil time to start
-    thread::sleep(Duration::from_secs(3));
+    // Give Anvil time to start if we started a new instance
+    if anvil_handle.is_some() {
+        thread::sleep(Duration::from_secs(3));
+    }
 
     // Verify Anvil is running
     if !verify_anvil_running().await {
@@ -130,65 +132,63 @@ async fn test_cli_integration_workflow() {
     // Reset configuration
     setup_local_test_env();
 
-    // Clean up
-    cleanup_anvil(anvil_handle).await;
+    // Clean up (only if we started a new instance)
+    if let Some(handle) = anvil_handle {
+        cleanup_anvil(Some(handle)).await;
+    }
 
     println!("\n✅ CLI Integration Test Completed Successfully!");
 }
 
 /// Start local Anvil node
 async fn start_local_anvil() -> Option<std::process::Child> {
-    // First try to start using our start-node binary
-    let output = Command::new("cargo")
-        .args(["run", "--bin", "start-node", "op", "--fast"])
+    // Check if anvil is already running on port 8545
+    if verify_anvil_running().await {
+        println!("✅ Anvil is already running on port 8545");
+        return None; // Return None to indicate we're using existing instance
+    }
+
+    // Start anvil with fork mode for Optimism
+    println!("🔄 Starting Anvil with Optimism fork...");
+    let anvil_output = Command::new("anvil")
+        .args([
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "8545",
+            "--accounts",
+            "10",
+            "--balance",
+            "10000",
+            "--gas-limit",
+            "30000000",
+            "--gas-price",
+            "1000000000",
+            "--chain-id",
+            "10",
+            "--fork-url",
+            "https://mainnet.optimism.io",
+            "--retries",
+            "3",
+            "--timeout",
+            "10000",
+            "--block-time",
+            "1",
+            "--silent",
+        ])
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
         .spawn();
 
-    match output {
+    match anvil_output {
         Ok(child) => {
-            println!("✅ Anvil process started with PID: {:?}", child.id());
+            println!("✅ Anvil started with PID: {:?}", child.id());
+            println!("🔗 Forking from Optimism mainnet");
             Some(child)
         }
         Err(e) => {
-            println!("❌ Failed to start Anvil via start-node: {}", e);
-
-            // Fallback: try to start anvil directly
-            println!("🔄 Trying direct anvil startup...");
-            let direct_output = Command::new("anvil")
-                .args([
-                    "--host",
-                    "127.0.0.1",
-                    "--port",
-                    "8545",
-                    "--accounts",
-                    "10",
-                    "--balance",
-                    "10000",
-                    "--gas-limit",
-                    "30000000",
-                    "--gas-price",
-                    "1000000000",
-                    "--chain-id",
-                    "10",
-                    "--block-time",
-                    "1",
-                    "--silent",
-                ])
-                .stdout(std::process::Stdio::piped())
-                .stderr(std::process::Stdio::piped())
-                .spawn();
-
-            match direct_output {
-                Ok(child) => {
-                    println!("✅ Anvil started directly with PID: {:?}", child.id());
-                    Some(child)
-                }
-                Err(e) => {
-                    println!("❌ Failed to start Anvil directly: {}", e);
-                    None
-                }
-            }
+            println!("❌ Failed to start Anvil: {}", e);
+            None
         }
     }
 }
@@ -234,8 +234,18 @@ where
 {
     println!("   Testing {}...", description);
 
-    // Use the pre-built binary to avoid compilation issues
-    let output = Command::new("./target/debug/castorix").args(args).output();
+    // Use the correct binary path
+    let binary_path = get_castorix_binary();
+    let output = if binary_path.starts_with("cargo run") {
+        // Use cargo run for the command
+        let mut cmd = Command::new("cargo");
+        cmd.args(["run", "--bin", "castorix", "--"]);
+        cmd.args(args);
+        cmd.output()
+    } else {
+        // Use the binary directly
+        Command::new(&binary_path).args(args).output()
+    };
 
     match output {
         Ok(output) => {
