@@ -38,8 +38,7 @@ async fn test_complete_farcaster_workflow() {
 
     // Verify Anvil is running
     if !verify_anvil_running().await {
-        println!("❌ Anvil failed to start");
-        return;
+        panic!("❌ Anvil failed to start - integration test cannot proceed without blockchain node");
     }
     println!("✅ Anvil is running");
 
@@ -109,25 +108,33 @@ async fn start_local_anvil() -> Option<std::process::Child> {
         }
         Err(e) => {
             println!("❌ Failed to start Anvil via start-node: {}", e);
-            
+
             // Fallback: try to start anvil directly
             println!("🔄 Trying direct anvil startup...");
             let direct_output = Command::new("anvil")
                 .args([
-                    "--host", "127.0.0.1",
-                    "--port", "8545",
-                    "--accounts", "10",
-                    "--balance", "10000",
-                    "--gas-limit", "30000000",
-                    "--gas-price", "1000000000",
-                    "--chain-id", "10",
-                    "--block-time", "1",
-                    "--silent"
+                    "--host",
+                    "127.0.0.1",
+                    "--port",
+                    "8545",
+                    "--accounts",
+                    "10",
+                    "--balance",
+                    "10000",
+                    "--gas-limit",
+                    "30000000",
+                    "--gas-price",
+                    "1000000000",
+                    "--chain-id",
+                    "10",
+                    "--block-time",
+                    "1",
+                    "--silent",
                 ])
                 .stdout(Stdio::piped())
                 .stderr(Stdio::piped())
                 .spawn();
-            
+
             match direct_output {
                 Ok(child) => {
                     println!("✅ Anvil started directly with PID: {:?}", child.id());

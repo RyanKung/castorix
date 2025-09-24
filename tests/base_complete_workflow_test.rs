@@ -40,8 +40,7 @@ async fn test_complete_base_workflow() {
 
     // Verify Base Anvil is running
     if !verify_base_anvil_running().await {
-        println!("❌ Base Anvil failed to start");
-        return;
+        panic!("❌ Base Anvil failed to start - integration test cannot proceed without blockchain node");
     }
     println!("✅ Base Anvil is running");
 

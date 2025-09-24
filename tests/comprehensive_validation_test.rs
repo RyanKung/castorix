@@ -348,15 +348,23 @@ async fn start_local_anvil() -> Option<std::process::Child> {
     // Try to start anvil directly with proper configuration
     let output = Command::new("anvil")
         .args([
-            "--host", "127.0.0.1",
-            "--port", "8545",
-            "--accounts", "10",
-            "--balance", "10000",
-            "--gas-limit", "30000000",
-            "--gas-price", "1000000000",
-            "--chain-id", "10",
-            "--block-time", "1",
-            "--silent"
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "8545",
+            "--accounts",
+            "10",
+            "--balance",
+            "10000",
+            "--gas-limit",
+            "30000000",
+            "--gas-price",
+            "1000000000",
+            "--chain-id",
+            "10",
+            "--block-time",
+            "1",
+            "--silent",
         ])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())

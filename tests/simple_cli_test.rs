@@ -123,7 +123,7 @@ where
             }
         }
         Err(e) => {
-            println!("   ❌ {} command failed: {}", description, e);
+            panic!("❌ {} command failed: {}", description, e);
         }
     }
 }
@@ -176,7 +176,7 @@ async fn test_cli_argument_parsing() {
                 }
             }
             Err(e) => {
-                println!("   ❌ {} test failed: {}", description, e);
+                panic!("❌ {} test failed: {}", description, e);
             }
         }
     }
@@ -216,7 +216,7 @@ async fn test_environment_configuration() {
             }
         }
         Err(e) => {
-            println!("   ❌ Configuration validation test failed: {}", e);
+            panic!("❌ Configuration validation test failed: {}", e);
         }
     }
 
