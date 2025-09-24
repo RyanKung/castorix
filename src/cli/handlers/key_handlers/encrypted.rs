@@ -165,7 +165,9 @@ pub async fn handle_delete_key(key_name: String, storage_path: Option<&str>) -> 
 
     println!("🗑️  Deleting encrypted key: {key_name}");
     let manager = if let Some(path) = storage_path {
-        EncryptedKeyManager::new(path)
+        // Construct the keys directory path
+        let keys_path = format!("{}/keys", path);
+        EncryptedKeyManager::new(&keys_path)
     } else {
         EncryptedKeyManager::default_config()
     };
@@ -179,7 +181,9 @@ pub async fn handle_delete_key(key_name: String, storage_path: Option<&str>) -> 
 
     // Verify password by trying to load the key
     let mut temp_manager = if let Some(path) = storage_path {
-        EncryptedKeyManager::new(path)
+        // Construct the keys directory path
+        let keys_path = format!("{}/keys", path);
+        EncryptedKeyManager::new(&keys_path)
     } else {
         EncryptedKeyManager::default_config()
     };
@@ -216,7 +220,9 @@ pub async fn handle_rename_key(
 
     println!("🔄 Renaming encrypted key: {old_name} → {new_name}");
     let mut manager = if let Some(path) = storage_path {
-        EncryptedKeyManager::new(path)
+        // Construct the keys directory path
+        let keys_path = format!("{}/keys", path);
+        EncryptedKeyManager::new(&keys_path)
     } else {
         EncryptedKeyManager::default_config()
     };
@@ -249,7 +255,9 @@ pub async fn handle_update_alias(
 
     println!("🏷️  Updating alias for key: {key_name}");
     let mut manager = if let Some(path) = storage_path {
-        EncryptedKeyManager::new(path)
+        // Construct the keys directory path
+        let keys_path = format!("{}/keys", path);
+        EncryptedKeyManager::new(&keys_path)
     } else {
         EncryptedKeyManager::default_config()
     };
@@ -332,7 +340,9 @@ pub async fn handle_import_key(storage_path: Option<&str>) -> Result<()> {
 
             // Encrypt and save
             let mut manager = if let Some(path) = storage_path {
-                EncryptedKeyManager::new(path)
+                // Construct the keys directory path
+                let keys_path = format!("{}/keys", path);
+                EncryptedKeyManager::new(&keys_path)
             } else {
                 EncryptedKeyManager::default_config()
             };
