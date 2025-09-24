@@ -78,7 +78,7 @@ async fn test_complete_base_workflow() {
             3. Or run tests in CI environment where nodes are pre-started");
         }
         println!("✅ Local Base Anvil node is running");
-        
+
         // Store handle for cleanup
         std::env::set_var("BASE_ANVIL_HANDLE", format!("{:?}", anvil_handle));
     }

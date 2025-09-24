@@ -61,7 +61,7 @@ async fn test_complete_ens_workflow() {
             );
         }
         println!("✅ Local Anvil node is running");
-        
+
         // Store handle for cleanup
         std::env::set_var("ANVIL_HANDLE", format!("{:?}", anvil_handle));
     }
