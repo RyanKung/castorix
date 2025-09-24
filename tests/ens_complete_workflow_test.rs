@@ -1,15 +1,11 @@
 use std::process::Command;
 use std::process::Stdio;
-use std::thread;
 use std::time::Duration;
-
-mod test_consts;
-use test_consts::setup_local_test_env;
 
 /// Complete ENS workflow integration test
 ///
 /// This test covers the full ENS workflow:
-/// 1. Start local Anvil node (REQUIRED - no downgrade)
+/// 1. Use public RPC nodes for blockchain access
 /// 2. Generate encrypted private key
 /// 3. Test ENS domain resolution
 /// 4. Test ENS domain verification
@@ -24,23 +20,17 @@ async fn test_complete_ens_workflow() {
     let test_data_dir = "./test_ens_data";
     let _ = std::fs::remove_dir_all(test_data_dir);
 
-    // Step 1: Start local Anvil node (REQUIRED - no downgrade allowed)
-    println!("📡 Starting local Anvil node...");
-    let anvil_handle = start_local_anvil().await;
+    // Always use public RPC nodes for testing - no environment variable dependency
+    println!("🌐 Using public RPC nodes for testing");
 
-    // Give Anvil time to start
-    thread::sleep(Duration::from_secs(3));
-
-    // Verify Anvil is running - FAIL if not available
-    if !verify_anvil_running().await {
-        panic!(
-            "❌ Anvil failed to start - integration test cannot proceed without blockchain node. This test requires a local Anvil node to function properly."
-        );
-    }
-    println!("✅ Anvil is running");
-
-    // Set up local test environment
-    setup_local_test_env();
+    // Set up public RPC endpoints directly
+    std::env::set_var(
+        "ETH_OP_RPC_URL",
+        "https://optimism-mainnet.g.alchemy.com/v2/demo",
+    );
+    std::env::set_var("ETH_RPC_URL", "https://eth-mainnet.g.alchemy.com/v2/demo");
+    std::env::set_var("ETH_BASE_RPC_URL", "https://mainnet.base.org");
+    std::env::set_var("FARCASTER_HUB_URL", "https://hub-api.neynar.com");
 
     let test_wallet_name = "ens-test-wallet";
     let test_domain = "testuser.eth";
@@ -74,90 +64,10 @@ async fn test_complete_ens_workflow() {
     let _ = std::fs::remove_dir_all(test_data_dir);
     println!("🗑️ Cleaned up test data directory");
 
-    // Stop Anvil
-    if let Some(mut handle) = anvil_handle {
-        let _ = handle.kill();
-        println!("🛑 Stopped local Anvil node");
-    }
-
     println!("\n✅ Complete ENS Workflow Test Completed Successfully!");
 }
 
-/// Start local Anvil node for testing
-async fn start_local_anvil() -> Option<std::process::Child> {
-    // Check if Anvil is available - FAIL if not found
-    let check_output = Command::new("which").arg("anvil").output();
-
-    if let Ok(output) = check_output {
-        if !output.status.success() {
-            panic!("❌ Anvil not found in PATH - this test requires Anvil to be installed and available");
-        }
-    } else {
-        panic!("❌ Cannot check for Anvil availability - this test requires Anvil to be installed and available");
-    }
-
-    let output = Command::new("anvil")
-        .args([
-            "--fork-url",
-            "https://optimism-mainnet.g.alchemy.com/v2/demo",
-            "--fork-block-number",
-            "latest",
-            "--port",
-            "8545",
-            "--host",
-            "0.0.0.0",
-            "--block-time",
-            "1",
-            "--retries",
-            "3",
-            "--timeout",
-            "10000",
-        ])
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn();
-
-    match output {
-        Ok(child) => {
-            println!("✅ Anvil process started");
-            Some(child)
-        }
-        Err(e) => {
-            panic!(
-                "❌ Failed to start Anvil: {} - this test requires Anvil to start successfully",
-                e
-            );
-        }
-    }
-}
-
-/// Verify that Anvil is running
-async fn verify_anvil_running() -> bool {
-    let output = Command::new("curl")
-        .args([
-            "-s",
-            "-X",
-            "POST",
-            "-H",
-            "Content-Type: application/json",
-            "-d",
-            r#"{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}"#,
-            "http://127.0.0.1:8545",
-        ])
-        .output();
-
-    match output {
-        Ok(output) => {
-            if output.status.success() {
-                let response = String::from_utf8_lossy(&output.stdout);
-                response.contains("result")
-            } else {
-                false
-            }
-        }
-        Err(_) => false,
-    }
-}
+// Removed Anvil-related functions - no longer needed since we use public RPC nodes
 
 /// Test encrypted key generation
 async fn test_generate_encrypted_key(test_data_dir: &str, wallet_name: &str) {
