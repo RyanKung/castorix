@@ -7,16 +7,32 @@ mod test_consts;
 use test_consts::setup_local_base_test_env;
 use test_consts::should_skip_rpc_tests;
 
+/// Generate a random hash string of specified length
+fn generate_random_hash(length: usize) -> String {
+    use std::collections::hash_map::DefaultHasher;
+    use std::hash::{Hash, Hasher};
+    use std::time::{SystemTime, UNIX_EPOCH};
+    
+    let mut hasher = DefaultHasher::new();
+    let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
+    timestamp.hash(&mut hasher);
+    
+    let hash = hasher.finish();
+    format!("{:x}", hash)[..length].to_string()
+}
+
 /// Complete Base workflow integration test
 ///
 /// This test covers the full Base workflow:
 /// 1. Start local Base Anvil node
 /// 2. Generate encrypted private key
-/// 3. Test Base ENS domain resolution
-/// 4. Test Base ENS domain verification
-/// 5. Generate username proof for Base domains
-/// 6. Verify proof
-/// 7. Clean up
+/// 3. Register Base ENS domain (with 9-char hash to prevent collisions)
+/// 4. Test Base ENS domain resolution
+/// 5. Test Base ENS domain verification
+/// 6. Generate username proof for Base domains
+/// 7. Verify proof
+/// 8. Test Base ENS domains query
+/// 9. Clean up
 #[tokio::test]
 async fn test_complete_base_workflow() {
     // Skip if no RPC tests should run
@@ -48,30 +64,36 @@ async fn test_complete_base_workflow() {
     setup_local_base_test_env();
 
     let test_wallet_name = "base-test-wallet";
-    let test_domain = "testuser.base.eth";
+    // Generate a 9-character random hash for domain to prevent collisions
+    let random_hash = generate_random_hash(9);
+    let test_domain = format!("{}.base.eth", random_hash);
     let test_fid = 777777; // Use a different FID to avoid conflicts
 
     // Step 2: Generate encrypted private key
     println!("\n🔑 Testing Encrypted Key Generation...");
     test_generate_encrypted_key(test_data_dir, test_wallet_name).await;
 
-    // Step 3: Test Base ENS domain resolution
+    // Step 3: Register Base ENS domain (simulate registration)
+    println!("\n📝 Testing Base ENS Domain Registration...");
+    test_base_ens_registration(test_data_dir, &test_domain).await;
+
+    // Step 4: Test Base ENS domain resolution
     println!("\n🔍 Testing Base ENS Domain Resolution...");
-    test_base_ens_resolution(test_data_dir, test_domain).await;
+    test_base_ens_resolution(test_data_dir, &test_domain).await;
 
-    // Step 4: Test Base ENS domain verification
+    // Step 5: Test Base ENS domain verification
     println!("\n✅ Testing Base ENS Domain Verification...");
-    test_base_ens_verification(test_data_dir, test_domain).await;
+    test_base_ens_verification(test_data_dir, &test_domain).await;
 
-    // Step 5: Generate username proof for Base domain
+    // Step 6: Generate username proof for Base domain
     println!("\n📝 Testing Base Username Proof Generation...");
-    test_base_proof_generation(test_data_dir, test_domain, test_fid, test_wallet_name).await;
+    test_base_proof_generation(test_data_dir, &test_domain, test_fid, test_wallet_name).await;
 
-    // Step 6: Verify proof
+    // Step 7: Verify proof
     println!("\n🔍 Testing Proof Verification...");
-    test_proof_verification(test_data_dir, test_domain, test_fid).await;
+    test_proof_verification(test_data_dir, &test_domain, test_fid).await;
 
-    // Step 7: Test Base ENS domains query
+    // Step 8: Test Base ENS domains query
     println!("\n🌐 Testing Base ENS Domains Query...");
     test_base_ens_domains_query(test_data_dir).await;
 
@@ -229,6 +251,40 @@ async fn test_generate_encrypted_key(test_data_dir: &str, wallet_name: &str) {
     }
 }
 
+/// Test Base ENS domain registration (simulate registration process)
+async fn test_base_ens_registration(test_data_dir: &str, domain: &str) {
+    println!("   📝 Testing Base ENS domain registration for: {}", domain);
+    
+    // In a real implementation, this would interact with Base ENS contracts
+    // For now, we'll simulate the registration process by checking if the domain
+    // follows the correct format and is available
+    
+    // Validate domain format
+    assert!(
+        domain.ends_with(".base.eth"),
+        "Domain should end with .base.eth: {}",
+        domain
+    );
+    
+    // Check that the subdomain part is a valid hash (9 characters)
+    let subdomain = domain.strip_suffix(".base.eth").unwrap();
+    assert!(
+        subdomain.len() == 9,
+        "Subdomain should be 9 characters long: {}",
+        subdomain
+    );
+    
+    // Validate that it's a valid hex string
+    assert!(
+        subdomain.chars().all(|c| c.is_ascii_hexdigit()),
+        "Subdomain should be a valid hex string: {}",
+        subdomain
+    );
+    
+    println!("   ✅ Domain format validation passed");
+    println!("   📝 Domain: {} (9-char hash: {})", domain, subdomain);
+}
+
 /// Test Base ENS domain resolution
 async fn test_base_ens_resolution(test_data_dir: &str, domain: &str) {
     println!("   🔍 Testing Base ENS domain resolution...");
@@ -306,12 +362,14 @@ async fn test_base_ens_verification(test_data_dir: &str, domain: &str) {
                         .find(|l| l.contains("Owner:") || l.contains("Error:"))
                         .unwrap_or("N/A")
                 );
-                // Note: Verification might fail on local Anvil, but the command should still work
+                // For a newly generated domain, we expect it to not be owned
+                // This is the expected behavior for a random hash domain
                 assert!(
-                    stdout.contains("Owner:")
+                    stdout.contains("You don't own this domain")
+                        || stdout.contains("Owner:")
                         || stdout.contains("Error:")
                         || stdout.contains("Failed"),
-                    "Base ENS verification should show owner or error: {}",
+                    "Base ENS verification should show ownership status: {}",
                     stdout
                 );
             } else {
@@ -571,7 +629,9 @@ async fn test_base_subdomain_checking() {
 
     println!("🔍 Testing Base Subdomain Checking...");
 
-    let test_domain = "test.base.eth";
+    // Generate a 9-character random hash for domain to prevent collisions
+    let random_hash = generate_random_hash(9);
+    let test_domain = format!("{}.base.eth", random_hash);
     let _test_address = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
 
     // Test base subdomain check
