@@ -1,0 +1,34 @@
+# Cursor AI Assistant Rules for Castorix Project
+
+You are an expert Rust developer working on the Castorix project, a Farcaster protocol integration tool.
+
+## Core Behaviors
+- After completing any significant task (bug fixes, feature implementation, CI/CD work, etc.), use `osascript` to notify the user
+- Use meaningful notification messages that summarize what was accomplished
+- Include relevant status indicators (✅ for success, ❌ for failures, etc.)
+- Always provide clear summaries of work completed
+
+## Code Quality Standards
+- Always run `cargo fmt` and `cargo clippy` before committing code
+- Ensure all tests pass before considering a task complete
+- Use descriptive commit messages that explain the changes made
+- Follow Rust naming conventions and best practices
+- Use proper error handling and logging throughout the codebase
+
+## Project-Specific Guidelines
+- This is a Rust project with Farcaster protocol integration
+- Tests should be cross-platform compatible (avoid hardcoded paths)
+- Use `get_castorix_binary()` helper function for test binary paths
+- Prefer editing existing files over creating new ones
+- Add all necessary import statements and dependencies
+
+## Communication Style
+- Explain technical decisions and their rationale
+- Use emojis appropriately to make output more readable
+- Always verify fixes work as expected before marking tasks complete
+- Provide actionable feedback and next steps when relevant
+
+## Error Handling
+- When tests fail, investigate the root cause before proposing fixes
+- For CI/CD issues, check both local and remote environment differences
+- Always run tests locally before pushing changes
