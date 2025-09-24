@@ -1,12 +1,34 @@
+use std::path::Path;
 use std::process::Command;
-use std::str::FromStr;
 
 use anyhow::Result;
-use castorix::farcaster::contracts::types::ContractAddresses;
-use castorix::farcaster::contracts::FarcasterContractClient;
 use ethers::signers::LocalWallet;
 use ethers::signers::Signer;
 use rand::rngs::OsRng;
+
+/// Get the correct path to the castorix binary
+fn get_castorix_binary() -> String {
+    // Try different possible paths
+    let possible_paths = vec![
+        "./target/debug/castorix",
+        "./target/release/castorix",
+        "get_castorix_binary()",
+        "./target/aarch64-apple-darwin/release/castorix",
+        "./target/x86_64-unknown-linux-gnu/debug/castorix",
+        "./target/x86_64-unknown-linux-gnu/release/castorix",
+        "./target/x86_64-pc-windows-msvc/debug/castorix.exe",
+        "./target/x86_64-pc-windows-msvc/release/castorix.exe",
+    ];
+
+    for path in possible_paths {
+        if Path::new(path).exists() {
+            return path.to_string();
+        }
+    }
+
+    // Fallback to cargo run if no binary found
+    "cargo run --bin castorix --".to_string()
+}
 
 /// Integration test for separate payment wallet functionality
 #[tokio::test]
@@ -37,7 +59,7 @@ async fn test_payment_wallet_cli_integration() -> Result<()> {
     println!("🔐 Testing custody wallet generation...");
     let custody_private_key = format!("{:x}", custody_wallet.signer().to_bytes());
 
-    let mut cmd = Command::new("./target/aarch64-apple-darwin/debug/castorix");
+    let mut cmd = Command::new(get_castorix_binary());
     let output = cmd
         .args([
             "--path",
@@ -62,7 +84,7 @@ async fn test_payment_wallet_cli_integration() -> Result<()> {
     println!("💳 Testing payment wallet generation...");
     let payment_private_key = format!("{:x}", payment_wallet.signer().to_bytes());
 
-    let mut cmd = Command::new("./target/aarch64-apple-darwin/debug/castorix");
+    let mut cmd = Command::new(get_castorix_binary());
     let output = cmd
         .args([
             "--path",
@@ -85,7 +107,7 @@ async fn test_payment_wallet_cli_integration() -> Result<()> {
 
     // Test 3: List wallets to verify both exist
     println!("📋 Testing wallet listing...");
-    let mut cmd = Command::new("./target/aarch64-apple-darwin/debug/castorix");
+    let mut cmd = Command::new(get_castorix_binary());
     let output = cmd.args(["--path", test_dir, "key", "list"]).output()?;
 
     if !output.status.success() {
@@ -108,7 +130,7 @@ async fn test_payment_wallet_cli_integration() -> Result<()> {
 
     // Test 4: Test storage price query with different wallets
     println!("💰 Testing storage price query...");
-    let mut cmd = Command::new("./target/aarch64-apple-darwin/debug/castorix");
+    let mut cmd = Command::new(get_castorix_binary());
     let output = cmd
         .args([
             "--path", test_dir, "storage", "price", "999999", // Test FID
@@ -132,7 +154,7 @@ async fn test_payment_wallet_cli_integration() -> Result<()> {
 
     // Test 5: Test storage rental with payment wallet (dry run)
     println!("🔄 Testing storage rental with payment wallet (dry run)...");
-    let mut cmd = Command::new("./target/aarch64-apple-darwin/debug/castorix");
+    let mut cmd = Command::new(get_castorix_binary());
     let output = cmd
         .args([
             "--path",
@@ -192,7 +214,7 @@ async fn test_payment_wallet_error_scenarios() -> Result<()> {
     let custody_private_key = format!("{:x}", custody_wallet.signer().to_bytes());
 
     // Create only custody wallet
-    let mut cmd = Command::new("./target/aarch64-apple-darwin/debug/castorix");
+    let mut cmd = Command::new(get_castorix_binary());
     let output = cmd
         .args([
             "--path",
@@ -214,7 +236,7 @@ async fn test_payment_wallet_error_scenarios() -> Result<()> {
 
     // Test 1: Try to use non-existent payment wallet
     println!("🔍 Testing non-existent payment wallet error...");
-    let mut cmd = Command::new("./target/aarch64-apple-darwin/debug/castorix");
+    let mut cmd = Command::new(get_castorix_binary());
     let output = cmd
         .args([
             "--path",
@@ -246,7 +268,7 @@ async fn test_payment_wallet_error_scenarios() -> Result<()> {
 
     // Test 2: Try to use same wallet for both custody and payment
     println!("🔍 Testing same wallet for custody and payment...");
-    let mut cmd = Command::new("./target/aarch64-apple-darwin/debug/castorix");
+    let mut cmd = Command::new(get_castorix_binary());
     let output = cmd
         .args([
             "--path",
@@ -310,7 +332,7 @@ async fn test_payment_wallet_different_fid_scenarios() -> Result<()> {
     let payment_private_key = format!("{:x}", payment_wallet.signer().to_bytes());
 
     // Create both wallets
-    let mut cmd = Command::new("./target/aarch64-apple-darwin/debug/castorix");
+    let mut cmd = Command::new(get_castorix_binary());
     let output = cmd
         .args([
             "--path",
@@ -327,7 +349,7 @@ async fn test_payment_wallet_different_fid_scenarios() -> Result<()> {
         panic!("❌ Custody wallet generation failed");
     }
 
-    let mut cmd = Command::new("./target/aarch64-apple-darwin/debug/castorix");
+    let mut cmd = Command::new(get_castorix_binary());
     let output = cmd
         .args([
             "--path",
@@ -351,7 +373,7 @@ async fn test_payment_wallet_different_fid_scenarios() -> Result<()> {
         println!("🔍 Testing FID: {}", fid);
 
         // Test storage price query for this FID
-        let mut cmd = Command::new("./target/aarch64-apple-darwin/debug/castorix");
+        let mut cmd = Command::new(get_castorix_binary());
         let output = cmd
             .args(["--path", test_dir, "storage", "price", fid, "--units", "1"])
             .output()?;
@@ -372,7 +394,7 @@ async fn test_payment_wallet_different_fid_scenarios() -> Result<()> {
         );
 
         // Test storage rental dry run for this FID
-        let mut cmd = Command::new("./target/aarch64-apple-darwin/debug/castorix");
+        let mut cmd = Command::new(get_castorix_binary());
         let output = cmd
             .args([
                 "--path",
