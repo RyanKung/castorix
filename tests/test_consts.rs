@@ -31,19 +31,16 @@ pub fn setup_placeholder_test_env() {
         "ETH_RPC_URL",
         "https://eth-mainnet.g.alchemy.com/v2/your_api_key_here",
     );
-    env::set_var("ETH_BASE_RPC_URL", "https://mainnet.base.org");
+    env::set_var("ETH_BASE_RPC_URL", "https://base-rpc.publicnode.com");
     env::set_var("FARCASTER_HUB_URL", "http://192.168.1.192:3381");
 }
 
-/// Set up demo API URLs for simple testing
+/// Set up public API URLs for testing (no API keys required)
 #[allow(dead_code)]
 pub fn setup_demo_test_env() {
-    env::set_var(
-        "ETH_OP_RPC_URL",
-        "https://optimism-mainnet.g.alchemy.com/v2/demo",
-    );
+    env::set_var("ETH_OP_RPC_URL", "https://mainnet.optimism.io");
     env::set_var("ETH_RPC_URL", "https://eth-mainnet.g.alchemy.com/v2/demo");
-    env::set_var("ETH_BASE_RPC_URL", "https://mainnet.base.org");
+    env::set_var("ETH_BASE_RPC_URL", "https://base-rpc.publicnode.com");
     env::set_var("FARCASTER_HUB_URL", "https://hub-api.neynar.com");
 }
 
