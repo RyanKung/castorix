@@ -36,6 +36,11 @@ jobs:
         with:
           version: nightly
 
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
       - name: Cache cargo registry
         uses: actions/cache@v3
         with:
@@ -94,6 +99,20 @@ jobs:
           echo "🧪 Running integration tests..."
           cargo test --test "*" --verbose
           echo "✅ Integration tests passed"
+
+      - name: Install Python dependencies
+        run: |
+          echo "🐍 Installing Python dependencies..."
+          cd tests
+          pip install -r requirements.txt
+          echo "✅ Python dependencies installed"
+
+      - name: Run Python integration tests
+        run: |
+          echo "🧪 Running Python integration tests..."
+          cd tests
+          python test_complete_farcaster_workflow.py
+          echo "✅ Python integration tests passed"
 
       - name: Test CLI functionality
         run: |
@@ -168,6 +187,7 @@ jobs:
           echo "✅ **Clippy**: Passed" >> $GITHUB_STEP_SUMMARY
           echo "✅ **Unit Tests**: Passed" >> $GITHUB_STEP_SUMMARY
           echo "✅ **Integration Tests**: Passed" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Python Integration Tests**: Passed" >> $GITHUB_STEP_SUMMARY
           echo "✅ **CLI Tests**: Passed" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Quality Metrics" >> $GITHUB_STEP_SUMMARY
@@ -195,6 +215,11 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
 
       - name: Cache cargo build
         uses: actions/cache@v3
@@ -226,11 +251,24 @@ jobs:
           
           # Run workflow tests (these may require external services)
           echo "Running workflow tests (may skip if external services unavailable)..."
-          cargo test --test farcaster_complete_workflow_test --verbose || echo "Workflow test skipped (external dependency)"
           cargo test --test ens_complete_workflow_test --verbose || echo "ENS workflow test skipped (external dependency)"
           cargo test --test base_complete_workflow_test --verbose || echo "Base workflow test skipped (external dependency)"
           
           echo "✅ Integration tests completed"
+
+      - name: Install Python dependencies
+        run: |
+          echo "🐍 Installing Python dependencies..."
+          cd tests
+          pip install -r requirements.txt
+          echo "✅ Python dependencies installed"
+
+      - name: Run Python integration tests
+        run: |
+          echo "🧪 Running Python integration tests..."
+          cd tests
+          python test_complete_farcaster_workflow.py
+          echo "✅ Python integration tests passed"
 
       - name: Test error handling
         run: |
@@ -287,6 +325,11 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
 
       - name: Cache cargo build
         uses: actions/cache@v3
