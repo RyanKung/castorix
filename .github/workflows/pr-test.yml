@@ -28,6 +28,9 @@ jobs:
           components: rustfmt, clippy
           override: true
 
+      - name: Install nightly Rust with rustfmt
+        run: rustup toolchain install nightly --component rustfmt
+
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
