@@ -387,6 +387,54 @@ impl FarcasterContractClient {
         }
     }
 
+    /// Rent storage with a separate payment wallet
+    /// This allows using a different wallet for payment while maintaining the same authorization
+    pub async fn rent_storage_with_payment_wallet(
+        &self,
+        fid: Fid,
+        units: u64,
+        payment_wallet: Arc<LocalWallet>,
+    ) -> Result<ContractResult<U256>> {
+        // Get storage price
+        let price = self.get_storage_price(units).await?;
+
+        // Get chain ID and create signer middleware for payment wallet
+        let chain_id = self.provider.get_chainid().await?;
+        let payment_wallet_with_chain_id = payment_wallet.as_ref().clone().with_chain_id(chain_id.as_u64());
+
+        // Get current nonce to avoid nonce conflicts
+        let nonce = self.get_next_nonce(payment_wallet.address()).await?;
+        println!("   📝 Using nonce: {} for payment wallet {}", nonce, payment_wallet.address());
+
+        let signer_middleware = SignerMiddleware::new(self.provider.clone(), payment_wallet_with_chain_id);
+
+        // Create the contract instance with payment wallet signer middleware
+        let contract = self.storage_registry.contract().clone();
+        let wallet_contract = contract.connect(Arc::new(signer_middleware));
+
+        // Call rent function using ethers call method with explicit nonce
+        let call = wallet_contract.method::<_, U256>("rent", (fid, units as u32))?;
+        match call.value(price).nonce(nonce).send().await {
+            Ok(tx) => {
+                let receipt = tx.await?;
+                match receipt {
+                    Some(receipt) => {
+                        // Parse the return values from the transaction receipt
+                        let overpayment = self.extract_overpayment_from_receipt(&receipt)?;
+                        Ok(ContractResult::Success(overpayment))
+                    }
+                    None => Ok(ContractResult::Error(
+                        "Transaction failed - no receipt".to_string(),
+                    )),
+                }
+            }
+            Err(e) => Ok(ContractResult::Error(format!(
+                "Storage rental failed: {}",
+                e
+            ))),
+        }
+    }
+
     /// Extract FID from transaction receipt
     fn extract_fid_from_receipt(&self, receipt: &ethers::types::TransactionReceipt) -> Result<u64> {
         println!(

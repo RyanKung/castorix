@@ -272,7 +272,9 @@ async fn test_cli_argument_parsing() {
     for (args, description) in test_cases {
         println!("   Testing {}...", description);
 
-        let output = Command::new("./target/aarch64-apple-darwin/debug/castorix").args(&args).output();
+        let output = Command::new("./target/aarch64-apple-darwin/debug/castorix")
+            .args(&args)
+            .output();
 
         match output {
             Ok(output) => {

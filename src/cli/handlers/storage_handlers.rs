@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use anyhow::Result;
 use ethers::middleware::Middleware;
 use ethers::providers::Http;
@@ -255,18 +257,15 @@ async fn handle_storage_rent(
     println!("✅ Proceeding with storage rental...");
 
     // Rent storage
-    // Note: If payment wallet is different from custody wallet, we detect it and warn the user
-    // Currently using custody wallet for both authorization and payment (FarcasterContractClient limitation)
-    // TODO: Enhance FarcasterContractClient to support separate payment wallets
     let result = if payment_wallet.address() != custody_wallet.address() {
         println!(
-            "⚠️  Note: Payment wallet {} differs from custody wallet {}",
+            "💳 Using separate payment wallet {} for payment (custody: {})",
             payment_wallet.address(),
             custody_wallet.address()
         );
-        println!("   Using custody wallet for both authorization and payment");
-        contract_client.rent_storage(fid, units as u64).await?
+        contract_client.rent_storage_with_payment_wallet(fid, units as u64, Arc::new(payment_wallet)).await?
     } else {
+        println!("💳 Using custody wallet for both authorization and payment");
         contract_client.rent_storage(fid, units as u64).await?
     };
 
