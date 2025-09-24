@@ -39,28 +39,13 @@ pub async fn handle_ens_command(
         }
         EnsCommands::BaseSubdomains { address } => {
             println!("🏗️ Getting Base subdomains owned by address: {address}");
-            println!("⚠️  Note: Base chain reverse lookup is not currently supported.");
-            println!("   Base subdomains are not indexed by The Graph API.");
+            println!("⚠️  Note: This feature has been removed as Base chain reverse lookup");
+            println!("   is not supported. Base subdomains are not indexed by The Graph API.");
             println!("   Use 'castorix ens resolve <domain>.base.eth' to check specific domains.");
-            match ens_proof.get_base_subdomains_by_address(&address).await {
-                Ok(domains) => {
-                    if domains.is_empty() {
-                        println!("❌ No Base subdomains found for address: {address}");
-                    } else {
-                        println!("✅ Found {} Base subdomain(s):", domains.len());
-                        for (i, domain) in domains.iter().enumerate() {
-                            println!("   {}. {}", i + 1, domain);
-                        }
-                    }
-                }
-                Err(e) => println!("❌ Failed to get Base subdomains: {e}"),
-            }
+            println!("❌ No Base subdomains found for address: {address}");
         }
         EnsCommands::AllDomains { address } => {
             println!("🌐 Getting all ENS domains for address: {address}");
-            println!(
-                "⚠️  Note: Base subdomains (*.base.eth) reverse lookup is not currently supported."
-            );
             match ens_proof.get_all_ens_domains_by_address(&address).await {
                 Ok(domains) => {
                     if domains.is_empty() {

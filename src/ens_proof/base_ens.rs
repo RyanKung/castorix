@@ -331,28 +331,9 @@ impl EnsProof {
         Ok(node)
     }
 
-    /// Get Base subdomains (like *.base.eth) for a given address
-    ///
-    /// ⚠️  Note: Base chain reverse lookup is not currently supported.
-    /// Base subdomains are not indexed by The Graph API, and direct
-    /// contract queries would require enumerating all possible subdomains.
-    ///
-    /// # Arguments
-    /// * `address` - The Ethereum address to query
-    ///
-    /// # Returns
-    /// * `Result<Vec<String>>` - Empty vector (Base chain not supported)
-    pub async fn get_base_subdomains_by_address(&self, _address: &str) -> Result<Vec<String>> {
-        // Base chain reverse lookup is not currently supported
-        // The Graph API doesn't index Base subdomains, and direct
-        // contract queries would require enumerating all possible subdomains
-        Ok(Vec::new())
-    }
-
     /// Get all ENS domains for a given address
     ///
     /// This method queries for regular ENS domains owned by the address.
-    /// Note: Base subdomains (*.base.eth) reverse lookup is not currently supported.
     ///
     /// # Arguments
     /// * `address` - The Ethereum address to query
@@ -360,8 +341,6 @@ impl EnsProof {
     /// # Returns
     /// * `Result<Vec<String>>` - List of ENS domains owned by the address
     pub async fn get_all_ens_domains_by_address(&self, address: &str) -> Result<Vec<String>> {
-        // Only query regular ENS domains
-        // Base subdomains reverse lookup is not currently supported
         self.get_ens_domains_by_address(address).await
     }
 }

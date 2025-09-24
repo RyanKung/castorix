@@ -374,9 +374,8 @@ pub enum EnsCommands {
 
     /// 🏗️ Get Base subdomains (*.base.eth) owned by an Ethereum address
     ///
-    /// ⚠️  Note: Base chain reverse lookup is not currently supported.
-    /// Base subdomains are not indexed by The Graph API, and direct
-    /// contract queries would require enumerating all possible subdomains.
+    /// ⚠️  Note: This feature has been removed as Base chain reverse lookup
+    /// is not supported. Base subdomains are not indexed by The Graph API.
     ///
     /// Example: castorix ens base-subdomains 0x1234...
     BaseSubdomains {
@@ -387,7 +386,6 @@ pub enum EnsCommands {
     /// 🌐 Get all ENS domains owned by an Ethereum address
     ///
     /// Queries for regular ENS domains owned by the address.
-    /// Note: Base subdomains (*.base.eth) reverse lookup is not currently supported.
     ///
     /// Example: castorix ens all-domains 0x1234...
     AllDomains {
