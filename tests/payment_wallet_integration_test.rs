@@ -12,7 +12,7 @@ fn get_castorix_binary() -> String {
     let possible_paths = vec![
         "./target/debug/castorix",
         "./target/release/castorix",
-        "get_castorix_binary()",
+        "./target/aarch64-apple-darwin/debug/castorix",
         "./target/aarch64-apple-darwin/release/castorix",
         "./target/x86_64-unknown-linux-gnu/debug/castorix",
         "./target/x86_64-unknown-linux-gnu/release/castorix",
