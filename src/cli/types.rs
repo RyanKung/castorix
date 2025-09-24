@@ -217,6 +217,9 @@ pub enum SignersCommands {
         /// Simulate the transaction without sending it to the chain
         #[arg(long)]
         dry_run: bool,
+        /// Automatically confirm the operation without prompting
+        #[arg(long)]
+        yes: bool,
     },
 
     /// ➖ Unregister a signer from a FID
@@ -371,9 +374,8 @@ pub enum EnsCommands {
 
     /// 🏗️ Get Base subdomains (*.base.eth) owned by an Ethereum address
     ///
-    /// ⚠️  Note: Base chain reverse lookup is not currently supported.
-    /// Base subdomains are not indexed by The Graph API, and direct
-    /// contract queries would require enumerating all possible subdomains.
+    /// ⚠️  Note: This feature has been removed as Base chain reverse lookup
+    /// is not supported. Base subdomains are not indexed by The Graph API.
     ///
     /// Example: castorix ens base-subdomains 0x1234...
     BaseSubdomains {
@@ -384,7 +386,6 @@ pub enum EnsCommands {
     /// 🌐 Get all ENS domains owned by an Ethereum address
     ///
     /// Queries for regular ENS domains owned by the address.
-    /// Note: Base subdomains (*.base.eth) reverse lookup is not currently supported.
     ///
     /// Example: castorix ens all-domains 0x1234...
     AllDomains {
@@ -425,18 +426,18 @@ pub enum EnsCommands {
         domain: String,
     },
 
-    /// 📝 Create username proof for ENS domain
+    /// 📝 Generate username proof for ENS domain
     ///
     /// Generate a signed proof linking your ENS domain to your Farcaster ID.
     /// This proof can be submitted to Farcaster to verify domain ownership.
     ///
-    /// Example: castorix ens create mydomain.eth 12345 --wallet-name my-wallet
-    Create {
+    /// Example: castorix ens proof mydomain.eth 12345 --wallet-name my-wallet
+    Proof {
         /// ENS domain name
         domain: String,
         /// Farcaster ID (your FID)
         fid: u64,
-        /// Wallet name for encrypted key (optional, uses PRIVATE_KEY if not specified)
+        /// Wallet name for encrypted key (required)
         #[arg(long)]
         wallet_name: Option<String>,
     },
@@ -466,21 +467,6 @@ pub enum HubCommands {
         fid: u64,
     },
 
-    /// 📝 Submit a cast
-    ///
-    /// Post a new cast to Farcaster. Can be a standalone cast or a reply.
-    /// Requires a loaded wallet for authentication.
-    ///
-    /// Example: castorix hub cast "Hello Farcaster!" 12345
-    Cast {
-        /// Cast text content
-        text: String,
-        /// Farcaster ID (your FID)
-        fid: u64,
-        /// Parent cast ID for replies (format: "fid:hash")
-        parent_cast_id: Option<String>,
-    },
-
     /// 📤 Submit username proof
     ///
     /// Submit a previously created username proof to Farcaster Hub.
@@ -496,37 +482,9 @@ pub enum HubCommands {
         proof_file: String,
         /// FID (Farcaster ID) for Ed25519 key signing
         fid: u64,
-        /// Wallet name for encrypted key (optional, uses PRIVATE_KEY if not specified)
+        /// Wallet name for encrypted key (required)
         #[arg(long)]
         wallet_name: Option<String>,
-    },
-
-    /// 📤 Submit a username proof to Farcaster Hub using EIP-712 signature
-    ///
-    /// Submit a username proof to the Farcaster Hub for verification.
-    /// The proof will be signed using EIP-712 signature with the Ethereum private key.
-    /// Requires specifying a wallet name for the Ethereum private key.
-    ///
-    /// Example: castorix hub submit-proof-eip712 ./proof.json --wallet-name my-wallet
-    SubmitProofEip712 {
-        /// Path to proof JSON file
-        proof_file: String,
-        /// Wallet name for encrypted Ethereum private key (required)
-        #[arg(long)]
-        wallet_name: String,
-    },
-
-    /// 🔗 Submit Ethereum address verification
-    ///
-    /// Submit a verification to link your Ethereum address to your Farcaster account.
-    /// This proves ownership of the address and enables ENS integration.
-    ///
-    /// Example: castorix hub verify-eth 12345 0x1234...
-    VerifyEth {
-        /// Farcaster ID (your FID)
-        fid: u64,
-        /// Ethereum address to verify
-        address: String,
     },
 
     /// 🔍 Get Ethereum addresses for a FID
@@ -652,4 +610,126 @@ pub enum HubCommands {
     ///
     /// Example: castorix hub spam-stat
     SpamStat,
+}
+
+/// FID (Farcaster ID) registration and management commands
+#[derive(Subcommand)]
+pub enum FidCommands {
+    /// 🆕 Register a new FID
+    ///
+    /// Register a new Farcaster ID (FID) on the blockchain.
+    /// This requires a wallet with sufficient ETH for gas fees and registration cost.
+    /// You can optionally specify extra storage units to rent during registration.
+    ///
+    /// ⚠️  WARNING: This triggers on-chain operations and consumes gas fees.
+    /// You will be prompted for confirmation before proceeding.
+    ///
+    /// Example: castorix fid register
+    /// Example: castorix fid register --wallet my-wallet
+    /// Example: castorix fid register --extra-storage 5 --dry-run
+    Register {
+        /// Wallet name for registration (required)
+        #[arg(long)]
+        wallet: Option<String>,
+        /// Number of extra storage units to rent (default: 0)
+        #[arg(long, default_value = "0")]
+        extra_storage: u64,
+        /// Recovery address (optional, defaults to same as registration wallet)
+        #[arg(long)]
+        recovery: Option<String>,
+        /// Simulate the transaction without sending it to the chain
+        #[arg(long)]
+        dry_run: bool,
+        /// Automatically confirm the operation without prompting
+        #[arg(long)]
+        yes: bool,
+    },
+
+    /// 💰 Check registration price
+    ///
+    /// Check the current cost to register a new FID, including optional extra storage.
+    /// This is a read-only operation that doesn't require authentication.
+    ///
+    /// Example: castorix fid price
+    /// Example: castorix fid price --extra-storage 5
+    Price {
+        /// Number of extra storage units to include in price calculation (default: 0)
+        #[arg(long, default_value = "0")]
+        extra_storage: u64,
+    },
+
+    /// 📋 List FIDs owned by wallet
+    ///
+    /// List all FIDs owned by a specific wallet address.
+    /// This is a read-only operation that queries the blockchain.
+    ///
+    /// Example: castorix fid list
+    /// Example: castorix fid list --wallet my-wallet
+    List {
+        /// Wallet name to check FIDs for (required)
+        #[arg(long)]
+        wallet: Option<String>,
+    },
+}
+
+/// Storage rental and management commands
+#[derive(Subcommand)]
+pub enum StorageCommands {
+    /// 🏠 Rent storage units
+    ///
+    /// Rent additional storage units for a specific FID.
+    /// This allows the FID to store more messages, casts, and other data.
+    /// Requires the custody wallet for the FID to authorize the transaction.
+    ///
+    /// ⚠️  WARNING: This triggers on-chain operations and consumes gas fees.
+    /// You will be prompted for confirmation before proceeding.
+    ///
+    /// Example: castorix storage rent 12345 --units 5
+    /// Example: castorix storage rent 12345 --units 10 --wallet my-wallet --dry-run
+    /// Example: castorix storage rent 12345 --units 5 --wallet custody-wallet --payment-wallet gas-payer
+    Rent {
+        /// FID (Farcaster ID) to rent storage for
+        fid: u64,
+        /// Number of storage units to rent
+        #[arg(long)]
+        units: u32,
+        /// Wallet name for custody key (optional, auto-detected if not provided)
+        #[arg(long)]
+        wallet: Option<String>,
+        /// ECDSA wallet name for gas payment (optional, defaults to custody wallet)
+        #[arg(long)]
+        payment_wallet: Option<String>,
+        /// Simulate the transaction without sending it to the chain
+        #[arg(long)]
+        dry_run: bool,
+        /// Automatically confirm the operation without prompting
+        #[arg(long)]
+        yes: bool,
+    },
+
+    /// 💰 Check storage rental price
+    ///
+    /// Check the current cost to rent storage units for a FID.
+    /// This is a read-only operation that doesn't require authentication.
+    ///
+    /// Example: castorix storage price 12345 --units 5
+    Price {
+        /// FID (Farcaster ID) to check storage price for
+        fid: u64,
+        /// Number of storage units to check price for
+        #[arg(long)]
+        units: u32,
+    },
+
+    /// 📊 Check storage usage and limits
+    ///
+    /// Check the current storage usage and limits for a specific FID.
+    /// This shows how much storage is currently used and available.
+    /// This is a read-only operation that doesn't require authentication.
+    ///
+    /// Example: castorix storage usage 12345
+    Usage {
+        /// FID (Farcaster ID) to check storage usage for
+        fid: u64,
+    },
 }

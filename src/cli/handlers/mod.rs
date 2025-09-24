@@ -1,11 +1,21 @@
 pub mod custody_handlers;
 pub mod ens_handlers;
+pub mod fid_handlers;
 pub mod hub_handlers;
 pub mod key_handlers;
 pub mod signers_handlers;
+pub mod storage_handlers;
 
-use crate::cli::types::*;
 use anyhow::Result;
+
+use crate::cli::types::CustodyCommands;
+use crate::cli::types::EnsCommands;
+use crate::cli::types::FidCommands;
+use crate::cli::types::HubCommands;
+use crate::cli::types::HubKeyCommands;
+use crate::cli::types::KeyCommands;
+use crate::cli::types::SignersCommands;
+use crate::cli::types::StorageCommands;
 
 /// CLI command handler
 pub struct CliHandler;
@@ -14,9 +24,15 @@ impl CliHandler {
     /// Handle key management commands (legacy)
     pub async fn handle_key_command(
         command: KeyCommands,
-        key_manager: &crate::key_manager::KeyManager,
+        key_manager: &crate::core::crypto::key_manager::KeyManager,
+        storage_path: Option<&str>,
     ) -> Result<()> {
-        crate::cli::handlers::key_handlers::core::handle_key_command(command, key_manager).await
+        crate::cli::handlers::key_handlers::core::handle_key_command(
+            command,
+            key_manager,
+            storage_path,
+        )
+        .await
     }
 
     /// Handle Hub Ed25519 key management commands
@@ -35,7 +51,7 @@ impl CliHandler {
     /// Handle Farcaster Hub commands
     pub async fn handle_hub_command(
         command: HubCommands,
-        hub_client: &crate::farcaster_client::FarcasterClient,
+        hub_client: &crate::core::client::hub_client::FarcasterClient,
     ) -> Result<()> {
         hub_handlers::handle_hub_command(command, hub_client).await
     }
@@ -48,8 +64,24 @@ impl CliHandler {
     /// Handle signer management commands
     pub async fn handle_signers_command(
         command: SignersCommands,
-        hub_client: &crate::farcaster_client::FarcasterClient,
+        hub_client: &crate::core::client::hub_client::FarcasterClient,
     ) -> Result<()> {
         signers_handlers::handle_signers_command(command, hub_client).await
+    }
+
+    /// Handle FID registration and management commands
+    pub async fn handle_fid_command(
+        command: FidCommands,
+        storage_path: Option<&str>,
+    ) -> Result<()> {
+        fid_handlers::handle_fid_command(command, storage_path).await
+    }
+
+    /// Handle storage rental and management commands
+    pub async fn handle_storage_command(
+        command: StorageCommands,
+        storage_path: Option<&str>,
+    ) -> Result<()> {
+        storage_handlers::handle_storage_command(command, storage_path).await
     }
 }

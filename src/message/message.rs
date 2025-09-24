@@ -869,7 +869,7 @@ impl MessageData {
         }
     }
 
-    // .UserNameProof username_proof_body = 15;
+    // .username_proof.UserNameProof username_proof_body = 15;
 
 
     pub fn get_username_proof_body(&self) -> &super::username_proof::UserNameProof {
@@ -4987,7 +4987,7 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     \x04\x20\x01(\x0cR\tsignatureB\0\x12=\n\x10signature_scheme\x18\x05\x20\
     \x01(\x0e2\x10.SignatureSchemeR\x0fsignatureSchemeB\0\x12\x18\n\x06signe\
     r\x18\x06\x20\x01(\x0cR\x06signerB\0\x12\x1f\n\ndata_bytes\x18\x07\x20\
-    \x01(\x0cR\tdataBytesB\0:\0\"\xc3\x06\n\x0bMessageData\x12\"\n\x04type\
+    \x01(\x0cR\tdataBytesB\0:\0\"\xd2\x06\n\x0bMessageData\x12\"\n\x04type\
     \x18\x01\x20\x01(\x0e2\x0c.MessageTypeR\x04typeB\0\x12\x12\n\x03fid\x18\
     \x02\x20\x01(\x04R\x03fidB\0\x12\x1e\n\ttimestamp\x18\x03\x20\x01(\rR\tt\
     imestampB\0\x12-\n\x07network\x18\x04\x20\x01(\x0e2\x11.FarcasterNetwork\
@@ -5000,78 +5000,79 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     ve_body\x18\n\x20\x01(\x0b2\x17.VerificationRemoveBodyH\0R\x16verificati\
     onRemoveBodyB\0\x127\n\x0euser_data_body\x18\x0c\x20\x01(\x0b2\r.UserDat\
     aBodyH\0R\x0cuserDataBodyB\0\x12*\n\tlink_body\x18\x0e\x20\x01(\x0b2\t.L\
-    inkBodyH\0R\x08linkBodyB\0\x12B\n\x13username_proof_body\x18\x0f\x20\x01\
-    (\x0b2\x0e.UserNameProofH\0R\x11usernameProofBodyB\0\x12@\n\x11frame_act\
-    ion_body\x18\x10\x20\x01(\x0b2\x10.FrameActionBodyH\0R\x0fframeActionBod\
-    yB\0\x12P\n\x17link_compact_state_body\x18\x11\x20\x01(\x0b2\x15.LinkCom\
-    pactStateBodyH\0R\x14linkCompactStateBodyB\0B\x06\n\x04body:\0\"M\n\x0cU\
-    serDataBody\x12#\n\x04type\x18\x01\x20\x01(\x0e2\r.UserDataTypeR\x04type\
-    B\0\x12\x16\n\x05value\x18\x02\x20\x01(\tR\x05valueB\0:\0\"N\n\x05Embed\
-    \x12\x14\n\x03url\x18\x01\x20\x01(\tH\0R\x03urlB\0\x12$\n\x07cast_id\x18\
-    \x02\x20\x01(\x0b2\x07.CastIdH\0R\x06castIdB\0B\x07\n\x05embed:\0\"\xc6\
-    \x02\n\x0bCastAddBody\x12-\n\x11embeds_deprecated\x18\x01\x20\x03(\tR\
-    \x10embedsDeprecatedB\0\x12\x1c\n\x08mentions\x18\x02\x20\x03(\x04R\x08m\
-    entionsB\0\x121\n\x0eparent_cast_id\x18\x03\x20\x01(\x0b2\x07.CastIdH\0R\
-    \x0cparentCastIdB\0\x12!\n\nparent_url\x18\x07\x20\x01(\tH\0R\tparentUrl\
-    B\0\x12\x14\n\x04text\x18\x04\x20\x01(\tR\x04textB\0\x12/\n\x12mentions_\
-    positions\x18\x05\x20\x03(\rR\x11mentionsPositionsB\0\x12\x20\n\x06embed\
-    s\x18\x06\x20\x03(\x0b2\x06.EmbedR\x06embedsB\0\x12\x1f\n\x04type\x18\
-    \x08\x20\x01(\x0e2\t.CastTypeR\x04typeB\0B\x08\n\x06parent:\0\"5\n\x0eCa\
-    stRemoveBody\x12!\n\x0btarget_hash\x18\x01\x20\x01(\x0cR\ntargetHashB\0:\
-    \0\"4\n\x06CastId\x12\x12\n\x03fid\x18\x01\x20\x01(\x04R\x03fidB\0\x12\
-    \x14\n\x04hash\x18\x02\x20\x01(\x0cR\x04hashB\0:\0\"\x95\x01\n\x0cReacti\
-    onBody\x12#\n\x04type\x18\x01\x20\x01(\x0e2\r.ReactionTypeR\x04typeB\0\
-    \x121\n\x0etarget_cast_id\x18\x02\x20\x01(\x0b2\x07.CastIdH\0R\x0ctarget\
-    CastIdB\0\x12!\n\ntarget_url\x18\x03\x20\x01(\tH\0R\ttargetUrlB\0B\x08\n\
-    \x06target:\0\"\xfb\x01\n\x1aVerificationAddAddressBody\x12\x1a\n\x07add\
-    ress\x18\x01\x20\x01(\x0cR\x07addressB\0\x12)\n\x0fclaim_signature\x18\
-    \x02\x20\x01(\x0cR\x0eclaimSignatureB\0\x12\x1f\n\nblock_hash\x18\x03\
-    \x20\x01(\x0cR\tblockHashB\0\x12-\n\x11verification_type\x18\x04\x20\x01\
-    (\rR\x10verificationTypeB\0\x12\x1b\n\x08chain_id\x18\x05\x20\x01(\rR\
-    \x07chainIdB\0\x12'\n\x08protocol\x18\x07\x20\x01(\x0e2\t.ProtocolR\x08p\
-    rotocolB\0:\0\"_\n\x16VerificationRemoveBody\x12\x1a\n\x07address\x18\
-    \x01\x20\x01(\x0cR\x07addressB\0\x12'\n\x08protocol\x18\x02\x20\x01(\x0e\
-    2\t.ProtocolR\x08protocolB\0:\0\"}\n\x08LinkBody\x12\x14\n\x04type\x18\
-    \x01\x20\x01(\tR\x04typeB\0\x12,\n\x10displayTimestamp\x18\x02\x20\x01(\
-    \rR\x10displayTimestampB\0\x12!\n\ntarget_fid\x18\x03\x20\x01(\x04H\0R\t\
-    targetFidB\0B\x08\n\x06target:\0\"Q\n\x14LinkCompactStateBody\x12\x14\n\
-    \x04type\x18\x01\x20\x01(\tR\x04typeB\0\x12!\n\x0btarget_fids\x18\x02\
-    \x20\x03(\x04R\ntargetFidsB\0:\0\"\xee\x01\n\x0fFrameActionBody\x12\x12\
-    \n\x03url\x18\x01\x20\x01(\x0cR\x03urlB\0\x12#\n\x0cbutton_index\x18\x02\
-    \x20\x01(\rR\x0bbuttonIndexB\0\x12\"\n\x07cast_id\x18\x03\x20\x01(\x0b2\
-    \x07.CastIdR\x06castIdB\0\x12\x1f\n\ninput_text\x18\x04\x20\x01(\x0cR\ti\
-    nputTextB\0\x12\x16\n\x05state\x18\x05\x20\x01(\x0cR\x05stateB\0\x12'\n\
-    \x0etransaction_id\x18\x06\x20\x01(\x0cR\rtransactionIdB\0\x12\x1a\n\x07\
-    address\x18\x07\x20\x01(\x0cR\x07addressB\0:\0*<\n\nHashScheme\x12\x14\n\
-    \x10HASH_SCHEME_NONE\x10\0\x12\x16\n\x12HASH_SCHEME_BLAKE3\x10\x01\x1a\0\
-    *i\n\x0fSignatureScheme\x12\x19\n\x15SIGNATURE_SCHEME_NONE\x10\0\x12\x1c\
-    \n\x18SIGNATURE_SCHEME_ED25519\x10\x01\x12\x1b\n\x17SIGNATURE_SCHEME_EIP\
-    712\x10\x02\x1a\0*\xb3\x03\n\x0bMessageType\x12\x15\n\x11MESSAGE_TYPE_NO\
-    NE\x10\0\x12\x19\n\x15MESSAGE_TYPE_CAST_ADD\x10\x01\x12\x1c\n\x18MESSAGE\
-    _TYPE_CAST_REMOVE\x10\x02\x12\x1d\n\x19MESSAGE_TYPE_REACTION_ADD\x10\x03\
-    \x12\x20\n\x1cMESSAGE_TYPE_REACTION_REMOVE\x10\x04\x12\x19\n\x15MESSAGE_\
-    TYPE_LINK_ADD\x10\x05\x12\x1c\n\x18MESSAGE_TYPE_LINK_REMOVE\x10\x06\x12-\
-    \n)MESSAGE_TYPE_VERIFICATION_ADD_ETH_ADDRESS\x10\x07\x12$\n\x20MESSAGE_T\
-    YPE_VERIFICATION_REMOVE\x10\x08\x12\x1e\n\x1aMESSAGE_TYPE_USER_DATA_ADD\
-    \x10\x0b\x12\x1f\n\x1bMESSAGE_TYPE_USERNAME_PROOF\x10\x0c\x12\x1d\n\x19M\
-    ESSAGE_TYPE_FRAME_ACTION\x10\r\x12#\n\x1fMESSAGE_TYPE_LINK_COMPACT_STATE\
-    \x10\x0e\x1a\0*\x8c\x01\n\x10FarcasterNetwork\x12\x1a\n\x16FARCASTER_NET\
-    WORK_NONE\x10\0\x12\x1d\n\x19FARCASTER_NETWORK_MAINNET\x10\x01\x12\x1d\n\
-    \x19FARCASTER_NETWORK_TESTNET\x10\x02\x12\x1c\n\x18FARCASTER_NETWORK_DEV\
-    NET\x10\x03\x1a\0*\x89\x03\n\x0cUserDataType\x12\x17\n\x13USER_DATA_TYPE\
-    _NONE\x10\0\x12\x16\n\x12USER_DATA_TYPE_PFP\x10\x01\x12\x1a\n\x16USER_DA\
-    TA_TYPE_DISPLAY\x10\x02\x12\x16\n\x12USER_DATA_TYPE_BIO\x10\x03\x12\x16\
-    \n\x12USER_DATA_TYPE_URL\x10\x05\x12\x1b\n\x17USER_DATA_TYPE_USERNAME\
-    \x10\x06\x12\x1b\n\x17USER_DATA_TYPE_LOCATION\x10\x07\x12\x1a\n\x16USER_\
-    DATA_TYPE_TWITTER\x10\x08\x12\x19\n\x15USER_DATA_TYPE_GITHUB\x10\t\x12\
-    \x19\n\x15USER_DATA_TYPE_BANNER\x10\n\x12&\n\"USER_DATA_PRIMARY_ADDRESS_\
-    ETHEREUM\x10\x0b\x12$\n\x20USER_DATA_PRIMARY_ADDRESS_SOLANA\x10\x0c\x12\
-    \x20\n\x1cUSER_DATA_TYPE_PROFILE_TOKEN\x10\r\x1a\0*5\n\x08CastType\x12\
-    \x08\n\x04CAST\x10\0\x12\r\n\tLONG_CAST\x10\x01\x12\x0e\n\nTEN_K_CAST\
-    \x10\x02\x1a\0*Z\n\x0cReactionType\x12\x16\n\x12REACTION_TYPE_NONE\x10\0\
-    \x12\x16\n\x12REACTION_TYPE_LIKE\x10\x01\x12\x18\n\x14REACTION_TYPE_RECA\
-    ST\x10\x02\x1a\0*8\n\x08Protocol\x12\x15\n\x11PROTOCOL_ETHEREUM\x10\0\
-    \x12\x13\n\x0fPROTOCOL_SOLANA\x10\x01\x1a\0B\0b\x06proto3\
+    inkBodyH\0R\x08linkBodyB\0\x12Q\n\x13username_proof_body\x18\x0f\x20\x01\
+    (\x0b2\x1d.username_proof.UserNameProofH\0R\x11usernameProofBodyB\0\x12@\
+    \n\x11frame_action_body\x18\x10\x20\x01(\x0b2\x10.FrameActionBodyH\0R\
+    \x0fframeActionBodyB\0\x12P\n\x17link_compact_state_body\x18\x11\x20\x01\
+    (\x0b2\x15.LinkCompactStateBodyH\0R\x14linkCompactStateBodyB\0B\x06\n\
+    \x04body:\0\"M\n\x0cUserDataBody\x12#\n\x04type\x18\x01\x20\x01(\x0e2\r.\
+    UserDataTypeR\x04typeB\0\x12\x16\n\x05value\x18\x02\x20\x01(\tR\x05value\
+    B\0:\0\"N\n\x05Embed\x12\x14\n\x03url\x18\x01\x20\x01(\tH\0R\x03urlB\0\
+    \x12$\n\x07cast_id\x18\x02\x20\x01(\x0b2\x07.CastIdH\0R\x06castIdB\0B\
+    \x07\n\x05embed:\0\"\xc6\x02\n\x0bCastAddBody\x12-\n\x11embeds_deprecate\
+    d\x18\x01\x20\x03(\tR\x10embedsDeprecatedB\0\x12\x1c\n\x08mentions\x18\
+    \x02\x20\x03(\x04R\x08mentionsB\0\x121\n\x0eparent_cast_id\x18\x03\x20\
+    \x01(\x0b2\x07.CastIdH\0R\x0cparentCastIdB\0\x12!\n\nparent_url\x18\x07\
+    \x20\x01(\tH\0R\tparentUrlB\0\x12\x14\n\x04text\x18\x04\x20\x01(\tR\x04t\
+    extB\0\x12/\n\x12mentions_positions\x18\x05\x20\x03(\rR\x11mentionsPosit\
+    ionsB\0\x12\x20\n\x06embeds\x18\x06\x20\x03(\x0b2\x06.EmbedR\x06embedsB\
+    \0\x12\x1f\n\x04type\x18\x08\x20\x01(\x0e2\t.CastTypeR\x04typeB\0B\x08\n\
+    \x06parent:\0\"5\n\x0eCastRemoveBody\x12!\n\x0btarget_hash\x18\x01\x20\
+    \x01(\x0cR\ntargetHashB\0:\0\"4\n\x06CastId\x12\x12\n\x03fid\x18\x01\x20\
+    \x01(\x04R\x03fidB\0\x12\x14\n\x04hash\x18\x02\x20\x01(\x0cR\x04hashB\0:\
+    \0\"\x95\x01\n\x0cReactionBody\x12#\n\x04type\x18\x01\x20\x01(\x0e2\r.Re\
+    actionTypeR\x04typeB\0\x121\n\x0etarget_cast_id\x18\x02\x20\x01(\x0b2\
+    \x07.CastIdH\0R\x0ctargetCastIdB\0\x12!\n\ntarget_url\x18\x03\x20\x01(\t\
+    H\0R\ttargetUrlB\0B\x08\n\x06target:\0\"\xfb\x01\n\x1aVerificationAddAdd\
+    ressBody\x12\x1a\n\x07address\x18\x01\x20\x01(\x0cR\x07addressB\0\x12)\n\
+    \x0fclaim_signature\x18\x02\x20\x01(\x0cR\x0eclaimSignatureB\0\x12\x1f\n\
+    \nblock_hash\x18\x03\x20\x01(\x0cR\tblockHashB\0\x12-\n\x11verification_\
+    type\x18\x04\x20\x01(\rR\x10verificationTypeB\0\x12\x1b\n\x08chain_id\
+    \x18\x05\x20\x01(\rR\x07chainIdB\0\x12'\n\x08protocol\x18\x07\x20\x01(\
+    \x0e2\t.ProtocolR\x08protocolB\0:\0\"_\n\x16VerificationRemoveBody\x12\
+    \x1a\n\x07address\x18\x01\x20\x01(\x0cR\x07addressB\0\x12'\n\x08protocol\
+    \x18\x02\x20\x01(\x0e2\t.ProtocolR\x08protocolB\0:\0\"}\n\x08LinkBody\
+    \x12\x14\n\x04type\x18\x01\x20\x01(\tR\x04typeB\0\x12,\n\x10displayTimes\
+    tamp\x18\x02\x20\x01(\rR\x10displayTimestampB\0\x12!\n\ntarget_fid\x18\
+    \x03\x20\x01(\x04H\0R\ttargetFidB\0B\x08\n\x06target:\0\"Q\n\x14LinkComp\
+    actStateBody\x12\x14\n\x04type\x18\x01\x20\x01(\tR\x04typeB\0\x12!\n\x0b\
+    target_fids\x18\x02\x20\x03(\x04R\ntargetFidsB\0:\0\"\xee\x01\n\x0fFrame\
+    ActionBody\x12\x12\n\x03url\x18\x01\x20\x01(\x0cR\x03urlB\0\x12#\n\x0cbu\
+    tton_index\x18\x02\x20\x01(\rR\x0bbuttonIndexB\0\x12\"\n\x07cast_id\x18\
+    \x03\x20\x01(\x0b2\x07.CastIdR\x06castIdB\0\x12\x1f\n\ninput_text\x18\
+    \x04\x20\x01(\x0cR\tinputTextB\0\x12\x16\n\x05state\x18\x05\x20\x01(\x0c\
+    R\x05stateB\0\x12'\n\x0etransaction_id\x18\x06\x20\x01(\x0cR\rtransactio\
+    nIdB\0\x12\x1a\n\x07address\x18\x07\x20\x01(\x0cR\x07addressB\0:\0*<\n\n\
+    HashScheme\x12\x14\n\x10HASH_SCHEME_NONE\x10\0\x12\x16\n\x12HASH_SCHEME_\
+    BLAKE3\x10\x01\x1a\0*i\n\x0fSignatureScheme\x12\x19\n\x15SIGNATURE_SCHEM\
+    E_NONE\x10\0\x12\x1c\n\x18SIGNATURE_SCHEME_ED25519\x10\x01\x12\x1b\n\x17\
+    SIGNATURE_SCHEME_EIP712\x10\x02\x1a\0*\xb3\x03\n\x0bMessageType\x12\x15\
+    \n\x11MESSAGE_TYPE_NONE\x10\0\x12\x19\n\x15MESSAGE_TYPE_CAST_ADD\x10\x01\
+    \x12\x1c\n\x18MESSAGE_TYPE_CAST_REMOVE\x10\x02\x12\x1d\n\x19MESSAGE_TYPE\
+    _REACTION_ADD\x10\x03\x12\x20\n\x1cMESSAGE_TYPE_REACTION_REMOVE\x10\x04\
+    \x12\x19\n\x15MESSAGE_TYPE_LINK_ADD\x10\x05\x12\x1c\n\x18MESSAGE_TYPE_LI\
+    NK_REMOVE\x10\x06\x12-\n)MESSAGE_TYPE_VERIFICATION_ADD_ETH_ADDRESS\x10\
+    \x07\x12$\n\x20MESSAGE_TYPE_VERIFICATION_REMOVE\x10\x08\x12\x1e\n\x1aMES\
+    SAGE_TYPE_USER_DATA_ADD\x10\x0b\x12\x1f\n\x1bMESSAGE_TYPE_USERNAME_PROOF\
+    \x10\x0c\x12\x1d\n\x19MESSAGE_TYPE_FRAME_ACTION\x10\r\x12#\n\x1fMESSAGE_\
+    TYPE_LINK_COMPACT_STATE\x10\x0e\x1a\0*\x8c\x01\n\x10FarcasterNetwork\x12\
+    \x1a\n\x16FARCASTER_NETWORK_NONE\x10\0\x12\x1d\n\x19FARCASTER_NETWORK_MA\
+    INNET\x10\x01\x12\x1d\n\x19FARCASTER_NETWORK_TESTNET\x10\x02\x12\x1c\n\
+    \x18FARCASTER_NETWORK_DEVNET\x10\x03\x1a\0*\x89\x03\n\x0cUserDataType\
+    \x12\x17\n\x13USER_DATA_TYPE_NONE\x10\0\x12\x16\n\x12USER_DATA_TYPE_PFP\
+    \x10\x01\x12\x1a\n\x16USER_DATA_TYPE_DISPLAY\x10\x02\x12\x16\n\x12USER_D\
+    ATA_TYPE_BIO\x10\x03\x12\x16\n\x12USER_DATA_TYPE_URL\x10\x05\x12\x1b\n\
+    \x17USER_DATA_TYPE_USERNAME\x10\x06\x12\x1b\n\x17USER_DATA_TYPE_LOCATION\
+    \x10\x07\x12\x1a\n\x16USER_DATA_TYPE_TWITTER\x10\x08\x12\x19\n\x15USER_D\
+    ATA_TYPE_GITHUB\x10\t\x12\x19\n\x15USER_DATA_TYPE_BANNER\x10\n\x12&\n\"U\
+    SER_DATA_PRIMARY_ADDRESS_ETHEREUM\x10\x0b\x12$\n\x20USER_DATA_PRIMARY_AD\
+    DRESS_SOLANA\x10\x0c\x12\x20\n\x1cUSER_DATA_TYPE_PROFILE_TOKEN\x10\r\x1a\
+    \0*5\n\x08CastType\x12\x08\n\x04CAST\x10\0\x12\r\n\tLONG_CAST\x10\x01\
+    \x12\x0e\n\nTEN_K_CAST\x10\x02\x1a\0*Z\n\x0cReactionType\x12\x16\n\x12RE\
+    ACTION_TYPE_NONE\x10\0\x12\x16\n\x12REACTION_TYPE_LIKE\x10\x01\x12\x18\n\
+    \x14REACTION_TYPE_RECAST\x10\x02\x1a\0*8\n\x08Protocol\x12\x15\n\x11PROT\
+    OCOL_ETHEREUM\x10\0\x12\x13\n\x0fPROTOCOL_SOLANA\x10\x01\x1a\0B\0b\x06pr\
+    oto3\
 ";
 
 static file_descriptor_proto_lazy: ::protobuf::rt::LazyV2<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::rt::LazyV2::INIT;

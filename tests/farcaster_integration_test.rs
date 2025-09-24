@@ -1,18 +1,22 @@
-use anyhow::Result;
-use castorix::farcaster::contracts::{
-    contract_client::FarcasterContractClient,
-    types::{ContractAddresses, ContractResult},
-};
-use ed25519_dalek::{Signer as Ed25519Signer, SigningKey, Verifier};
-use ethers::{
-    middleware::Middleware,
-    middleware::SignerMiddleware,
-    providers::{Http, Provider},
-    signers::{LocalWallet, Signer},
-    types::{Address, TransactionRequest, U256},
-};
-use rand::rngs::OsRng;
 use std::str::FromStr;
+
+use anyhow::Result;
+use castorix::farcaster::contracts::contract_client::FarcasterContractClient;
+use castorix::farcaster::contracts::types::ContractAddresses;
+use castorix::farcaster::contracts::types::ContractResult;
+use ed25519_dalek::Signer as Ed25519Signer;
+use ed25519_dalek::SigningKey;
+use ed25519_dalek::Verifier;
+use ethers::middleware::Middleware;
+use ethers::middleware::SignerMiddleware;
+use ethers::providers::Http;
+use ethers::providers::Provider;
+use ethers::signers::LocalWallet;
+use ethers::signers::Signer;
+use ethers::types::Address;
+use ethers::types::TransactionRequest;
+use ethers::types::U256;
+use rand::rngs::OsRng;
 
 /// Simplified integration test configuration
 #[derive(Clone)]

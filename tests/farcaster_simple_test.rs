@@ -1,24 +1,23 @@
-use anyhow::Result;
-use castorix::farcaster::contracts::types::*;
-use castorix::farcaster::contracts::FarcasterContractClient;
-use ed25519_dalek::{Signer as Ed25519Signer, SigningKey, Verifier as Ed25519Verifier};
-use ethers::{
-    providers::{Http, Middleware, Provider},
-    signers::{LocalWallet, Signer},
-    types::Address,
-};
-use rand::rngs::OsRng;
 use std::str::FromStr;
+
+use anyhow::Result;
+use castorix::farcaster::contracts::types::ContractAddresses;
+use castorix::farcaster::contracts::types::ContractResult;
+use castorix::farcaster::contracts::FarcasterContractClient;
+use ed25519_dalek::Signer as Ed25519Signer;
+use ed25519_dalek::SigningKey;
+use ed25519_dalek::Verifier as Ed25519Verifier;
+use ethers::providers::Http;
+use ethers::providers::Middleware;
+use ethers::providers::Provider;
+use ethers::signers::LocalWallet;
+use ethers::signers::Signer;
+use ethers::types::Address;
+use rand::rngs::OsRng;
 
 /// Simple Farcaster test that can be run directly with cargo test
 #[tokio::test]
 async fn test_farcaster_contracts_connectivity() -> Result<()> {
-    // Skip test if not in test environment
-    if std::env::var("RUNNING_TESTS").is_err() {
-        println!("⏭️  Skipping test (not in test environment)");
-        return Ok(());
-    }
-
     println!("🌟 Testing Farcaster contracts connectivity...");
 
     // Use local Anvil configuration
@@ -42,8 +41,7 @@ async fn test_farcaster_contracts_connectivity() -> Result<()> {
             );
         }
         Err(e) => {
-            println!("❌ Contract verification failed: {}", e);
-            return Err(e);
+            panic!("❌ Contract verification failed: {}. This is a critical test failure - contract connectivity is required for testing.", e);
         }
     }
 
@@ -63,14 +61,13 @@ async fn test_farcaster_contracts_connectivity() -> Result<()> {
         Err(e) => {
             let error_msg = e.to_string();
             if error_msg.contains("proxy/network configuration") || error_msg.contains("Surge") {
-                println!("⚠️  Network info blocked by proxy/VPN (this is expected):");
+                println!("ℹ️  Network info blocked by proxy/VPN (this is expected):");
                 println!(
                     "   Your system is using a proxy (Surge) that blocks localhost connections"
                 );
                 println!("   This doesn't affect contract functionality testing");
             } else {
-                println!("⚠️  Failed to get network info: {}", e);
-                println!("   This doesn't affect contract functionality testing");
+                panic!("❌ Failed to get network info: {}. This doesn't affect contract functionality testing but indicates a serious issue.", e);
             }
         }
     }
@@ -177,8 +174,7 @@ async fn test_complete_farcaster_flow() -> Result<()> {
             println!("   Block Number: {}", result.block_number);
         }
         Err(e) => {
-            println!("❌ Contract verification failed: {}", e);
-            return Err(e);
+            panic!("❌ Contract verification failed: {}. This is a critical test failure - contract connectivity is required for testing.", e);
         }
     }
 
@@ -262,7 +258,7 @@ async fn test_fid_registration_real() -> Result<()> {
             );
         }
         Ok(ContractResult::Error(e)) => {
-            println!("⚠️  Error checking ID Gateway: {}", e);
+            panic!("❌ Error checking ID Gateway: {}", e);
         }
         Err(e) => {
             println!("❌ Failed to check ID Gateway: {}", e);
@@ -277,7 +273,7 @@ async fn test_fid_registration_real() -> Result<()> {
             println!("   Price: {} ETH", ethers::utils::format_ether(price));
         }
         Ok(ContractResult::Error(e)) => {
-            println!("⚠️  Error getting price: {}", e);
+            panic!("❌ Error getting price: {}", e);
         }
         Err(e) => {
             println!("❌ Failed to get price: {}", e);
@@ -326,7 +322,7 @@ async fn test_storage_registry_real() -> Result<()> {
             );
         }
         Ok(ContractResult::Error(e)) => {
-            println!("⚠️  Error getting storage registry: {}", e);
+            panic!("❌ Error getting storage registry: {}", e);
         }
         Err(e) => {
             println!("❌ Failed to get storage registry: {}", e);
@@ -343,7 +339,7 @@ async fn test_storage_registry_real() -> Result<()> {
             );
         }
         Ok(ContractResult::Error(e)) => {
-            println!("⚠️  Error getting price per unit: {}", e);
+            panic!("❌ Error getting price per unit: {}", e);
         }
         Err(e) => {
             println!("❌ Failed to get price per unit: {}", e);
@@ -393,7 +389,7 @@ async fn test_key_registry_real() -> Result<()> {
             println!("   Total keys in registry for FID {}: {}", fid, count);
         }
         Ok(ContractResult::Error(e)) => {
-            println!("⚠️  Error getting key count: {}", e);
+            panic!("❌ Error getting key count: {}", e);
         }
         Err(e) => {
             println!("❌ Failed to get key count: {}", e);
@@ -452,8 +448,7 @@ async fn test_complete_farcaster_contracts() -> Result<()> {
             );
         }
         Err(e) => {
-            println!("❌ Contract verification failed: {}", e);
-            return Err(e);
+            panic!("❌ Contract verification failed: {}. This is a critical test failure - contract connectivity is required for testing.", e);
         }
     }
 
@@ -464,10 +459,10 @@ async fn test_complete_farcaster_contracts() -> Result<()> {
             println!("   Price: {} ETH", ethers::utils::format_ether(price));
         }
         Ok(ContractResult::Error(e)) => {
-            println!("⚠️  Error: {}", e);
+            panic!("❌ Error: {}", e);
         }
         Err(e) => {
-            println!("❌ Failed: {}", e);
+            panic!("❌ Failed: {}", e);
         }
     }
 
@@ -481,10 +476,10 @@ async fn test_complete_farcaster_contracts() -> Result<()> {
             );
         }
         Ok(ContractResult::Error(e)) => {
-            println!("⚠️  Error: {}", e);
+            panic!("❌ Error: {}", e);
         }
         Err(e) => {
-            println!("❌ Failed: {}", e);
+            panic!("❌ Failed: {}", e);
         }
     }
 
@@ -495,10 +490,10 @@ async fn test_complete_farcaster_contracts() -> Result<()> {
             println!("   Total keys in registry for FID 1: {}", count);
         }
         Ok(ContractResult::Error(e)) => {
-            println!("⚠️  Error: {}", e);
+            panic!("❌ Error: {}", e);
         }
         Err(e) => {
-            println!("❌ Failed: {}", e);
+            panic!("❌ Failed: {}", e);
         }
     }
 

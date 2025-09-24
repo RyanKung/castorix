@@ -1,28 +1,33 @@
-use anyhow::Result;
-use ethers::{
-    middleware::Middleware,
-    middleware::SignerMiddleware,
-    providers::{Http, Provider},
-    signers::{LocalWallet, Signer},
-    types::{Address, TransactionRequest, H256, U256},
-};
-use hex;
 use std::str::FromStr;
 use std::sync::Arc;
 use std::sync::OnceLock;
 
-use crate::farcaster::contracts::{
-    bundler_abi::BundlerAbi,
-    id_gateway_abi::IdGatewayAbi,
-    id_registry_abi::IdRegistryAbi,
-    key_gateway_abi::KeyGatewayAbi,
-    key_registry_abi::KeyRegistryAbi,
-    nonce_manager::NonceRegistry,
-    signed_key_request_validator_abi::SignedKeyRequestValidatorAbi,
-    storage_registry_abi::StorageRegistryAbi,
-    types::{ContractAddresses, ContractResult, Fid},
-    types::{FidInfo, NetworkStatus},
-};
+use anyhow::Result;
+use ethers::middleware::Middleware;
+use ethers::middleware::SignerMiddleware;
+use ethers::providers::Http;
+use ethers::providers::Provider;
+use ethers::signers::LocalWallet;
+use ethers::signers::Signer;
+use ethers::types::Address;
+use ethers::types::TransactionRequest;
+use ethers::types::H256;
+use ethers::types::U256;
+use hex;
+
+use crate::farcaster::contracts::bundler_abi::BundlerAbi;
+use crate::farcaster::contracts::id_gateway_abi::IdGatewayAbi;
+use crate::farcaster::contracts::id_registry_abi::IdRegistryAbi;
+use crate::farcaster::contracts::key_gateway_abi::KeyGatewayAbi;
+use crate::farcaster::contracts::key_registry_abi::KeyRegistryAbi;
+use crate::farcaster::contracts::nonce_manager::NonceRegistry;
+use crate::farcaster::contracts::signed_key_request_validator_abi::SignedKeyRequestValidatorAbi;
+use crate::farcaster::contracts::storage_registry_abi::StorageRegistryAbi;
+use crate::farcaster::contracts::types::ContractAddresses;
+use crate::farcaster::contracts::types::ContractResult;
+use crate::farcaster::contracts::types::Fid;
+use crate::farcaster::contracts::types::FidInfo;
+use crate::farcaster::contracts::types::NetworkStatus;
 
 // Global nonce registry shared across all FarcasterContractClient instances
 static GLOBAL_NONCE_REGISTRY: OnceLock<Arc<tokio::sync::Mutex<NonceRegistry>>> = OnceLock::new();
@@ -226,7 +231,8 @@ impl FarcasterContractClient {
         let wallet_with_chain_id = wallet.as_ref().clone().with_chain_id(chain_id.as_u64());
 
         // Get current nonce to avoid nonce conflicts
-        let nonce = self.get_next_nonce(wallet.address()).await?;
+        let mut registry = self.nonce_registry.lock().await;
+        let nonce = registry.get_next_nonce(wallet.address()).await?;
         println!("   📝 Using nonce: {}", nonce);
 
         let signer_middleware = SignerMiddleware::new(self.provider.clone(), wallet_with_chain_id);
@@ -304,7 +310,8 @@ impl FarcasterContractClient {
         let wallet_with_chain_id = wallet.as_ref().clone().with_chain_id(chain_id.as_u64());
 
         // Get current nonce to avoid nonce conflicts
-        let nonce = self.get_next_nonce(wallet.address()).await?;
+        let mut registry = self.nonce_registry.lock().await;
+        let nonce = registry.get_next_nonce(wallet.address()).await?;
         println!("   📝 Using nonce: {}", nonce);
 
         let signer_middleware = SignerMiddleware::new(self.provider.clone(), wallet_with_chain_id);
@@ -350,12 +357,70 @@ impl FarcasterContractClient {
         let wallet_with_chain_id = wallet.as_ref().clone().with_chain_id(chain_id.as_u64());
 
         // Get current nonce to avoid nonce conflicts
-        let nonce = self.get_next_nonce(wallet.address()).await?;
+        let mut registry = self.nonce_registry.lock().await;
+        let nonce = registry.get_next_nonce(wallet.address()).await?;
         println!("   📝 Using nonce: {}", nonce);
 
         let signer_middleware = SignerMiddleware::new(self.provider.clone(), wallet_with_chain_id);
 
         // Create the contract instance with signer middleware
+        let contract = self.storage_registry.contract().clone();
+        let wallet_contract = contract.connect(Arc::new(signer_middleware));
+
+        // Call rent function using ethers call method with explicit nonce
+        let call = wallet_contract.method::<_, U256>("rent", (fid, units as u32))?;
+        match call.value(price).nonce(nonce).send().await {
+            Ok(tx) => {
+                let receipt = tx.await?;
+                match receipt {
+                    Some(receipt) => {
+                        // Parse the return values from the transaction receipt
+                        let overpayment = self.extract_overpayment_from_receipt(&receipt)?;
+                        Ok(ContractResult::Success(overpayment))
+                    }
+                    None => Ok(ContractResult::Error(
+                        "Transaction failed - no receipt".to_string(),
+                    )),
+                }
+            }
+            Err(e) => Ok(ContractResult::Error(format!(
+                "Storage rental failed: {}",
+                e
+            ))),
+        }
+    }
+
+    /// Rent storage with a separate payment wallet
+    /// This allows using a different wallet for payment while maintaining the same authorization
+    pub async fn rent_storage_with_payment_wallet(
+        &self,
+        fid: Fid,
+        units: u64,
+        payment_wallet: Arc<LocalWallet>,
+    ) -> Result<ContractResult<U256>> {
+        // Get storage price
+        let price = self.get_storage_price(units).await?;
+
+        // Get chain ID and create signer middleware for payment wallet
+        let chain_id = self.provider.get_chainid().await?;
+        let payment_wallet_with_chain_id = payment_wallet
+            .as_ref()
+            .clone()
+            .with_chain_id(chain_id.as_u64());
+
+        // Get current nonce to avoid nonce conflicts
+        let mut registry = self.nonce_registry.lock().await;
+        let nonce = registry.get_next_nonce(payment_wallet.address()).await?;
+        println!(
+            "   📝 Using nonce: {} for payment wallet {}",
+            nonce,
+            payment_wallet.address()
+        );
+
+        let signer_middleware =
+            SignerMiddleware::new(self.provider.clone(), payment_wallet_with_chain_id);
+
+        // Create the contract instance with payment wallet signer middleware
         let contract = self.storage_registry.contract().clone();
         let wallet_contract = contract.connect(Arc::new(signer_middleware));
 
@@ -504,12 +569,6 @@ impl FarcasterContractClient {
         }
     }
 
-    /// Get the next nonce for a wallet using NonceManager
-    async fn get_next_nonce(&self, address: Address) -> Result<U256> {
-        let mut registry = self.nonce_registry.lock().await;
-        registry.get_next_nonce(address).await
-    }
-
     /// Fund a wallet using NonceManager for nonce management
     pub async fn fund_wallet(&self, target_address: Address, amount: U256) -> Result<H256> {
         let funder_key = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"; // Account 0
@@ -519,7 +578,8 @@ impl FarcasterContractClient {
         let funder_with_chain_id = funder_wallet.with_chain_id(chain_id.as_u64());
 
         // Get next nonce for funder using NonceManager
-        let nonce = self.get_next_nonce(funder_address).await?;
+        let mut registry = self.nonce_registry.lock().await;
+        let nonce = registry.get_next_nonce(funder_address).await?;
         println!("   🔧 Using nonce {} for funder {}", nonce, funder_address);
 
         let fund_tx = TransactionRequest::new()
@@ -657,211 +717,6 @@ impl FarcasterContractClient {
         }
     }
 
-    /// Register a signer key for a specific FID owner (third-party registration)
-    /// This allows Wallet B to pay gas for Wallet A's signer registration
-    pub async fn register_signer_key_for_fid_owner(
-        &self,
-        fid_owner_address: ethers::types::Address,
-        fid: u64,
-        key_type: u32,
-        key: Vec<u8>,
-        metadata_type: u8,
-        _metadata: Vec<u8>,
-    ) -> Result<ContractResult<()>> {
-        println!(
-            "🔑 Registering signer key for FID owner {} (FID: {})",
-            fid_owner_address, fid
-        );
-
-        let wallet = self
-            .wallet
-            .as_ref()
-            .ok_or_else(|| anyhow::anyhow!("Wallet required for signer registration"))?;
-
-        // Verify that the FID owner address has the specified FID
-        let fid_owner_fid = match self.get_fid_for_address(fid_owner_address).await? {
-            Some(owner_fid) => owner_fid,
-            None => {
-                return Ok(ContractResult::Error(
-                    "FID owner address does not have a FID".to_string(),
-                ))
-            }
-        };
-
-        if fid_owner_fid != fid {
-            return Ok(ContractResult::Error(format!(
-                "FID owner address {} has FID {}, but expected FID {}",
-                fid_owner_address, fid_owner_fid, fid
-            )));
-        }
-
-        // Create deadline (1 hour from now)
-        let deadline = std::time::SystemTime::now()
-            .duration_since(std::time::SystemTime::UNIX_EPOCH)?
-            .as_secs()
-            + 3600;
-
-        println!("   FID {} owner: {}", fid, fid_owner_address);
-        println!("   Current wallet (gas payer): {}", wallet.address());
-        println!("   ✅ Third-party registration authorized - current wallet will pay gas");
-
-        // Create EIP-712 signature for SignedKeyRequest using SignedKeyRequestValidator
-        // Note: We need to create a temporary client with the FID owner's wallet to sign
-        // For this test, we'll assume the FID owner has pre-signed the request
-        // In a real implementation, this would be done off-chain by the FID owner
-
-        // For now, let's create a mock signature (in real implementation, this would come from FID owner)
-        let signature = vec![0u8; 65]; // Mock signature - in real implementation, this would be from FID owner
-
-        // Create SignedKeyRequestMetadata using the signature
-        let signed_key_request_metadata = self
-            .create_signed_key_request_metadata(fid, fid_owner_address, &key, deadline, signature)
-            .await?;
-
-        // Use addFor method to pass fidOwner correctly
-        println!("   Calling key_gateway.addFor with:");
-        println!("     fid_owner: {}", fid_owner_address);
-        println!("     key_type: {}", key_type);
-        println!("     key: {}", hex::encode(&key));
-        println!("     metadata_type: {}", metadata_type);
-        println!(
-            "     metadata length: {}",
-            signed_key_request_metadata.len()
-        );
-        println!("     deadline: {}", deadline);
-
-        // Create EIP-712 signature for KeyGateway.addFor using current wallet (gas payer)
-        let add_for_signature = self
-            .create_add_for_signature(
-                fid_owner_address,
-                key_type,
-                &key,
-                metadata_type,
-                &signed_key_request_metadata,
-                deadline,
-            )
-            .await?;
-
-        let result = self
-            .key_gateway
-            .add_for(
-                fid_owner_address,
-                key_type,
-                key,
-                metadata_type,
-                signed_key_request_metadata,
-                deadline.into(),
-                add_for_signature,
-            )
-            .await?;
-
-        match result {
-            ContractResult::Success(_receipt) => {
-                println!("   ✅ Third-party signer key registered successfully!");
-                Ok(ContractResult::Success(()))
-            }
-            ContractResult::Error(e) => {
-                println!("   ❌ Third-party signer registration failed: {}", e);
-                Ok(ContractResult::Error(format!(
-                    "Third-party signer registration failed: {}",
-                    e
-                )))
-            }
-        }
-    }
-
-    /// Register a signer key with pre-generated metadata (for third-party registration)
-    #[allow(clippy::too_many_arguments)]
-    pub async fn register_signer_key_with_metadata(
-        &self,
-        fid_owner_address: ethers::types::Address,
-        fid: u64,
-        key_type: u32,
-        key: Vec<u8>,
-        metadata_type: u8,
-        metadata: Vec<u8>,
-        deadline: u64,
-    ) -> Result<ContractResult<()>> {
-        println!(
-            "🔑 Registering signer key with pre-generated metadata for FID owner {} (FID: {})",
-            fid_owner_address, fid
-        );
-
-        let wallet = self
-            .wallet
-            .as_ref()
-            .ok_or_else(|| anyhow::anyhow!("Wallet required for signer registration"))?;
-
-        // Verify that the FID owner address has the specified FID
-        let fid_owner_fid = match self.get_fid_for_address(fid_owner_address).await? {
-            Some(owner_fid) => owner_fid,
-            None => {
-                return Ok(ContractResult::Error(
-                    "FID owner address does not have a FID".to_string(),
-                ))
-            }
-        };
-
-        if fid_owner_fid != fid {
-            return Ok(ContractResult::Error(format!(
-                "FID owner address {} has FID {}, but expected FID {}",
-                fid_owner_address, fid_owner_fid, fid
-            )));
-        }
-
-        println!("   FID {} owner: {}", fid, fid_owner_address);
-        println!("   Current wallet (gas payer): {}", wallet.address());
-        println!("   ✅ Third-party registration authorized - current wallet will pay gas");
-
-        // Use addFor method to pass fidOwner correctly
-        println!("   Calling key_gateway.addFor with:");
-        println!("     fid_owner: {}", fid_owner_address);
-        println!("     key_type: {}", key_type);
-        println!("     key: {}", hex::encode(&key));
-        println!("     metadata_type: {}", metadata_type);
-        println!("     metadata length: {}", metadata.len());
-        println!("     deadline: {}", deadline);
-
-        // Create EIP-712 signature for KeyGateway.addFor using current wallet (gas payer)
-        let add_for_signature = self
-            .create_add_for_signature(
-                fid_owner_address,
-                key_type,
-                &key,
-                metadata_type,
-                &metadata,
-                deadline,
-            )
-            .await?;
-
-        let result = self
-            .key_gateway
-            .add_for(
-                fid_owner_address,
-                key_type,
-                key,
-                metadata_type,
-                metadata,
-                deadline.into(),
-                add_for_signature,
-            )
-            .await?;
-
-        match result {
-            ContractResult::Success(_receipt) => {
-                println!("   ✅ Third-party signer key registered successfully!");
-                Ok(ContractResult::Success(()))
-            }
-            ContractResult::Error(e) => {
-                println!("   ❌ Third-party signer registration failed: {}", e);
-                Ok(ContractResult::Error(format!(
-                    "Third-party signer registration failed: {}",
-                    e
-                )))
-            }
-        }
-    }
-
     /// Submit signer registration with pre-generated signatures (for third-party gas payment)
     #[allow(clippy::too_many_arguments)]
     pub async fn submit_signer_registration_with_signatures(
@@ -883,7 +738,7 @@ impl FarcasterContractClient {
             .ok_or_else(|| anyhow::anyhow!("Wallet required for signer registration"))?;
 
         // Verify that the FID owner address has the specified FID
-        let fid_owner_fid = match self.get_fid_for_address(fid_owner_address).await? {
+        let fid_owner_fid = match self.address_has_fid(fid_owner_address).await? {
             Some(owner_fid) => owner_fid,
             None => {
                 return Ok(ContractResult::Error(
@@ -937,14 +792,6 @@ impl FarcasterContractClient {
                     e
                 )))
             }
-        }
-    }
-
-    /// Get the FID for a specific address
-    async fn get_fid_for_address(&self, address: ethers::types::Address) -> Result<Option<u64>> {
-        match self.id_registry.id_of(address).await? {
-            ContractResult::Success(fid) => Ok(Some(fid)),
-            ContractResult::Error(_) => Ok(None),
         }
     }
 
@@ -1044,8 +891,10 @@ impl FarcasterContractClient {
         deadline: u64,
         signature: Vec<u8>,
     ) -> Result<Vec<u8>> {
+        use ethers::types::Bytes;
+        use ethers::types::U256;
+
         use crate::farcaster::contracts::generated::signedkeyrequestvalidator_bindings::SignedKeyRequestMetadata;
-        use ethers::types::{Bytes, U256};
 
         // Create the metadata struct with the provided signature
         let metadata_struct = SignedKeyRequestMetadata {
@@ -1074,8 +923,11 @@ impl FarcasterContractClient {
         validator_address: ethers::types::Address,
         chain_id: u64,
     ) -> Result<ethers::types::transaction::eip712::TypedData> {
-        use ethers::types::transaction::eip712::{EIP712Domain, Eip712DomainType, TypedData};
         use std::collections::BTreeMap;
+
+        use ethers::types::transaction::eip712::EIP712Domain;
+        use ethers::types::transaction::eip712::Eip712DomainType;
+        use ethers::types::transaction::eip712::TypedData;
 
         // Create domain separator
         let domain = EIP712Domain {
@@ -1168,8 +1020,11 @@ impl FarcasterContractClient {
         key_gateway_address: ethers::types::Address,
         chain_id: u64,
     ) -> Result<ethers::types::transaction::eip712::TypedData> {
-        use ethers::types::transaction::eip712::{EIP712Domain, Eip712DomainType, TypedData};
         use std::collections::BTreeMap;
+
+        use ethers::types::transaction::eip712::EIP712Domain;
+        use ethers::types::transaction::eip712::Eip712DomainType;
+        use ethers::types::transaction::eip712::TypedData;
 
         // Domain separator for Farcaster KeyGateway
         let domain = EIP712Domain {

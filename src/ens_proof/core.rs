@@ -1,11 +1,13 @@
-use crate::{
-    encrypted_key_manager::EncryptedKeyManager,
-    key_manager::KeyManager,
-    username_proof::{UserNameProof, UserNameType},
-};
-use anyhow::{Context, Result};
-use ethers::{prelude::*, types::Address};
 use std::str::FromStr;
+
+use anyhow::Context;
+use anyhow::Result;
+use ethers::types::Address;
+
+use crate::core::crypto::key_manager::KeyManager;
+use crate::core::protocol::username_proof::UserNameProof;
+use crate::core::protocol::username_proof::UserNameType;
+use crate::encrypted_key_manager::EncryptedKeyManager;
 
 /// ENS domain proof implementation
 pub struct EnsProof {
@@ -34,10 +36,9 @@ impl EnsProof {
     /// # Returns
     /// * `Result<Self>` - The EnsProof instance or an error
     pub fn from_env() -> Result<Self> {
-        let key_manager = KeyManager::from_env("PRIVATE_KEY")?;
-        let rpc_url = std::env::var("ETH_RPC_URL")
-            .with_context(|| "Failed to read ETH_RPC_URL from environment variables")?;
-        Ok(Self::new(key_manager, rpc_url))
+        Err(anyhow::anyhow!(
+            "ENS proof requires a wallet name. Use EnsProof::new() instead."
+        ))
     }
 
     /// Resolve ENS domain to address
@@ -47,15 +48,14 @@ impl EnsProof {
     ///
     /// # Returns
     /// * `Result<Address>` - The resolved address or an error
-    pub async fn resolve_ens(&self, _domain: &str) -> Result<Address> {
-        let _provider = Provider::<Http>::try_from(&self.rpc_url)
-            .with_context(|| "Failed to create provider")?;
-
-        // Simple ENS resolution using the standard ENS resolver
-        // In a real implementation, you would use the ENS contract
-        // For now, we'll return a placeholder
-        Address::from_str("0x0000000000000000000000000000000000000000")
-            .with_context(|| "Failed to parse address")
+    pub async fn resolve_ens(&self, domain: &str) -> Result<Address> {
+        // Use the Base ENS implementation for resolution
+        match self.query_base_ens_contract(domain).await? {
+            Some(address_str) => {
+                Address::from_str(&address_str).with_context(|| "Failed to parse resolved address")
+            }
+            None => Err(anyhow::anyhow!("Domain not found: {}", domain)),
+        }
     }
 
     /// Create a username proof for an ENS domain

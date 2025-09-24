@@ -15,16 +15,16 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 use anyhow::Result;
-use castorix::{
-    cli::{
-        commands::Commands,
-        types::{HubCommands, KeyCommands},
-        Cli, CliHandler,
-    },
-    ens_proof::EnsProof,
-    farcaster_client::FarcasterClient,
-    key_manager::{init_env, KeyManager},
-};
+use castorix::cli::commands::Commands;
+use castorix::cli::types::HubCommands;
+use castorix::cli::types::KeyCommands;
+use castorix::cli::Cli;
+use castorix::cli::CliHandler;
+use castorix::consts;
+use castorix::core::client::hub_client::FarcasterClient;
+use castorix::core::crypto::key_manager::init_env;
+use castorix::core::crypto::key_manager::KeyManager;
+use castorix::ens_proof::EnsProof;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -50,27 +50,21 @@ async fn main() -> Result<()> {
                         &KeyManager::from_private_key(
                             "0000000000000000000000000000000000000000000000000000000000000001",
                         )?,
+                        cli.path.as_deref(),
                     )
                     .await?;
                 }
                 _ => {
-                    // For other commands, try to load from environment
-                    match KeyManager::from_env("PRIVATE_KEY") {
-                        Ok(key_manager) => {
-                            CliHandler::handle_key_command(action, &key_manager).await?;
-                        }
-                        Err(_) => {
-                            println!("❌ No private key found in environment variables.");
-                            println!("💡 Use 'castorix key generate-encrypted <name>' to create an encrypted key, or");
-                            println!("   set PRIVATE_KEY environment variable for legacy mode.");
-                        }
-                    }
+                    println!("❌ Key command requires a wallet name.");
+                    println!("💡 Use 'castorix key generate-encrypted <name>' to create an encrypted key, or");
+                    println!(
+                        "   use 'castorix key load <key-name>' to load an existing encrypted key."
+                    );
                 }
             }
         }
         Commands::Hub { action } => {
-            let hub_url = std::env::var("FARCASTER_HUB_URL")
-                .unwrap_or_else(|_| "https://hub-api.neynar.com".to_string());
+            let hub_url = crate::consts::get_config().farcaster_hub_url().to_string();
 
             // For read-only operations, we don't need a key manager
             match action {
@@ -88,28 +82,10 @@ async fn main() -> Result<()> {
                     let hub_client = FarcasterClient::read_only(hub_url);
                     CliHandler::handle_hub_command(action, &hub_client).await?;
                 }
-                HubCommands::SubmitProof { .. } | HubCommands::SubmitProofEip712 { .. } => {
+                HubCommands::SubmitProof { .. } => {
                     // These commands handle their own key management
                     let hub_client = FarcasterClient::read_only(hub_url);
                     CliHandler::handle_hub_command(action, &hub_client).await?;
-                }
-                _ => {
-                    // For write operations, we need a key manager
-                    match KeyManager::from_env("PRIVATE_KEY") {
-                        Ok(key_manager) => {
-                            let hub_client =
-                                FarcasterClient::with_key_manager(hub_url, key_manager);
-                            CliHandler::handle_hub_command(action, &hub_client).await?;
-                        }
-                        Err(_) => {
-                            println!("❌ No private key found in environment variables.");
-                            println!("💡 Please either:");
-                            println!(
-                                "   1. Set PRIVATE_KEY environment variable for legacy mode, or"
-                            );
-                            println!("   2. Use 'castorix key load <key-name>' to load an encrypted key first");
-                        }
-                    }
                 }
             }
         }
@@ -117,14 +93,12 @@ async fn main() -> Result<()> {
             CliHandler::handle_custody_command(action).await?;
         }
         Commands::Signers { action } => {
-            let hub_url = std::env::var("FARCASTER_HUB_URL")
-                .unwrap_or_else(|_| "https://hub-api.neynar.com".to_string());
+            let hub_url = crate::consts::get_config().farcaster_hub_url().to_string();
             let hub_client = FarcasterClient::read_only(hub_url);
             CliHandler::handle_signers_command(action, &hub_client).await?;
         }
         Commands::Ens { action } => {
-            let rpc_url = std::env::var("ETH_RPC_URL")
-                .unwrap_or_else(|_| "https://eth-mainnet.g.alchemy.com/v2/demo".to_string());
+            let rpc_url = consts::get_config().eth_rpc_url().to_string();
 
             // Create a dummy key manager for ENS operations
             let dummy_key = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
@@ -135,6 +109,12 @@ async fn main() -> Result<()> {
                 println!("❌ Failed to create key manager for ENS operations");
             }
         }
+        Commands::Fid { action } => {
+            CliHandler::handle_fid_command(action, cli.path.as_deref()).await?;
+        }
+        Commands::Storage { action } => {
+            CliHandler::handle_storage_command(action, cli.path.as_deref()).await?;
+        }
     }
 
     Ok(())
@@ -143,7 +123,8 @@ async fn main() -> Result<()> {
 #[cfg(test)]
 mod tests {
     use ed25519_dalek::SigningKey;
-    use ethers::signers::{LocalWallet, Signer};
+    use ethers::signers::LocalWallet;
+    use ethers::signers::Signer;
 
     #[test]
     fn test_ecdsa_to_ed25519_conversion() {

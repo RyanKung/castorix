@@ -5,15 +5,14 @@
 
 #![cfg(not(doctest))]
 
-use crate::farcaster::contracts::{
-    generated::storageregistry_bindings::StorageRegistry as StorageRegistryContract,
-    types::ContractResult,
-};
 use anyhow::Result;
-use ethers::{
-    providers::{Http, Provider},
-    types::{Address, U256},
-};
+use ethers::providers::Http;
+use ethers::providers::Provider;
+use ethers::types::Address;
+use ethers::types::U256;
+
+use crate::farcaster::contracts::generated::storageregistry_bindings::StorageRegistry as StorageRegistryContract;
+use crate::farcaster::contracts::types::ContractResult;
 
 /// Storage units type
 pub type StorageUnits = u32;

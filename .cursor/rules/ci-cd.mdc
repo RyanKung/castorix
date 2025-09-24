@@ -1,0 +1,35 @@
+---
+description: CI/CD and deployment rules for Castorix
+globs:
+  - '.github/workflows/**/*.yml'
+  - '.github/workflows/**/*.yaml'
+  - 'Dockerfile*'
+  - 'docker-compose*.yml'
+alwaysApply: false
+---
+
+# CI/CD Rules
+
+## Pre-commit Checks
+- Run `cargo fmt --all -- --check`
+- Run `cargo clippy --all-targets --all-features -- -D warnings`
+- Run `cargo test --lib`
+- Check for TODO/FIXME comments in source code
+
+## GitHub Actions
+- Use latest stable Rust toolchain
+- Cache cargo dependencies for faster builds
+- Run tests in parallel when possible
+- Use meaningful job names and descriptions
+
+## Testing Strategy
+- Unit tests must pass locally before pushing
+- Integration tests should be robust and handle network failures
+- Use environment variables for test configuration
+- Skip tests that require external services when appropriate
+
+## Release Process
+- Tag releases with semantic versioning
+- Update CHANGELOG.md for each release
+- Build and test release binaries
+- Verify all features work in release mode

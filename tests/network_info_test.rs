@@ -1,15 +1,12 @@
 use anyhow::Result;
 use castorix::farcaster::contracts::FarcasterContractClient;
-use ethers::providers::{Http, Middleware, Provider};
+use ethers::providers::Http;
+use ethers::providers::Middleware;
+use ethers::providers::Provider;
 
 /// Test network info retrieval specifically
 #[tokio::test]
 async fn test_network_info_retrieval() -> Result<()> {
-    if std::env::var("RUNNING_TESTS").is_err() {
-        println!("⏭️  Skipping test (not in test environment)");
-        return Ok(());
-    }
-
     println!("🌐 Testing network info retrieval...");
 
     let rpc_url = "http://127.0.0.1:8545";
@@ -25,8 +22,7 @@ async fn test_network_info_retrieval() -> Result<()> {
             println!("   ✅ Chain ID: {}", chain_id);
         }
         Err(e) => {
-            println!("   ❌ Chain ID failed: {}", e);
-            return Err(e.into());
+            panic!("❌ Chain ID failed: {}. This is a critical test failure - basic RPC connectivity is required.", e);
         }
     }
 
@@ -37,8 +33,7 @@ async fn test_network_info_retrieval() -> Result<()> {
             println!("   ✅ Block Number: {}", block_number);
         }
         Err(e) => {
-            println!("   ❌ Block Number failed: {}", e);
-            return Err(e.into());
+            panic!("❌ Block Number failed: {}. This is a critical test failure - basic RPC connectivity is required.", e);
         }
     }
 
@@ -49,8 +44,7 @@ async fn test_network_info_retrieval() -> Result<()> {
             println!("   ✅ Gas Price: {} wei", gas_price);
         }
         Err(e) => {
-            println!("   ❌ Gas Price failed: {}", e);
-            return Err(e.into());
+            panic!("❌ Gas Price failed: {}. This is a critical test failure - basic RPC connectivity is required.", e);
         }
     }
 
@@ -73,8 +67,7 @@ async fn test_network_info_retrieval() -> Result<()> {
             );
         }
         Err(e) => {
-            println!("   ❌ Combined method failed: {}", e);
-            return Err(e);
+            panic!("❌ Combined method failed: {}. This is a critical test failure - network status retrieval is required for testing.", e);
         }
     }
 
@@ -86,11 +79,6 @@ async fn test_network_info_retrieval() -> Result<()> {
 /// Test network info with retry logic
 #[tokio::test]
 async fn test_network_info_with_retry() -> Result<()> {
-    if std::env::var("RUNNING_TESTS").is_err() {
-        println!("⏭️  Skipping test (not in test environment)");
-        return Ok(());
-    }
-
     println!("🔄 Testing network info with retry logic...");
 
     let rpc_url = "http://127.0.0.1:8545";
@@ -147,7 +135,7 @@ async fn test_network_info_with_retry() -> Result<()> {
 
     println!("❌ All retry attempts failed");
     if let Some(error) = last_error {
-        return Err(error.into());
+        panic!("❌ All retry attempts failed: {}. This is a critical test failure - network connectivity is required.", error);
     }
 
     Ok(())
@@ -156,11 +144,6 @@ async fn test_network_info_with_retry() -> Result<()> {
 /// Test basic RPC connectivity
 #[tokio::test]
 async fn test_basic_rpc_connectivity() -> Result<()> {
-    if std::env::var("RUNNING_TESTS").is_err() {
-        println!("⏭️  Skipping test (not in test environment)");
-        return Ok(());
-    }
-
     println!("🔗 Testing basic RPC connectivity...");
 
     let rpc_url = "http://127.0.0.1:8545";
@@ -178,8 +161,7 @@ async fn test_basic_rpc_connectivity() -> Result<()> {
             }
         }
         Err(e) => {
-            println!("   ❌ HTTP connection failed: {}", e);
-            return Err(e.into());
+            panic!("❌ HTTP connection failed: {}. This is a critical test failure - basic HTTP connectivity is required.", e);
         }
     }
 
@@ -190,8 +172,7 @@ async fn test_basic_rpc_connectivity() -> Result<()> {
             println!("   ✅ Provider created successfully");
         }
         Err(e) => {
-            println!("   ❌ Provider creation failed: {}", e);
-            return Err(e.into());
+            panic!("❌ Provider creation failed: {}. This is a critical test failure - provider creation is required.", e);
         }
     }
 
@@ -203,11 +184,6 @@ async fn test_basic_rpc_connectivity() -> Result<()> {
 /// Test network info with custom timeout
 #[tokio::test]
 async fn test_network_info_with_timeout() -> Result<()> {
-    if std::env::var("RUNNING_TESTS").is_err() {
-        println!("⏭️  Skipping test (not in test environment)");
-        return Ok(());
-    }
-
     println!("⏱️  Testing network info with custom timeout...");
 
     let rpc_url = "http://127.0.0.1:8545";

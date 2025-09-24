@@ -1,8 +1,10 @@
 use anyhow::Result;
 
 pub async fn handle_generate_encrypted() -> Result<()> {
-    use crate::encrypted_key_manager::{EncryptedKeyManager, prompt_password};
-    use std::io::{self, Write};
+    use crate::encrypted_key_manager::EncryptedKeyManager;
+    use crate::encrypted_key_manager::prompt_password;
+    use std::io;
+    use std::io::Write;
     use ethers::signers::Signer;
     
     println!("🔐 Generate Encrypted Private Key");
@@ -66,7 +68,8 @@ pub async fn handle_generate_encrypted() -> Result<()> {
 }
 
 pub async fn handle_load_key(key_name: String) -> Result<()> {
-    use crate::encrypted_key_manager::{EncryptedKeyManager, prompt_password};
+    use crate::encrypted_key_manager::EncryptedKeyManager;
+    use crate::encrypted_key_manager::prompt_password;
     
     println!("🔓 Loading encrypted key: {}", key_name);
     let mut manager = EncryptedKeyManager::default();
@@ -122,7 +125,8 @@ pub async fn handle_list_keys() -> Result<()> {
 }
 
 pub async fn handle_delete_key(key_name: String) -> Result<()> {
-    use crate::encrypted_key_manager::{EncryptedKeyManager, prompt_password};
+    use crate::encrypted_key_manager::EncryptedKeyManager;
+    use crate::encrypted_key_manager::prompt_password;
     use std::fs;
     
     println!("🗑️  Deleting encrypted key: {}", key_name);
@@ -157,7 +161,8 @@ pub async fn handle_delete_key(key_name: String) -> Result<()> {
 }
 
 pub async fn handle_rename_key(old_name: String, new_name: String) -> Result<()> {
-    use crate::encrypted_key_manager::{EncryptedKeyManager, prompt_password};
+    use crate::encrypted_key_manager::EncryptedKeyManager;
+    use crate::encrypted_key_manager::prompt_password;
     
     println!("🔄 Renaming encrypted key: {} → {}", old_name, new_name);
     let mut manager = EncryptedKeyManager::default();
@@ -181,7 +186,8 @@ pub async fn handle_rename_key(old_name: String, new_name: String) -> Result<()>
 }
 
 pub async fn handle_update_alias(key_name: String, new_alias: String) -> Result<()> {
-    use crate::encrypted_key_manager::{EncryptedKeyManager, prompt_password};
+    use crate::encrypted_key_manager::EncryptedKeyManager;
+    use crate::encrypted_key_manager::prompt_password;
     
     println!("🏷️  Updating alias for key: {}", key_name);
     let mut manager = EncryptedKeyManager::default();
@@ -205,8 +211,10 @@ pub async fn handle_update_alias(key_name: String, new_alias: String) -> Result<
 }
 
 pub async fn handle_import_key() -> Result<()> {
-    use crate::encrypted_key_manager::{EncryptedKeyManager, prompt_password};
-    use std::io::{self, Write};
+    use crate::encrypted_key_manager::EncryptedKeyManager;
+    use crate::encrypted_key_manager::prompt_password;
+    use std::io;
+    use std::io::Write;
     use ethers::signers::Signer;
     use std::str::FromStr;
     

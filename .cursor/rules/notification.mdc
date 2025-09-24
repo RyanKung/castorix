@@ -1,0 +1,28 @@
+---
+description: Task completion notification requirements for Castorix project
+alwaysApply: false
+---
+
+# Task Completion Notifications
+
+## Core Requirement
+- After completing any significant task (bug fixes, feature implementation, CI/CD work, etc.), ALWAYS use `osascript` to notify the user
+- This is a critical requirement that must be followed for every completed task
+
+## Notification Format
+Use the following osascript command format:
+```bash
+osascript -e 'display notification "✅ [Task Summary]" with title "Castorix [Category]" sound name "Glass"'
+```
+
+## Examples
+- ✅ CI errors fixed and code committed
+- ✅ Feature implementation completed
+- ✅ Bug fix deployed successfully
+- ❌ Task failed - requires attention
+
+## Status Indicators
+- Use ✅ for successful completion
+- Use ❌ for failures or errors
+- Use 🔧 for ongoing work or maintenance
+- Use 🚀 for new features or releases

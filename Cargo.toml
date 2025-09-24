@@ -12,6 +12,33 @@ keywords = ["farcaster", "ethereum", "blockchain", "social", "protocol"]
 categories = ["web-programming", "network-programming", "cryptography"]
 authors = ["Your Name <your.email@example.com>"]
 
+# Exclude development-only files from the published package
+exclude = [
+    "contracts/**/*",
+    "generated_abis/**/*", 
+    "target/**/*",
+    ".github/**/*",
+    "tests/**/*",
+    "*.json",
+    "*.bin",
+    "test_data/**/*",
+    "test_*_data/**/*",
+    "scripts/**/*",
+    "RELEASE.md",
+    "RULES.md",
+    "CONTRIBUTING.md",
+    "devlog.md",
+    "fyi.md",
+    "logo.png",
+    "proof_*.json",
+    "labels/**/*",
+]
+
+# Library configuration
+[lib]
+name = "castorix"
+path = "src/lib.rs"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]

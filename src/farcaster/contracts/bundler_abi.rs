@@ -5,14 +5,14 @@
 
 #![cfg(not(doctest))]
 
-use crate::farcaster::contracts::{
-    generated::bundler_bindings::Bundler as BundlerContract, types::ContractResult,
-};
 use anyhow::Result;
-use ethers::{
-    providers::{Http, Provider},
-    types::{Address, U256},
-};
+use ethers::providers::Http;
+use ethers::providers::Provider;
+use ethers::types::Address;
+use ethers::types::U256;
+
+use crate::farcaster::contracts::generated::bundler_bindings::Bundler as BundlerContract;
+use crate::farcaster::contracts::types::ContractResult;
 
 /// ABI-based Bundler contract wrapper
 #[derive(Clone)]

@@ -1,11 +1,17 @@
 use anyhow::Result;
-use ed25519_dalek::{Signer as Ed25519Signer, SigningKey, Verifier as Ed25519Verifier};
-use ethers::{
-    providers::{Http, Middleware, Provider},
-    signers::{LocalWallet, Signer},
-    types::{transaction::eip2718::TypedTransaction, Address, TransactionRequest, U256},
-    utils::parse_ether,
-};
+use ed25519_dalek::Signer as Ed25519Signer;
+use ed25519_dalek::SigningKey;
+use ed25519_dalek::Verifier as Ed25519Verifier;
+use ethers::providers::Http;
+use ethers::providers::Middleware;
+use ethers::providers::Provider;
+use ethers::signers::LocalWallet;
+use ethers::signers::Signer;
+use ethers::types::transaction::eip2718::TypedTransaction;
+use ethers::types::Address;
+use ethers::types::TransactionRequest;
+use ethers::types::U256;
+use ethers::utils::parse_ether;
 use rand::rngs::OsRng;
 
 /// Simple local transaction test configuration
@@ -138,11 +144,6 @@ impl SimpleWalletClient {
 
 #[tokio::test]
 async fn test_simple_local_transaction() -> Result<()> {
-    if std::env::var("RUNNING_TESTS").is_err() {
-        println!("⏭️  Skipping test (not in test environment)");
-        return Ok(());
-    }
-
     println!("🚀 Testing simple local transaction...");
 
     let config = SimpleTestConfig::for_local_test();
@@ -166,11 +167,6 @@ async fn test_simple_local_transaction() -> Result<()> {
 
 #[tokio::test]
 async fn test_network_connectivity() -> Result<()> {
-    if std::env::var("RUNNING_TESTS").is_err() {
-        println!("⏭️  Skipping test (not in test environment)");
-        return Ok(());
-    }
-
     println!("🌐 Testing network connectivity...");
 
     let config = SimpleTestConfig::for_local_test();

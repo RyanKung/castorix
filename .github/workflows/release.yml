@@ -23,6 +23,9 @@ jobs:
           components: rustfmt, clippy
           override: true
 
+      - name: Install nightly Rust with rustfmt
+        run: rustup toolchain install nightly --component rustfmt
+
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
@@ -56,13 +59,45 @@ jobs:
           fi
 
       - name: Build contracts and generate bindings
-        run: cargo build --release --all-features
+        run: |
+          echo "🔨 Building project with contract bindings..."
+          cargo build --release --all-features
+          echo "✅ Build completed successfully"
+          
+          # Verify generated bindings exist
+          if [ -d "src/farcaster/contracts/generated" ]; then
+            echo "✅ Contract bindings generated successfully"
+            ls -la src/farcaster/contracts/generated/
+          else
+            echo "⚠️ Warning: No contract bindings found"
+          fi
 
       - name: Check formatting
-        run: cargo fmt --all -- --check
+        run: cargo +nightly fmt --all -- --check
 
       - name: Run clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Run unit tests
+        run: cargo test --lib --verbose
+
+      - name: Run integration tests
+        run: cargo test --test "*" --verbose
+
+      - name: Test CLI help commands
+        run: |
+          cargo run --bin castorix -- --help
+          cargo run --bin castorix -- key --help
+          cargo run --bin castorix -- fid --help
+          cargo run --bin castorix -- storage --help
+          cargo run --bin castorix -- ens --help
+          cargo run --bin castorix -- signers --help
+          cargo run --bin castorix -- hub --help
+
+      - name: Test node startup commands
+        run: |
+          cargo run --bin start-node -- --help
+          cargo run --bin stop-node --help || echo "stop-node help command test completed"
 
   release:
     name: Create Release

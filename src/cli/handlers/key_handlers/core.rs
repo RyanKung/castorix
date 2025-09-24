@@ -1,10 +1,13 @@
+use anyhow::Context;
+use anyhow::Result;
+
 use crate::cli::types::KeyCommands;
-use anyhow::{Context, Result};
 
 /// Handle key management commands (legacy)
 pub async fn handle_key_command(
     command: KeyCommands,
-    key_manager: &crate::key_manager::KeyManager,
+    key_manager: &crate::core::crypto::key_manager::KeyManager,
+    storage_path: Option<&str>,
 ) -> Result<()> {
     match command {
         KeyCommands::Info => {
@@ -13,7 +16,11 @@ pub async fn handle_key_command(
             println!("📋 Stored Encrypted Keys Information:");
             println!("{}", "=".repeat(50));
 
-            let manager = EncryptedKeyManager::default_config();
+            let manager = if let Some(path) = storage_path {
+                EncryptedKeyManager::new(path)
+            } else {
+                EncryptedKeyManager::default_config()
+            };
             match manager.list_keys_with_info() {
                 Ok(key_infos) => {
                     if key_infos.is_empty() {
@@ -81,28 +88,28 @@ pub async fn handle_key_command(
             println!("   ⚠️  Keep this private key secure and never share it!");
         }
         KeyCommands::GenerateEncrypted => {
-            super::encrypted::handle_generate_encrypted().await?;
+            super::encrypted::handle_generate_encrypted(storage_path).await?;
         }
         KeyCommands::Load { key_name } => {
-            super::encrypted::handle_load_key(key_name).await?;
+            super::encrypted::handle_load_key(key_name, storage_path).await?;
         }
         KeyCommands::List => {
-            super::encrypted::handle_list_keys().await?;
+            super::encrypted::handle_list_keys(storage_path).await?;
         }
         KeyCommands::Delete { key_name } => {
-            super::encrypted::handle_delete_key(key_name).await?;
+            super::encrypted::handle_delete_key(key_name, storage_path).await?;
         }
         KeyCommands::Rename { old_name, new_name } => {
-            super::encrypted::handle_rename_key(old_name, new_name).await?;
+            super::encrypted::handle_rename_key(old_name, new_name, storage_path).await?;
         }
         KeyCommands::UpdateAlias {
             key_name,
             new_alias,
         } => {
-            super::encrypted::handle_update_alias(key_name, new_alias).await?;
+            super::encrypted::handle_update_alias(key_name, new_alias, storage_path).await?;
         }
         KeyCommands::Import => {
-            super::encrypted::handle_import_key().await?;
+            super::encrypted::handle_import_key(storage_path).await?;
         }
     }
     Ok(())

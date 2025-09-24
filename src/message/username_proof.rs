@@ -156,7 +156,7 @@ impl UserNameProof {
         self.fid = v;
     }
 
-    // .UserNameType type = 6;
+    // .username_proof.UserNameType field_type = 6;
 
 
     pub fn get_field_type(&self) -> UserNameType {
@@ -325,7 +325,7 @@ impl ::protobuf::Message for UserNameProof {
                 |m: &mut UserNameProof| { &mut m.fid },
             ));
             fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeEnum<UserNameType>>(
-                "type",
+                "field_type",
                 |m: &UserNameProof| { &m.field_type },
                 |m: &mut UserNameProof| { &mut m.field_type },
             ));
@@ -424,15 +424,15 @@ impl ::protobuf::reflect::ProtobufValue for UserNameType {
 }
 
 static file_descriptor_proto_data: &'static [u8] = b"\
-    \n\x14username_proof.proto\"\xb8\x01\n\rUserNameProof\x12\x1e\n\ttimesta\
-    mp\x18\x01\x20\x01(\x04R\ttimestampB\0\x12\x14\n\x04name\x18\x02\x20\x01\
-    (\x0cR\x04nameB\0\x12\x16\n\x05owner\x18\x03\x20\x01(\x0cR\x05ownerB\0\
-    \x12\x1e\n\tsignature\x18\x04\x20\x01(\x0cR\tsignatureB\0\x12\x12\n\x03f\
-    id\x18\x05\x20\x01(\x04R\x03fidB\0\x12#\n\x04type\x18\x06\x20\x01(\x0e2\
-    \r.UserNameTypeR\x04typeB\0:\0*w\n\x0cUserNameType\x12\x16\n\x12USERNAME\
-    _TYPE_NONE\x10\0\x12\x17\n\x13USERNAME_TYPE_FNAME\x10\x01\x12\x18\n\x14U\
-    SERNAME_TYPE_ENS_L1\x10\x02\x12\x1a\n\x16USERNAME_TYPE_BASENAME\x10\x03\
-    \x1a\0B\0b\x06proto3\
+    \n\x14username_proof.proto\x12\x0eusername_proof\"\xd2\x01\n\rUserNamePr\
+    oof\x12\x1e\n\ttimestamp\x18\x01\x20\x01(\x04R\ttimestampB\0\x12\x14\n\
+    \x04name\x18\x02\x20\x01(\x0cR\x04nameB\0\x12\x16\n\x05owner\x18\x03\x20\
+    \x01(\x0cR\x05ownerB\0\x12\x1e\n\tsignature\x18\x04\x20\x01(\x0cR\tsigna\
+    tureB\0\x12\x12\n\x03fid\x18\x05\x20\x01(\x04R\x03fidB\0\x12=\n\nfield_t\
+    ype\x18\x06\x20\x01(\x0e2\x1c.username_proof.UserNameTypeR\tfieldTypeB\0\
+    :\0*w\n\x0cUserNameType\x12\x16\n\x12USERNAME_TYPE_NONE\x10\0\x12\x17\n\
+    \x13USERNAME_TYPE_FNAME\x10\x01\x12\x18\n\x14USERNAME_TYPE_ENS_L1\x10\
+    \x02\x12\x1a\n\x16USERNAME_TYPE_BASENAME\x10\x03\x1a\0B\0b\x06proto3\
 ";
 
 static file_descriptor_proto_lazy: ::protobuf::rt::LazyV2<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::rt::LazyV2::INIT;

@@ -1,5 +1,13 @@
-use crate::cli::types::*;
-use clap::{Parser, Subcommand};
+use clap::Parser;
+use clap::Subcommand;
+
+use crate::cli::types::CustodyCommands;
+use crate::cli::types::EnsCommands;
+use crate::cli::types::FidCommands;
+use crate::cli::types::HubCommands;
+use crate::cli::types::KeyCommands;
+use crate::cli::types::SignersCommands;
+use crate::cli::types::StorageCommands;
 
 /// Castorix - Farcaster ENS Domain Proof Tool
 /// A comprehensive tool for managing private keys, creating ENS domain proofs, and interacting with Farcaster Hub
@@ -21,6 +29,7 @@ Key Features:
   • 📡 Farcaster Hub Integration - Submit proofs and interact with Farcaster
   • 🏷️  Key Aliases - Organize keys with friendly names and descriptions
   • 🔄 Key Management - Rename, update, and manage multiple keys
+  • 📁 Custom Storage Path - Specify custom directory for storing encrypted keys
 
 Examples:
   # Generate a new encrypted key
@@ -32,15 +41,23 @@ Examples:
   # List all your keys
   castorix key list
   
-  # Create an ENS proof (using default key)
-  castorix ens create vitalik.eth 12345
+  # Generate an ENS proof (using default key)
+  castorix ens proof vitalik.eth 12345
   
-  # Create an ENS proof (using specific encrypted wallet)
-  castorix ens create ryankung.base.eth 460432 --wallet-name my-wallet
+  # Generate an ENS proof (using specific encrypted wallet)
+  castorix ens proof ryankung.base.eth 460432 --wallet-name my-wallet
+  
+  # Use custom storage path
+  castorix --path /custom/path key generate-encrypted my-wallet "My Wallet"
   
 For more information, visit: https://github.com/your-repo/castorix
 "#)]
 pub struct Cli {
+    /// Custom path for storing encrypted keys and configuration files
+    /// If not specified, uses the default system directory (~/.castorix/)
+    #[arg(long, global = true, value_name = "PATH")]
+    pub path: Option<String>,
+
     #[command(subcommand)]
     pub command: Commands,
 }
@@ -57,7 +74,7 @@ pub enum Commands {
     },
     /// 🌐 ENS domain proof operations
     ///
-    /// Create and verify ENS domain proofs for Farcaster integration.
+    /// Generate and verify ENS domain proofs for Farcaster integration.
     /// Link your ENS domains to your Farcaster identity.
     ///
     /// Use --wallet-name to select specific encrypted wallets for signing.
@@ -88,6 +105,22 @@ pub enum Commands {
     Signers {
         #[command(subcommand)]
         action: SignersCommands,
+    },
+    /// 🆔 FID registration and management
+    ///
+    /// Register new Farcaster IDs (FIDs) and manage existing ones.
+    /// This includes checking registration prices and listing owned FIDs.
+    Fid {
+        #[command(subcommand)]
+        action: FidCommands,
+    },
+    /// 🏠 Storage rental and management
+    ///
+    /// Rent and manage storage units for Farcaster IDs.
+    /// This allows FIDs to store more messages, casts, and other data.
+    Storage {
+        #[command(subcommand)]
+        action: StorageCommands,
     },
 }
 

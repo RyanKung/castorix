@@ -1,18 +1,28 @@
-use crate::key_manager::KeyManager;
-use aes_gcm::aead::{Aead, AeadCore, KeyInit};
-use aes_gcm::{Aes256Gcm, Key, Nonce};
-use anyhow::{Context, Result};
-use argon2::password_hash::{rand_core::OsRng, SaltString};
-use argon2::{Argon2, PasswordHasher};
-use base64::{engine::general_purpose, Engine as _};
-use ethers::{
-    core::k256::ecdsa::SigningKey,
-    prelude::*,
-    signers::{LocalWallet, Signer},
-};
-use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
+
+use aes_gcm::aead::Aead;
+use aes_gcm::aead::AeadCore;
+use aes_gcm::aead::KeyInit;
+use aes_gcm::Aes256Gcm;
+use aes_gcm::Key;
+use aes_gcm::Nonce;
+use anyhow::Context;
+use anyhow::Result;
+use argon2::password_hash::rand_core::OsRng;
+use argon2::password_hash::SaltString;
+use argon2::Argon2;
+use argon2::PasswordHasher;
+use base64::engine::general_purpose;
+use base64::Engine as _;
+use ethers::core::k256::ecdsa::SigningKey;
+use ethers::prelude::*;
+use ethers::signers::LocalWallet;
+use ethers::signers::Signer;
+use serde::Deserialize;
+use serde::Serialize;
+
+use crate::core::crypto::key_manager::KeyManager;
 
 /// Encrypted key storage structure
 #[derive(Debug, Serialize, Deserialize)]
@@ -524,8 +534,9 @@ pub fn prompt_password(prompt: &str) -> Result<String> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use tempfile::TempDir;
+
+    use super::*;
 
     #[tokio::test]
     async fn test_encrypted_key_generation() {

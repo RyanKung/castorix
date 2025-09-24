@@ -1,5 +1,6 @@
-use crate::cli::types::EnsCommands;
 use anyhow::Result;
+
+use crate::cli::types::EnsCommands;
 
 /// Handle ENS commands
 pub async fn handle_ens_command(
@@ -38,28 +39,13 @@ pub async fn handle_ens_command(
         }
         EnsCommands::BaseSubdomains { address } => {
             println!("🏗️ Getting Base subdomains owned by address: {address}");
-            println!("⚠️  Note: Base chain reverse lookup is not currently supported.");
-            println!("   Base subdomains are not indexed by The Graph API.");
+            println!("⚠️  Note: This feature has been removed as Base chain reverse lookup");
+            println!("   is not supported. Base subdomains are not indexed by The Graph API.");
             println!("   Use 'castorix ens resolve <domain>.base.eth' to check specific domains.");
-            match ens_proof.get_base_subdomains_by_address(&address).await {
-                Ok(domains) => {
-                    if domains.is_empty() {
-                        println!("❌ No Base subdomains found for address: {address}");
-                    } else {
-                        println!("✅ Found {} Base subdomain(s):", domains.len());
-                        for (i, domain) in domains.iter().enumerate() {
-                            println!("   {}. {}", i + 1, domain);
-                        }
-                    }
-                }
-                Err(e) => println!("❌ Failed to get Base subdomains: {e}"),
-            }
+            println!("❌ No Base subdomains found for address: {address}");
         }
         EnsCommands::AllDomains { address } => {
             println!("🌐 Getting all ENS domains for address: {address}");
-            println!(
-                "⚠️  Note: Base subdomains (*.base.eth) reverse lookup is not currently supported."
-            );
             match ens_proof.get_all_ens_domains_by_address(&address).await {
                 Ok(domains) => {
                     if domains.is_empty() {
@@ -116,22 +102,22 @@ pub async fn handle_ens_command(
                 Err(e) => println!("❌ Failed to verify ownership: {e}"),
             }
         }
-        EnsCommands::Create {
+        EnsCommands::Proof {
             domain,
             fid,
             wallet_name,
         } => {
             if let Some(wallet_name) = &wallet_name {
-                println!("📝 Creating username proof for domain: {domain} (FID: {fid}) using wallet: {wallet_name}");
+                println!("📝 Generating username proof for domain: {domain} (FID: {fid}) using wallet: {wallet_name}");
             } else {
-                println!("📝 Creating username proof for domain: {domain} (FID: {fid})");
+                println!("📝 Generating username proof for domain: {domain} (FID: {fid})");
             }
             match ens_proof
                 .create_ens_proof_with_wallet(&domain, fid, wallet_name.as_deref())
                 .await
             {
                 Ok(proof) => {
-                    println!("✅ Username proof created successfully!");
+                    println!("✅ Username proof generated successfully!");
                     match ens_proof.serialize_proof(&proof) {
                         Ok(json) => {
                             println!("📄 Proof JSON:");
@@ -155,7 +141,7 @@ pub async fn handle_ens_command(
             let proof_data: serde_json::Value = serde_json::from_str(&proof_content)?;
 
             // Create UserNameProof from JSON
-            let mut proof = crate::username_proof::UserNameProof::new();
+            let mut proof = crate::core::protocol::username_proof::UserNameProof::new();
             proof.set_timestamp(proof_data["timestamp"].as_u64().unwrap_or(0));
             proof.set_name(
                 proof_data["name"]

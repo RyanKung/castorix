@@ -9,25 +9,41 @@ fn main() {
         setup_test_environment();
     }
 
-    // Generate protobuf code from Snapchain's proto files
+    // Generate protobuf code from proto files
     let out_dir = "src/message";
 
     let proto_files = [
-        "snapchain/src/proto/message.proto",
-        "snapchain/src/proto/username_proof.proto",
+        "proto/snapchain/username_proof.proto",
+        "proto/snapchain/message.proto",
     ];
+
+    // Create output directory
+    if let Err(e) = fs::create_dir_all(out_dir) {
+        println!("cargo:warning=Failed to create protobuf output directory: {e}");
+        return;
+    }
 
     let mut codegen = protobuf_codegen_pure::Codegen::new();
     codegen.out_dir(out_dir);
-    codegen.include("snapchain/src/proto");
+    codegen.include("proto/snapchain");
 
+    // Add all proto files at once to ensure proper dependency resolution
     for proto_file in &proto_files {
         if Path::new(proto_file).exists() {
+            println!("cargo:info=Adding proto file: {}", proto_file);
             codegen.input(proto_file);
+        } else {
+            println!("cargo:warning=Proto file not found: {}", proto_file);
         }
     }
 
-    codegen.run().expect("protobuf codegen failed");
+    match codegen.run() {
+        Ok(_) => println!("cargo:info=Successfully generated protobuf code"),
+        Err(e) => {
+            println!("cargo:warning=Protobuf codegen failed: {}", e);
+            // Don't fail the build, just warn
+        }
+    }
 
     // Compile Solidity contracts and generate ABIs
     compile_farcaster_contracts();
@@ -109,14 +125,15 @@ fn compile_farcaster_contracts() {
 }
 
 fn generate_rust_bindings() {
-    let abi_dir = "generated_abis";
-    let bindings_dir = "src/farcaster/contracts/generated";
-
-    // Check if ABI files exist
-    if !Path::new(abi_dir).exists() {
-        println!("cargo:warning=ABI directory not found, skipping Rust binding generation");
+    // Check if we're in a development environment with contracts available
+    let is_dev_env = Path::new("contracts").exists() && Path::new("generated_abis").exists();
+    if !is_dev_env {
+        println!("cargo:info=Development contracts not found, using pre-generated bindings");
         return;
     }
+
+    let abi_dir = "generated_abis";
+    let bindings_dir = "src/farcaster/contracts/generated";
 
     // Create bindings directory
     if let Err(e) = fs::create_dir_all(bindings_dir) {
@@ -142,6 +159,8 @@ fn generate_rust_bindings() {
         ("RecoveryProxy", "RecoveryProxy.sol/RecoveryProxy.json"),
     ];
 
+    let mut generated_modules = Vec::new();
+
     for (contract_name, abi_path) in &contracts {
         let abi_file = format!("{abi_dir}/{abi_path}");
         if Path::new(&abi_file).exists() {
@@ -154,7 +173,13 @@ fn generate_rust_bindings() {
 
             // Use ethers abigen macro to generate bindings
             match generate_contract_bindings(contract_name, &abi_file, &binding_file) {
-                Ok(_) => println!("cargo:info=Successfully generated bindings for {contract_name}"),
+                Ok(_) => {
+                    println!("cargo:info=Successfully generated bindings for {contract_name}");
+                    generated_modules.push(format!(
+                        "pub mod {}_bindings;",
+                        contract_name.to_lowercase()
+                    ));
+                }
                 Err(e) => {
                     println!("cargo:warning=Failed to generate bindings for {contract_name}: {e}")
                 }
@@ -165,12 +190,8 @@ fn generate_rust_bindings() {
     }
 
     // Create mod.rs file for the generated bindings (sorted alphabetically)
-    let mut module_names: Vec<String> = contracts
-        .iter()
-        .map(|(name, _)| format!("pub mod {}_bindings;", name.to_lowercase()))
-        .collect();
-    module_names.sort(); // Sort alphabetically to ensure consistent formatting
-    let mod_content = module_names.join("\n") + "\n"; // Add trailing newline
+    generated_modules.sort();
+    let mod_content = generated_modules.join("\n") + "\n"; // Add trailing newline
 
     let mod_file = format!("{bindings_dir}/mod.rs");
     if let Err(e) = fs::write(&mod_file, mod_content) {

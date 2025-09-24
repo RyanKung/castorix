@@ -1,5 +1,6 @@
-use crate::cli::types::CustodyCommands;
 use anyhow::Result;
+
+use crate::cli::types::CustodyCommands;
 
 /// Handle custody commands
 pub async fn handle_custody_command(command: CustodyCommands) -> Result<()> {
@@ -50,7 +51,7 @@ async fn handle_custody_list() -> Result<()> {
                     {
                         if let Ok(fid) = fid_str.parse::<u64>() {
                             let file_path = entry.path().to_string_lossy().to_string();
-                            if let Ok(manager) = crate::encrypted_eth_key_manager::EncryptedEthKeyManager::load_from_file(&file_path) {
+                            if let Ok(manager) = crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::load_from_file(&file_path) {
                                 if let Ok(address) = manager.get_address(fid) {
                                     custody_keys.push((fid, address, file_path));
                                 }
@@ -104,9 +105,9 @@ async fn handle_custody_import(fid: u64) -> Result<()> {
 
     // Use FID-specific custody key file
     let custody_key_file =
-        crate::encrypted_eth_key_manager::EncryptedEthKeyManager::custody_key_file(fid)?;
+        crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::custody_key_file(fid)?;
     let mut encrypted_manager =
-        crate::encrypted_eth_key_manager::EncryptedEthKeyManager::load_from_file(
+        crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::load_from_file(
             &custody_key_file,
         )?;
 
@@ -152,9 +153,9 @@ async fn handle_custody_from_mnemonic(fid: u64) -> Result<()> {
 
     // Use FID-specific custody key file
     let custody_key_file =
-        crate::encrypted_eth_key_manager::EncryptedEthKeyManager::custody_key_file(fid)?;
+        crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::custody_key_file(fid)?;
     let mut encrypted_manager =
-        crate::encrypted_eth_key_manager::EncryptedEthKeyManager::load_from_file(
+        crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::load_from_file(
             &custody_key_file,
         )?;
 
@@ -171,8 +172,10 @@ async fn handle_custody_from_mnemonic(fid: u64) -> Result<()> {
 
     // Create Farcaster client to get custody address from Hub API
     let config = crate::consts::get_config();
-    let hub_client =
-        crate::farcaster_client::FarcasterClient::new(config.farcaster_hub_url.clone(), None);
+    let hub_client = crate::core::client::hub_client::FarcasterClient::new(
+        config.farcaster_hub_url.clone(),
+        None,
+    );
 
     // Get custody address from Hub API
     let actual_custody_address = hub_client
@@ -219,7 +222,7 @@ async fn handle_custody_delete(fid: u64) -> Result<()> {
 
     // Check if FID-specific custody key file exists
     let custody_key_file =
-        crate::encrypted_eth_key_manager::EncryptedEthKeyManager::custody_key_file(fid)?;
+        crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::custody_key_file(fid)?;
 
     if !std::path::Path::new(&custody_key_file).exists() {
         return Err(anyhow::anyhow!("❌ No ECDSA key found for FID: {}", fid));
@@ -227,7 +230,7 @@ async fn handle_custody_delete(fid: u64) -> Result<()> {
 
     // Load the encrypted key manager
     let encrypted_manager =
-        crate::encrypted_eth_key_manager::EncryptedEthKeyManager::load_from_file(
+        crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::load_from_file(
             &custody_key_file,
         )?;
 
@@ -245,7 +248,7 @@ async fn handle_custody_delete(fid: u64) -> Result<()> {
     println!("   File: {}", custody_key_file);
 
     // Confirm deletion
-    let confirm = crate::encrypted_eth_key_manager::prompt_password(
+    let confirm = crate::core::crypto::encrypted_storage::prompt_password(
         "Are you sure you want to delete this key? Type 'DELETE' to confirm: ",
     )?;
 

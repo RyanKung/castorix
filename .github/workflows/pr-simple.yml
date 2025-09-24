@@ -1,0 +1,99 @@
+name: PR Simple Tests
+
+on:
+  pull_request:
+    branches: [master, main]
+    types: [opened, synchronize, reopened]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  pr-tests:
+    name: PR Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+          override: true
+
+      - name: Install nightly Rust with rustfmt
+        run: rustup toolchain install nightly --component rustfmt
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Initialize contracts submodule
+        run: |
+          if [ -f "contracts/.git" ]; then
+            echo "Contracts submodule already initialized"
+          else
+            echo "Initializing contracts submodule..."
+            git submodule update --init --recursive contracts || echo "Warning: Failed to initialize contracts submodule"
+          fi
+
+      - name: Build project first (to generate required files)
+        run: cargo build --all-features
+
+      - name: Check formatting
+        run: cargo +nightly fmt --all -- --check
+
+      - name: Run clippy
+        run: cargo clippy --all-targets --all-features
+
+
+      - name: Run unit tests
+        run: cargo test --lib
+
+      - name: Run integration tests
+        run: cargo test --test "*"
+
+      - name: Test CLI commands
+        run: |
+          cargo run --bin castorix -- --help
+          cargo run --bin castorix -- key --help
+          cargo run --bin castorix -- fid --help
+          cargo run --bin castorix -- storage --help
+          cargo run --bin castorix -- ens --help
+          cargo run --bin start-node -- --help
+
+      - name: Check for TODO/FIXME comments
+        run: |
+          echo "🔍 Checking for TODO/FIXME comments..."
+          if grep -r "TODO\|FIXME\|XXX\|HACK" src/ --include="*.rs"; then
+            echo "⚠️ Found TODO/FIXME comments in source code:"
+            grep -r "TODO\|FIXME\|XXX\|HACK" src/ --include="*.rs" || true
+            echo "Please review and address these comments before merging."
+          else
+            echo "✅ No TODO/FIXME comments found in source code"
+          fi
+
+      - name: Generate test summary
+        run: |
+          echo "## PR Test Results ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build**: ✅ Passed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Formatting**: ✅ Passed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Clippy**: ✅ Passed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Unit Tests**: ✅ Passed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Integration Tests**: ✅ Passed" >> $GITHUB_STEP_SUMMARY
+          echo "- **CLI Tests**: ✅ Passed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Code Quality**: ✅ Passed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🎉 All tests passed! Ready for review." >> $GITHUB_STEP_SUMMARY

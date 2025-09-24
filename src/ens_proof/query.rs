@@ -1,5 +1,7 @@
+use anyhow::Context;
+use anyhow::Result;
+
 use super::core::EnsProof;
-use anyhow::{Context, Result};
 
 impl EnsProof {
     /// Get ENS domains that have proofs for the current address
@@ -182,8 +184,9 @@ impl EnsProof {
         address: &str,
         domain_patterns: &[&str],
     ) -> Result<Vec<String>> {
-        use ethers::types::Address;
         use std::str::FromStr;
+
+        use ethers::types::Address;
 
         let _provider =
             ethers::providers::Provider::<ethers::providers::Http>::try_from(&self.rpc_url)

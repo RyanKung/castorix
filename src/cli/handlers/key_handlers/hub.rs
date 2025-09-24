@@ -1,5 +1,6 @@
-use crate::cli::types::HubKeyCommands;
 use anyhow::Result;
+
+use crate::cli::types::HubKeyCommands;
 
 /// Handle Hub key management commands
 pub async fn handle_hub_key_command(command: HubKeyCommands) -> Result<()> {
@@ -26,9 +27,11 @@ async fn handle_hub_key_import(fid: u64) -> Result<()> {
 
     // Check if key already exists
     let eth_keys_file =
-        crate::encrypted_eth_key_manager::EncryptedEthKeyManager::default_keys_file()?;
+        crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::default_keys_file()?;
     let mut eth_manager =
-        crate::encrypted_eth_key_manager::EncryptedEthKeyManager::load_from_file(&eth_keys_file)?;
+        crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::load_from_file(
+            &eth_keys_file,
+        )?;
 
     let eth_exists = eth_manager.has_key(fid);
 
@@ -36,7 +39,10 @@ async fn handle_hub_key_import(fid: u64) -> Result<()> {
         println!("⚠️  ECDSA key already exists for FID: {fid}");
 
         print!("\nDo you want to replace the existing key? (y/N): ");
-        use std::io::{self, Write};
+        use std::io::Write;
+        use std::io::{
+            self,
+        };
         io::stdout().flush()?;
 
         let mut input = String::new();
@@ -54,14 +60,15 @@ async fn handle_hub_key_import(fid: u64) -> Result<()> {
     }
 
     // Prompt for private key interactively
-    let private_key = crate::encrypted_eth_key_manager::prompt_password(
+    let private_key = crate::core::crypto::encrypted_storage::prompt_password(
         "Enter ECDSA private key (hex format): ",
     )?;
 
     // Prompt for password
     let password =
-        crate::encrypted_eth_key_manager::prompt_password("Enter password for encryption: ")?;
-    let confirm_password = crate::encrypted_eth_key_manager::prompt_password("Confirm password: ")?;
+        crate::core::crypto::encrypted_storage::prompt_password("Enter password for encryption: ")?;
+    let confirm_password =
+        crate::core::crypto::encrypted_storage::prompt_password("Confirm password: ")?;
 
     if password != confirm_password {
         println!("❌ Passwords do not match!");
@@ -99,9 +106,10 @@ async fn handle_hub_key_list() -> Result<()> {
     println!("📋 All ECDSA Keys");
     println!("{}", "=".repeat(50));
 
-    let keys_file = crate::encrypted_eth_key_manager::EncryptedEthKeyManager::default_keys_file()?;
+    let keys_file =
+        crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::default_keys_file()?;
     let manager =
-        crate::encrypted_eth_key_manager::EncryptedEthKeyManager::load_from_file(&keys_file)?;
+        crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::load_from_file(&keys_file)?;
 
     let keys = manager.list_keys();
     if keys.is_empty() {
@@ -162,9 +170,11 @@ async fn handle_hub_key_from_mnemonic(fid: u64) -> Result<()> {
 
     // Check if key already exists
     let eth_keys_file =
-        crate::encrypted_eth_key_manager::EncryptedEthKeyManager::default_keys_file()?;
+        crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::default_keys_file()?;
     let mut eth_manager =
-        crate::encrypted_eth_key_manager::EncryptedEthKeyManager::load_from_file(&eth_keys_file)?;
+        crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::load_from_file(
+            &eth_keys_file,
+        )?;
 
     let eth_exists = eth_manager.has_key(fid);
 
@@ -172,7 +182,10 @@ async fn handle_hub_key_from_mnemonic(fid: u64) -> Result<()> {
         println!("⚠️  ECDSA key already exists for FID: {fid}");
 
         print!("\nDo you want to replace the existing key? (y/N): ");
-        use std::io::{self, Write};
+        use std::io::Write;
+        use std::io::{
+            self,
+        };
         io::stdout().flush()?;
 
         let mut input = String::new();
@@ -190,13 +203,15 @@ async fn handle_hub_key_from_mnemonic(fid: u64) -> Result<()> {
     }
 
     // Prompt for recovery phrase interactively
-    let recovery_phrase =
-        crate::encrypted_eth_key_manager::prompt_password("Enter recovery phrase (mnemonic): ")?;
+    let recovery_phrase = crate::core::crypto::encrypted_storage::prompt_password(
+        "Enter recovery phrase (mnemonic): ",
+    )?;
 
     // Prompt for password
     let password =
-        crate::encrypted_eth_key_manager::prompt_password("Enter password for encryption: ")?;
-    let confirm_password = crate::encrypted_eth_key_manager::prompt_password("Confirm password: ")?;
+        crate::core::crypto::encrypted_storage::prompt_password("Enter password for encryption: ")?;
+    let confirm_password =
+        crate::core::crypto::encrypted_storage::prompt_password("Confirm password: ")?;
 
     if password != confirm_password {
         println!("❌ Passwords do not match!");
@@ -238,9 +253,11 @@ async fn handle_hub_key_delete(fid: u64) -> Result<()> {
     println!("{}", "=".repeat(40));
 
     let eth_keys_file =
-        crate::encrypted_eth_key_manager::EncryptedEthKeyManager::default_keys_file()?;
+        crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::default_keys_file()?;
     let mut eth_manager =
-        crate::encrypted_eth_key_manager::EncryptedEthKeyManager::load_from_file(&eth_keys_file)?;
+        crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::load_from_file(
+            &eth_keys_file,
+        )?;
 
     // Check if key exists
     if !eth_manager.has_key(fid) {
@@ -256,7 +273,10 @@ async fn handle_hub_key_delete(fid: u64) -> Result<()> {
 
     // Confirm deletion
     print!("\n⚠️  Are you sure you want to delete this key? (y/N): ");
-    use std::io::{self, Write};
+    use std::io::Write;
+    use std::io::{
+        self,
+    };
     io::stdout().flush()?;
 
     let mut input = String::new();

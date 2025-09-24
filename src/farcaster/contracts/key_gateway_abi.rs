@@ -5,16 +5,17 @@
 
 #![cfg(not(doctest))]
 
-use crate::farcaster::contracts::{
-    generated::keygateway_bindings::KeyGateway as KeyGatewayContract, types::ContractResult,
-};
 use anyhow::Result;
-use ethers::{
-    middleware::Middleware,
-    providers::{Http, Provider},
-    types::transaction::eip2718::TypedTransaction,
-    types::{Address, Bytes, U256},
-};
+use ethers::middleware::Middleware;
+use ethers::providers::Http;
+use ethers::providers::Provider;
+use ethers::types::transaction::eip2718::TypedTransaction;
+use ethers::types::Address;
+use ethers::types::Bytes;
+use ethers::types::U256;
+
+use crate::farcaster::contracts::generated::keygateway_bindings::KeyGateway as KeyGatewayContract;
+use crate::farcaster::contracts::types::ContractResult;
 
 /// ABI-based KeyGateway contract wrapper
 #[derive(Clone)]

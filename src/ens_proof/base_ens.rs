@@ -1,9 +1,15 @@
-use super::core::EnsProof;
-use anyhow::Result;
-use ethers::providers::{Http, Middleware, Provider};
-use ethers::types::transaction::eip2718::TypedTransaction;
-use ethers::types::{Address, TransactionRequest, H160};
 use std::str::FromStr;
+
+use anyhow::Result;
+use ethers::providers::Http;
+use ethers::providers::Middleware;
+use ethers::providers::Provider;
+use ethers::types::transaction::eip2718::TypedTransaction;
+use ethers::types::Address;
+use ethers::types::TransactionRequest;
+use ethers::types::H160;
+
+use super::core::EnsProof;
 
 impl EnsProof {
     /// Check if a specific Base subdomain exists and get its owner
@@ -150,15 +156,14 @@ impl EnsProof {
         dotenv::dotenv().ok();
 
         // Use appropriate RPC URL based on domain type
+        let config = crate::consts::get_config();
         let (rpc_url, chain_name) = if domain.ends_with(".base.eth") {
             // For Base subdomains, use Base chain RPC
-            let base_rpc = std::env::var("ETH_BASE_RPC_URL")
-                .or_else(|_| std::env::var("ETH_RPC_URL"))
-                .unwrap_or_else(|_| self.rpc_url.clone());
+            let base_rpc = config.eth_base_rpc_url().to_string();
             (base_rpc, "Base")
         } else {
             // For regular ENS domains, use ETH_RPC_URL
-            let eth_rpc = std::env::var("ETH_RPC_URL").unwrap_or_else(|_| self.rpc_url.clone());
+            let eth_rpc = config.eth_rpc_url().to_string();
             (eth_rpc, "Ethereum")
         };
 
@@ -299,7 +304,8 @@ impl EnsProof {
     /// # Returns
     /// * `Result<[u8; 32]>` - The namehash as a 32-byte array
     fn calculate_namehash(&self, domain: &str) -> Result<[u8; 32]> {
-        use tiny_keccak::{Hasher, Keccak};
+        use tiny_keccak::Hasher;
+        use tiny_keccak::Keccak;
 
         // Split domain into labels
         let labels: Vec<&str> = domain.split('.').collect();
@@ -325,28 +331,9 @@ impl EnsProof {
         Ok(node)
     }
 
-    /// Get Base subdomains (like *.base.eth) for a given address
-    ///
-    /// ⚠️  Note: Base chain reverse lookup is not currently supported.
-    /// Base subdomains are not indexed by The Graph API, and direct
-    /// contract queries would require enumerating all possible subdomains.
-    ///
-    /// # Arguments
-    /// * `address` - The Ethereum address to query
-    ///
-    /// # Returns
-    /// * `Result<Vec<String>>` - Empty vector (Base chain not supported)
-    pub async fn get_base_subdomains_by_address(&self, _address: &str) -> Result<Vec<String>> {
-        // Base chain reverse lookup is not currently supported
-        // The Graph API doesn't index Base subdomains, and direct
-        // contract queries would require enumerating all possible subdomains
-        Ok(Vec::new())
-    }
-
     /// Get all ENS domains for a given address
     ///
     /// This method queries for regular ENS domains owned by the address.
-    /// Note: Base subdomains (*.base.eth) reverse lookup is not currently supported.
     ///
     /// # Arguments
     /// * `address` - The Ethereum address to query
@@ -354,8 +341,6 @@ impl EnsProof {
     /// # Returns
     /// * `Result<Vec<String>>` - List of ENS domains owned by the address
     pub async fn get_all_ens_domains_by_address(&self, address: &str) -> Result<Vec<String>> {
-        // Only query regular ENS domains
-        // Base subdomains reverse lookup is not currently supported
         self.get_ens_domains_by_address(address).await
     }
 }

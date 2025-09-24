@@ -1,9 +1,15 @@
 use anyhow::Result;
 
-pub async fn handle_generate_encrypted() -> Result<()> {
-    use crate::encrypted_key_manager::{prompt_password, EncryptedKeyManager};
+pub async fn handle_generate_encrypted(storage_path: Option<&str>) -> Result<()> {
+    use std::io::Write;
+    use std::io::{
+        self,
+    };
+
     use ethers::signers::Signer;
-    use std::io::{self, Write};
+
+    use crate::encrypted_key_manager::prompt_password;
+    use crate::encrypted_key_manager::EncryptedKeyManager;
 
     println!("🔐 Generate Encrypted Private Key");
     println!("{}", "=".repeat(40));
@@ -22,7 +28,13 @@ pub async fn handle_generate_encrypted() -> Result<()> {
 
     // Generate private key and show address
     println!("\n🔑 Generating new private key...");
-    let mut manager = EncryptedKeyManager::default_config();
+    let mut manager = if let Some(path) = storage_path {
+        // Construct the keys directory path
+        let keys_path = format!("{}/keys", path);
+        EncryptedKeyManager::new(&keys_path)
+    } else {
+        EncryptedKeyManager::default_config()
+    };
     let temp_private_key = manager.generate_private_key()?;
     let private_key_bytes = temp_private_key.to_bytes();
     let temp_wallet = ethers::signers::LocalWallet::from(temp_private_key);
@@ -65,7 +77,12 @@ pub async fn handle_generate_encrypted() -> Result<()> {
             println!("✅ Encrypted key saved successfully!");
             println!("   Key Name: {key_name}");
             println!("   Address: {address}");
-            println!("   Storage: ~/.castorix/keys/{key_name}.json");
+            let storage_path = if let Some(path) = storage_path {
+                format!("{}/keys/{key_name}.json", path)
+            } else {
+                format!("~/.castorix/keys/{key_name}.json")
+            };
+            println!("   Storage: {storage_path}");
         }
         Err(e) => println!("❌ Failed to save encrypted key: {e}"),
     }
@@ -73,11 +90,18 @@ pub async fn handle_generate_encrypted() -> Result<()> {
     Ok(())
 }
 
-pub async fn handle_load_key(key_name: String) -> Result<()> {
-    use crate::encrypted_key_manager::{prompt_password, EncryptedKeyManager};
+pub async fn handle_load_key(key_name: String, storage_path: Option<&str>) -> Result<()> {
+    use crate::encrypted_key_manager::prompt_password;
+    use crate::encrypted_key_manager::EncryptedKeyManager;
 
     println!("🔓 Loading encrypted key: {key_name}");
-    let mut manager = EncryptedKeyManager::default_config();
+    let mut manager = if let Some(path) = storage_path {
+        // Construct the keys directory path
+        let keys_path = format!("{}/keys", path);
+        EncryptedKeyManager::new(&keys_path)
+    } else {
+        EncryptedKeyManager::default_config()
+    };
 
     if !manager.key_exists(&key_name) {
         println!("❌ Key '{key_name}' not found!");
@@ -97,10 +121,16 @@ pub async fn handle_load_key(key_name: String) -> Result<()> {
     Ok(())
 }
 
-pub async fn handle_list_keys() -> Result<()> {
+pub async fn handle_list_keys(storage_path: Option<&str>) -> Result<()> {
     use crate::encrypted_key_manager::EncryptedKeyManager;
 
-    let manager = EncryptedKeyManager::default_config();
+    let manager = if let Some(path) = storage_path {
+        // Construct the keys directory path
+        let keys_path = format!("{}/keys", path);
+        EncryptedKeyManager::new(&keys_path)
+    } else {
+        EncryptedKeyManager::default_config()
+    };
     match manager.list_keys_with_info() {
         Ok(key_infos) => {
             if key_infos.is_empty() {
@@ -127,12 +157,20 @@ pub async fn handle_list_keys() -> Result<()> {
     Ok(())
 }
 
-pub async fn handle_delete_key(key_name: String) -> Result<()> {
-    use crate::encrypted_key_manager::{prompt_password, EncryptedKeyManager};
+pub async fn handle_delete_key(key_name: String, storage_path: Option<&str>) -> Result<()> {
     use std::fs;
 
+    use crate::encrypted_key_manager::prompt_password;
+    use crate::encrypted_key_manager::EncryptedKeyManager;
+
     println!("🗑️  Deleting encrypted key: {key_name}");
-    let manager = EncryptedKeyManager::default_config();
+    let manager = if let Some(path) = storage_path {
+        // Construct the keys directory path
+        let keys_path = format!("{}/keys", path);
+        EncryptedKeyManager::new(&keys_path)
+    } else {
+        EncryptedKeyManager::default_config()
+    };
 
     if !manager.key_exists(&key_name) {
         println!("❌ Key '{key_name}' not found!");
@@ -142,11 +180,21 @@ pub async fn handle_delete_key(key_name: String) -> Result<()> {
     let password = prompt_password("Enter password to confirm deletion: ")?;
 
     // Verify password by trying to load the key
-    let mut temp_manager = EncryptedKeyManager::default_config();
+    let mut temp_manager = if let Some(path) = storage_path {
+        // Construct the keys directory path
+        let keys_path = format!("{}/keys", path);
+        EncryptedKeyManager::new(&keys_path)
+    } else {
+        EncryptedKeyManager::default_config()
+    };
     match temp_manager.load_and_decrypt(&password, &key_name).await {
         Ok(_) => {
             // Password is correct, proceed with deletion
-            let key_path = format!("~/.castorix/keys/{key_name}.json");
+            let key_path = if let Some(path) = storage_path {
+                format!("{}/{key_name}.json", path)
+            } else {
+                format!("~/.castorix/keys/{key_name}.json")
+            };
             let expanded_path = shellexpand::tilde(&key_path).to_string();
 
             match fs::remove_file(&expanded_path) {
@@ -162,11 +210,22 @@ pub async fn handle_delete_key(key_name: String) -> Result<()> {
     Ok(())
 }
 
-pub async fn handle_rename_key(old_name: String, new_name: String) -> Result<()> {
-    use crate::encrypted_key_manager::{prompt_password, EncryptedKeyManager};
+pub async fn handle_rename_key(
+    old_name: String,
+    new_name: String,
+    storage_path: Option<&str>,
+) -> Result<()> {
+    use crate::encrypted_key_manager::prompt_password;
+    use crate::encrypted_key_manager::EncryptedKeyManager;
 
     println!("🔄 Renaming encrypted key: {old_name} → {new_name}");
-    let mut manager = EncryptedKeyManager::default_config();
+    let mut manager = if let Some(path) = storage_path {
+        // Construct the keys directory path
+        let keys_path = format!("{}/keys", path);
+        EncryptedKeyManager::new(&keys_path)
+    } else {
+        EncryptedKeyManager::default_config()
+    };
 
     if !manager.key_exists(&old_name) {
         println!("❌ Key '{old_name}' not found!");
@@ -186,11 +245,22 @@ pub async fn handle_rename_key(old_name: String, new_name: String) -> Result<()>
     Ok(())
 }
 
-pub async fn handle_update_alias(key_name: String, new_alias: String) -> Result<()> {
-    use crate::encrypted_key_manager::{prompt_password, EncryptedKeyManager};
+pub async fn handle_update_alias(
+    key_name: String,
+    new_alias: String,
+    storage_path: Option<&str>,
+) -> Result<()> {
+    use crate::encrypted_key_manager::prompt_password;
+    use crate::encrypted_key_manager::EncryptedKeyManager;
 
     println!("🏷️  Updating alias for key: {key_name}");
-    let mut manager = EncryptedKeyManager::default_config();
+    let mut manager = if let Some(path) = storage_path {
+        // Construct the keys directory path
+        let keys_path = format!("{}/keys", path);
+        EncryptedKeyManager::new(&keys_path)
+    } else {
+        EncryptedKeyManager::default_config()
+    };
 
     if !manager.key_exists(&key_name) {
         println!("❌ Key '{key_name}' not found!");
@@ -210,11 +280,17 @@ pub async fn handle_update_alias(key_name: String, new_alias: String) -> Result<
     Ok(())
 }
 
-pub async fn handle_import_key() -> Result<()> {
-    use crate::encrypted_key_manager::{prompt_password, EncryptedKeyManager};
-    use ethers::signers::Signer;
-    use std::io::{self, Write};
+pub async fn handle_import_key(storage_path: Option<&str>) -> Result<()> {
+    use std::io::Write;
+    use std::io::{
+        self,
+    };
     use std::str::FromStr;
+
+    use ethers::signers::Signer;
+
+    use crate::encrypted_key_manager::prompt_password;
+    use crate::encrypted_key_manager::EncryptedKeyManager;
 
     println!("📥 Import Private Key");
     println!("{}", "=".repeat(40));
@@ -263,7 +339,13 @@ pub async fn handle_import_key() -> Result<()> {
             }
 
             // Encrypt and save
-            let mut manager = EncryptedKeyManager::default_config();
+            let mut manager = if let Some(path) = storage_path {
+                // Construct the keys directory path
+                let keys_path = format!("{}/keys", path);
+                EncryptedKeyManager::new(&keys_path)
+            } else {
+                EncryptedKeyManager::default_config()
+            };
             match manager
                 .import_and_encrypt(&private_key, &password, &key_name, &key_name)
                 .await

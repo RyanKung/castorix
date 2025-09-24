@@ -1,14 +1,22 @@
-use crate::{
-    key_manager::KeyManager,
-    message::{FarcasterNetwork, HashScheme, Message, MessageData, MessageType, SignatureScheme},
-    username_proof::{UserNameProof, UserNameType},
-};
-use anyhow::{Context, Result};
+use anyhow::Context;
+use anyhow::Result;
 use chrono::Utc;
-use ed25519_dalek::{Signer as Ed25519Signer, SigningKey};
+use ed25519_dalek::Signer as Ed25519Signer;
+use ed25519_dalek::SigningKey;
 use protobuf::Message as ProtobufMessage;
 use reqwest::Client;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
+
+use crate::core::crypto::key_manager::KeyManager;
+use crate::core::protocol::message::FarcasterNetwork;
+use crate::core::protocol::message::HashScheme;
+use crate::core::protocol::message::Message;
+use crate::core::protocol::message::MessageData;
+use crate::core::protocol::message::MessageType;
+use crate::core::protocol::message::SignatureScheme;
+use crate::core::protocol::username_proof::UserNameProof;
+use crate::core::protocol::username_proof::UserNameType;
 
 /// Farcaster Hub client for submitting messages and proofs
 pub struct FarcasterClient {
@@ -102,11 +110,9 @@ impl FarcasterClient {
     /// # Returns
     /// * `Result<Self>` - The FarcasterClient instance or an error
     pub fn from_env() -> Result<Self> {
-        let key_manager = KeyManager::from_env("PRIVATE_KEY")?;
-        let hub_url = std::env::var("FARCASTER_HUB_URL")
-            .unwrap_or_else(|_| "https://hub-api.neynar.com".to_string());
-
-        Ok(Self::with_key_manager(hub_url, key_manager))
+        Err(anyhow::anyhow!(
+            "Hub client requires a wallet name. Use FarcasterClient::with_key_manager() instead."
+        ))
     }
 
     /// Create a new Farcaster client without authentication (read-only operations)
@@ -217,9 +223,10 @@ impl FarcasterClient {
     ) -> Result<HubResponse> {
         // Load encrypted Ed25519 key manager
         let keys_file =
-            crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::default_keys_file()?;
+            crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::default_keys_file(
+            )?;
         let ed25519_manager =
-            crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::load_from_file(
+            crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::load_from_file(
                 &keys_file,
             )?;
 
@@ -229,7 +236,7 @@ impl FarcasterClient {
         }
 
         // Prompt for password
-        let password = crate::encrypted_ed25519_key_manager::prompt_password(&format!(
+        let password = crate::core::crypto::encrypted_storage::prompt_password(&format!(
             "Enter password for FID {fid}: "
         ))?;
 
@@ -688,9 +695,10 @@ impl FarcasterClient {
     async fn get_ed25519_private_key_for_fid(&self, fid: u64) -> Result<Vec<u8>> {
         // Load encrypted Ed25519 key manager
         let keys_file =
-            crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::default_keys_file()?;
+            crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::default_keys_file(
+            )?;
         let ed25519_manager =
-            crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::load_from_file(
+            crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::load_from_file(
                 &keys_file,
             )?;
 
@@ -700,7 +708,7 @@ impl FarcasterClient {
         }
 
         // Prompt for password
-        let password = crate::encrypted_ed25519_key_manager::prompt_password(&format!(
+        let password = crate::core::crypto::encrypted_storage::prompt_password(&format!(
             "Enter password for FID {fid}: "
         ))?;
 
@@ -1019,9 +1027,9 @@ impl FarcasterClient {
 pub async fn get_ed25519_public_key_for_fid(fid: u64) -> Result<String> {
     // Load encrypted Ed25519 key manager
     let keys_file =
-        crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::default_keys_file()?;
+        crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::default_keys_file()?;
     let ed25519_manager =
-        crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::load_from_file(
+        crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::load_from_file(
             &keys_file,
         )?;
 
@@ -1051,18 +1059,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_farcaster_client_from_env() {
-        // Set test environment variables
-        std::env::set_var(
-            "PRIVATE_KEY",
-            "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-        );
-        std::env::set_var("FARCASTER_HUB_URL", "https://hub-api.neynar.com");
-
+        // Test that from_env now returns an error (environment variables are no longer allowed)
         let result = FarcasterClient::from_env();
-        assert!(result.is_ok());
-
-        // Clean up
-        std::env::remove_var("PRIVATE_KEY");
-        std::env::remove_var("FARCASTER_HUB_URL");
+        assert!(result.is_err());
     }
 }

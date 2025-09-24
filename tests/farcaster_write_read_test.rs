@@ -1,11 +1,17 @@
+use std::str::FromStr;
+
 use anyhow::Result;
 use castorix::farcaster::contracts::FarcasterContractClient;
-use ethers::{
-    providers::{Http, Middleware, Provider},
-    signers::{LocalWallet, Signer},
-    types::{Address, TransactionReceipt, TransactionRequest, H256, U256},
-};
-use std::str::FromStr;
+use ethers::providers::Http;
+use ethers::providers::Middleware;
+use ethers::providers::Provider;
+use ethers::signers::LocalWallet;
+use ethers::signers::Signer;
+use ethers::types::Address;
+use ethers::types::TransactionReceipt;
+use ethers::types::TransactionRequest;
+use ethers::types::H256;
+use ethers::types::U256;
 
 /// Test configuration for write-read operations
 #[derive(Debug, Clone)]
@@ -27,9 +33,7 @@ impl WriteReadTestConfig {
                 println!("✅ Network connection successful! Chain ID: {}", chain_id);
             }
             Err(e) => {
-                println!("⚠️  Network connection failed: {}", e);
-                println!("   This may be due to proxy interference (Surge)");
-                println!("   Tests will continue but may fail...");
+                panic!("❌ Network connection failed: {}. This may be due to proxy interference (Surge). Tests cannot continue.", e);
             }
         }
 
@@ -173,11 +177,6 @@ impl WriteReadTestClient {
 
     /// Test basic transaction sending and verification
     pub async fn test_basic_transaction_write_read(&self) -> Result<()> {
-        if std::env::var("RUNNING_TESTS").is_err() {
-            println!("⏭️  Skipping test (not in test environment)");
-            return Ok(());
-        }
-
         println!("💸 Testing Basic Transaction Write-Read Flow...");
 
         // 1. Read initial state
@@ -261,11 +260,6 @@ impl WriteReadTestClient {
 
     /// Test contract call with write-read verification
     pub async fn test_contract_call_write_read(&self) -> Result<()> {
-        if std::env::var("RUNNING_TESTS").is_err() {
-            println!("⏭️  Skipping test (not in test environment)");
-            return Ok(());
-        }
-
         println!("📋 Testing Contract Call Write-Read Flow...");
 
         // 1. Read initial contract state
@@ -321,7 +315,7 @@ impl WriteReadTestClient {
         // Just verify both calls completed (ContractResult doesn't implement PartialEq)
         println!("   Initial total supply result: {:?}", initial_total_supply);
         println!("   Final total supply result: {:?}", final_total_supply);
-        println!("⚠️  Contract calls may return errors on local Anvil (this is expected)");
+        // Note: Contract calls may return errors on local Anvil (this is expected)
 
         println!("✅ Contract call write-read test completed successfully!");
 
@@ -330,11 +324,6 @@ impl WriteReadTestClient {
 
     /// Test network state changes
     pub async fn test_network_state_write_read(&self) -> Result<()> {
-        if std::env::var("RUNNING_TESTS").is_err() {
-            println!("⏭️  Skipping test (not in test environment)");
-            return Ok(());
-        }
-
         println!("🌐 Testing Network State Write-Read Flow...");
 
         // 1. Read initial network state
@@ -394,11 +383,6 @@ impl WriteReadTestClient {
 
     /// Test complete write-read flow
     pub async fn test_complete_write_read_flow(&self) -> Result<()> {
-        if std::env::var("RUNNING_TESTS").is_err() {
-            println!("⏭️  Skipping test (not in test environment)");
-            return Ok(());
-        }
-
         println!("🌟 Testing Complete Write-Read Flow...");
 
         // Test all write-read operations (in order to avoid nonce conflicts)

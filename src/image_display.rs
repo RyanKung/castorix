@@ -1,6 +1,7 @@
+use std::io::Write;
+
 use anyhow::Result;
 use image::GenericImageView;
-use std::io::Write;
 use tempfile::NamedTempFile;
 
 /// Display profile picture in terminal using different methods
@@ -75,14 +76,7 @@ impl ImageDisplay {
 
     /// Calculate display size based on terminal line spacing
     fn calculate_display_size() -> (u32, u32) {
-        // Check for custom aspect ratio in environment variable
-        if let Ok(ratio) = std::env::var("CASTORIX_IMAGE_RATIO") {
-            if let Ok(ratio_value) = ratio.parse::<f32>() {
-                let width = 40;
-                let height = (width as f32 / ratio_value) as u32;
-                return (width, height);
-            }
-        }
+        // Use default display size
 
         // Fixed dimensions for optimal display (increased by 30%)
         let width = 56; // 增加30%宽度 (43 * 1.3)

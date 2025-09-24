@@ -1,0 +1,5 @@
+# Rustfmt configuration for import formatting
+imports_granularity = "Item"
+group_imports = "StdExternalCrate"
+imports_layout = "Vertical"
+imports_indent = "Block"

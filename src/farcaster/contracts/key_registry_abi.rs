@@ -5,15 +5,14 @@
 
 #![cfg(not(doctest))]
 
-use crate::farcaster::contracts::{
-    generated::keyregistry_bindings::KeyRegistry as KeyRegistryContract,
-    types::{ContractResult, Fid},
-};
 use anyhow::Result;
-use ethers::{
-    providers::{Http, Provider},
-    types::Address,
-};
+use ethers::providers::Http;
+use ethers::providers::Provider;
+use ethers::types::Address;
+
+use crate::farcaster::contracts::generated::keyregistry_bindings::KeyRegistry as KeyRegistryContract;
+use crate::farcaster::contracts::types::ContractResult;
+use crate::farcaster::contracts::types::Fid;
 
 /// ABI-based KeyRegistry contract wrapper
 #[derive(Clone)]
