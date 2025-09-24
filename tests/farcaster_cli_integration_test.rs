@@ -232,7 +232,7 @@ async fn test_environment_configuration() {
     // Test with placeholder values
     setup_placeholder_test_env();
 
-    let output = Command::new("./target/debug/castorix")
+    let output = Command::new("./target/aarch64-apple-darwin/debug/castorix")
         .args(["fid", "price"])
         .output();
 
@@ -272,7 +272,7 @@ async fn test_cli_argument_parsing() {
     for (args, description) in test_cases {
         println!("   Testing {}...", description);
 
-        let output = Command::new("./target/debug/castorix").args(&args).output();
+        let output = Command::new("./target/aarch64-apple-darwin/debug/castorix").args(&args).output();
 
         match output {
             Ok(output) => {

@@ -26,7 +26,7 @@ pub fn setup_local_base_test_env() {
 /// Set up placeholder URLs for configuration validation testing
 #[allow(dead_code)]
 pub fn setup_placeholder_test_env() {
-    env::set_var("ETH_OP_RPC_URL", "https://www.optimism.io/");
+    env::set_var("ETH_OP_RPC_URL", "https://mainnet.optimism.io");
     env::set_var(
         "ETH_RPC_URL",
         "https://eth-mainnet.g.alchemy.com/v2/your_api_key_here",

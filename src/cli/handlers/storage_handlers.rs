@@ -255,9 +255,9 @@ async fn handle_storage_rent(
     println!("✅ Proceeding with storage rental...");
 
     // Rent storage
-    // Note: If payment wallet is different from custody wallet, we need to handle this differently
-    // For now, we'll use the custody wallet for both authorization and payment
-    // TODO: Implement separate payment wallet support in FarcasterContractClient
+    // Note: If payment wallet is different from custody wallet, we detect it and warn the user
+    // Currently using custody wallet for both authorization and payment (FarcasterContractClient limitation)
+    // TODO: Enhance FarcasterContractClient to support separate payment wallets
     let result = if payment_wallet.address() != custody_wallet.address() {
         println!(
             "⚠️  Note: Payment wallet {} differs from custody wallet {}",
