@@ -2,6 +2,11 @@
 
 # Pre-commit hook for castorix project
 # This hook runs cargo fmt and cargo clippy --fix before allowing commits
+#
+# Testing Strategy:
+# - Pre-commit: Only runs unit tests (fast, no external dependencies)
+# - Local development: Use 'make test-local' for integration tests with Anvil nodes
+# - CI: GitHub Actions manages Anvil nodes and runs all tests
 
 set -e
 
@@ -56,12 +61,20 @@ fi
 echo "🧪 Running quick unit tests..."
 cargo test --lib --quiet
 
+echo "🔍 Checking for integration test dependencies..."
+if grep -r "anvil\|Anvil" tests/ --include="*.rs" > /dev/null 2>&1; then
+    echo "ℹ️  Integration tests detected (require Anvil nodes)"
+    echo "   Use 'make test-local' to run integration tests locally"
+    echo "   CI will run integration tests with pre-started nodes"
+fi
+
 echo "✅ Pre-commit checks passed!"
 echo "📋 Summary:"
 echo "   - Code formatted with nightly rustfmt"
 echo "   - Clippy auto-fixes applied"
 echo "   - Import formatting validated"
 echo "   - Unit tests passed"
+echo "   - Integration tests skipped (require Anvil nodes)"
 echo "   - Ready to commit"
 
 exit 0

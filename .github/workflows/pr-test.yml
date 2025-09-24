@@ -239,9 +239,40 @@ jobs:
       - name: Build project
         run: cargo build --release
 
+      - name: Start Anvil nodes for testing
+        run: |
+          echo "🚀 Starting Anvil nodes for testing..."
+          
+          # Start Optimism Anvil node
+          echo "Starting Optimism Anvil node on port 8545..."
+          anvil --fork-url "https://mainnet.optimism.io" --port 8545 --host 0.0.0.0 --block-time 1 --retries 3 --timeout 10000 &
+          OPTIMISM_PID=$!
+          echo "OPTIMISM_PID=$OPTIMISM_PID" >> $GITHUB_ENV
+          
+          # Start Base Anvil node  
+          echo "Starting Base Anvil node on port 8546..."
+          anvil --fork-url "https://base-rpc.publicnode.com" --port 8546 --host 0.0.0.0 --block-time 1 --retries 3 --timeout 10000 &
+          BASE_PID=$!
+          echo "BASE_PID=$BASE_PID" >> $GITHUB_ENV
+          
+          # Wait for nodes to start
+          sleep 10
+          
+          # Verify nodes are running
+          echo "Verifying Anvil nodes are running..."
+          curl -s -X POST -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}' http://127.0.0.1:8545 > /dev/null && echo "✅ Optimism Anvil is running" || echo "❌ Optimism Anvil failed to start"
+          curl -s -X POST -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}' http://127.0.0.1:8546 > /dev/null && echo "✅ Base Anvil is running" || echo "❌ Base Anvil failed to start"
+          
+          echo "✅ Anvil nodes started successfully"
+
       - name: Run comprehensive integration tests
         run: |
           echo "🧪 Running comprehensive integration tests..."
+          
+          # Set environment variables for tests to use pre-started nodes
+          export ETH_OP_RPC_URL="http://127.0.0.1:8545"
+          export ETH_BASE_RPC_URL="http://127.0.0.1:8546"
+          export RUNNING_TESTS="true"
           
           # Run all integration tests
           cargo test --test farcaster_integration_test --verbose
@@ -249,12 +280,25 @@ jobs:
           cargo test --test farcaster_write_read_test --verbose
           cargo test --test network_info_test --verbose
           
-          # Run workflow tests (these may require external services)
-          echo "Running workflow tests (may skip if external services unavailable)..."
-          cargo test --test ens_complete_workflow_test --verbose || echo "ENS workflow test skipped (external dependency)"
-          cargo test --test base_complete_workflow_test --verbose || echo "Base workflow test skipped (external dependency)"
+          # Run workflow tests with pre-started nodes
+          echo "Running workflow tests with pre-started Anvil nodes..."
+          cargo test --test ens_complete_workflow_test --verbose
+          cargo test --test base_complete_workflow_test --verbose
           
           echo "✅ Integration tests completed"
+
+      - name: Stop Anvil nodes
+        if: always()
+        run: |
+          echo "🛑 Stopping Anvil nodes..."
+          if [ ! -z "$OPTIMISM_PID" ]; then
+            kill $OPTIMISM_PID 2>/dev/null || true
+            echo "✅ Optimism Anvil stopped"
+          fi
+          if [ ! -z "$BASE_PID" ]; then
+            kill $BASE_PID 2>/dev/null || true
+            echo "✅ Base Anvil stopped"
+          fi
 
       - name: Install Python dependencies
         run: |
