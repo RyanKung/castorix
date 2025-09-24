@@ -170,6 +170,12 @@ pub struct EncryptedEthKeyManager {
     inner: EncryptedEthKeyManagerImpl,
 }
 
+impl Default for EncryptedEd25519KeyManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl EncryptedEd25519KeyManager {
     /// Create a new instance
     pub fn new() -> Self {
@@ -286,6 +292,12 @@ impl EncryptedKeyManager for EncryptedEd25519KeyManager {
         password: &str,
     ) -> Result<ed25519_dalek::VerifyingKey, CryptoError> {
         self.get_verifying_key(fid, password)
+    }
+}
+
+impl Default for EncryptedEthKeyManager {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

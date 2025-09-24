@@ -768,9 +768,9 @@ impl FarcasterContractClient {
 
         // This method requires the FID owner to provide a real signature
         // The signature must be created by the FID owner's wallet off-chain
-        return Ok(ContractResult::Error(
+        Ok(ContractResult::Error(
             "Third-party signer registration requires a real signature from the FID owner. This feature is not implemented.".to_string()
-        ));
+        ))
     }
 
     /// Register a signer key with pre-generated metadata (for third-party registration)
