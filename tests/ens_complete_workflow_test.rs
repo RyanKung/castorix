@@ -3,6 +3,9 @@ use std::process::Stdio;
 use std::thread;
 use std::time::Duration;
 
+// Add reqwest and serde_json for HTTP client functionality
+// These are already available in the test dependencies
+
 mod test_consts;
 use test_consts::setup_local_test_env;
 
@@ -37,55 +40,42 @@ async fn test_complete_ens_workflow() {
             std::env::var("RUNNING_TESTS").unwrap_or_else(|_| "not set".to_string())
         );
 
-        // Verify Anvil is running on expected ports
-        if !verify_anvil_running().await {
+        // Verify both Anvil nodes are running on expected ports
+        let op_running = verify_anvil_running("Optimism", "http://127.0.0.1:8545").await;
+        let base_running = verify_anvil_running("Base", "http://127.0.0.1:8546").await;
+
+        if !op_running || !base_running {
             println!("❌ Pre-started Anvil node verification failed");
             println!("🔍 Debugging information:");
-            println!("  - Checking port 8545...");
-
-            // Try to get more detailed error information
-            let curl_output = Command::new("curl")
-                .args([
-                    "-v",
-                    "-s",
-                    "-X",
-                    "POST",
-                    "-H",
-                    "Content-Type: application/json",
-                    "-d",
-                    r#"{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}"#,
-                    "http://127.0.0.1:8545",
-                ])
-                .output();
-
-            match curl_output {
-                Ok(output) => {
-                    println!("  - Curl exit status: {}", output.status);
-                    println!(
-                        "  - Curl stdout: {}",
-                        String::from_utf8_lossy(&output.stdout)
-                    );
-                    println!(
-                        "  - Curl stderr: {}",
-                        String::from_utf8_lossy(&output.stderr)
-                    );
+            println!(
+                "  - Optimism node (8545): {}",
+                if op_running {
+                    "✅ Running"
+                } else {
+                    "❌ Not responding"
                 }
-                Err(e) => {
-                    println!("  - Curl failed to execute: {}", e);
+            );
+            println!(
+                "  - Base node (8546): {}",
+                if base_running {
+                    "✅ Running"
+                } else {
+                    "❌ Not responding"
                 }
-            }
+            );
 
             panic!(
-                "❌ Pre-started Anvil node not available - integration test cannot proceed without blockchain node.\n\
+                "❌ Pre-started Anvil nodes not available - ENS test requires both Optimism and Base nodes.\n\
                 \n\
                 Debug info:\n\
                 - RUNNING_TESTS env var: {}\n\
-                - Expected Anvil on port 8545\n\
+                - Expected Optimism Anvil on port 8545\n\
+                - Expected Base Anvil on port 8546\n\
                 - Check workflow logs for Anvil startup errors",
                 std::env::var("RUNNING_TESTS").unwrap_or_else(|_| "not set".to_string())
             );
         }
-        println!("✅ Pre-started Anvil node is running");
+        println!("✅ Both pre-started Anvil nodes are running");
     } else {
         println!("🏠 Starting local Anvil node for local testing...");
         let anvil_handle = start_local_anvil().await;
@@ -94,7 +84,7 @@ async fn test_complete_ens_workflow() {
         thread::sleep(Duration::from_secs(3));
 
         // Verify Anvil is running - FAIL if not available
-        if !verify_anvil_running().await {
+        if !verify_anvil_running("Local Optimism", "http://127.0.0.1:8545").await {
             println!("❌ Anvil failed to start - trying to start manually...");
             println!("💡 Use 'make start-nodes' to start Anvil nodes, then run 'make test-ci'");
             println!("💡 Or use 'make test-local' to start nodes and run tests automatically");
@@ -208,32 +198,33 @@ async fn start_local_anvil() -> Option<std::process::Child> {
     }
 }
 
-/// Verify that Anvil is running
-async fn verify_anvil_running() -> bool {
-    let output = Command::new("curl")
-        .args([
-            "-s",
-            "-X",
-            "POST",
-            "-H",
-            "Content-Type: application/json",
-            "-d",
-            r#"{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}"#,
-            "http://127.0.0.1:8545",
-        ])
-        .output();
+/// Verify Anvil is running by checking if it responds to RPC calls
+async fn verify_anvil_running(node_name: &str, url: &str) -> bool {
+    let client = reqwest::Client::new();
+    let payload = serde_json::json!({
+        "jsonrpc": "2.0",
+        "method": "eth_blockNumber",
+        "params": [],
+        "id": 1
+    });
 
-    match output {
-        Ok(output) => {
-            if output.status.success() {
-                let response = String::from_utf8_lossy(&output.stdout);
-                response.contains("result")
-            } else {
-                false
+    match client.post(url).json(&payload).send().await {
+        Ok(response) => {
+            if response.status().is_success() {
+                if let Ok(text) = response.text().await {
+                    if text.contains("result") {
+                        println!("✅ {} RPC is responding", node_name);
+                        return true;
+                    }
+                }
             }
         }
-        Err(_) => false,
+        Err(e) => {
+            println!("❌ {} RPC error: {}", node_name, e);
+        }
     }
+
+    false
 }
 
 /// Test encrypted key generation

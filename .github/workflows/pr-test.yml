@@ -245,13 +245,13 @@ jobs:
           
           # Start Optimism Anvil node
           echo "Starting Optimism Anvil node on port 8545..."
-          nohup anvil --fork-url "https://mainnet.optimism.io" --port 8545 --host 0.0.0.0 --block-time 1 --retries 3 --timeout 10000 > anvil_optimism.log 2>&1 &
+          nohup anvil --fork-url "https://mainnet.optimism.io" --port 8545 --host 0.0.0.0 --block-time 1 --retries 5 --timeout 30000 --fork-retries 5 > anvil_optimism.log 2>&1 &
           OPTIMISM_PID=$!
           echo "OPTIMISM_PID=$OPTIMISM_PID" >> $GITHUB_ENV
           
           # Start Base Anvil node  
           echo "Starting Base Anvil node on port 8546..."
-          nohup anvil --fork-url "https://base-rpc.publicnode.com" --port 8546 --host 0.0.0.0 --block-time 1 --retries 3 --timeout 10000 > anvil_base.log 2>&1 &
+          nohup anvil --fork-url "https://base-rpc.publicnode.com" --port 8546 --host 0.0.0.0 --block-time 1 --retries 5 --timeout 30000 --fork-retries 5 > anvil_base.log 2>&1 &
           BASE_PID=$!
           echo "BASE_PID=$BASE_PID" >> $GITHUB_ENV
           
