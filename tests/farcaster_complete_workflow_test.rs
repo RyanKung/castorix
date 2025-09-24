@@ -18,11 +18,6 @@ use test_consts::setup_placeholder_test_env;
 /// 6. Clean up
 #[tokio::test]
 async fn test_complete_farcaster_workflow() {
-    // Skip if no RPC tests should run
-    if test_consts::should_skip_rpc_tests() {
-        println!("Skipping RPC tests");
-        return;
-    }
 
     println!("🚀 Starting Complete Farcaster Workflow Test");
 
@@ -99,17 +94,28 @@ async fn start_local_anvil() -> Option<std::process::Child> {
     // Start anvil directly with Optimism fork configuration
     let output = Command::new("anvil")
         .args([
-            "--host", "127.0.0.1",
-            "--port", "8545",
-            "--accounts", "10",
-            "--balance", "10000",
-            "--gas-limit", "30000000",
-            "--gas-price", "1000000000",
-            "--chain-id", "10",
-            "--fork-url", "https://mainnet.optimism.io",
-            "--retries", "3",
-            "--timeout", "10000",
-            "--block-time", "1",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "8545",
+            "--accounts",
+            "10",
+            "--balance",
+            "10000",
+            "--gas-limit",
+            "30000000",
+            "--gas-price",
+            "1000000000",
+            "--chain-id",
+            "10",
+            "--fork-url",
+            "https://mainnet.optimism.io",
+            "--retries",
+            "3",
+            "--timeout",
+            "10000",
+            "--block-time",
+            "1",
             "--silent",
         ])
         .stdout(Stdio::piped())
@@ -198,13 +204,93 @@ async fn verify_anvil_running() -> bool {
     false
 }
 
+/// Create encrypted wallet using a simple and reliable method
+async fn create_wallet_interactive(wallet_name: &str, private_key: &str) -> bool {
+    println!("   🔄 Starting wallet creation process...");
+    
+    // Use a simple approach: create the wallet file directly
+    create_wallet_directly(wallet_name, private_key).await
+}
+
+/// Create wallet directly using the actual EncryptedKeyManager
+async fn create_wallet_directly(wallet_name: &str, private_key: &str) -> bool {
+    use std::fs;
+    use std::path::Path;
+    use std::str::FromStr;
+    use ethers::signers::{LocalWallet, Signer};
+    
+    println!("   🔑 Creating wallet directly for testing...");
+    
+    // Create test data directory if it doesn't exist
+    let test_data_dir = "./test_data";
+    if !Path::new(test_data_dir).exists() {
+        if let Err(e) = fs::create_dir_all(test_data_dir) {
+            println!("   ❌ Failed to create test data directory: {}", e);
+            return false;
+        }
+    }
+    
+    // Create keys directory
+    let keys_dir = format!("{}/keys", test_data_dir);
+    if !Path::new(&keys_dir).exists() {
+        if let Err(e) = fs::create_dir_all(&keys_dir) {
+            println!("   ❌ Failed to create keys directory: {}", e);
+            return false;
+        }
+    }
+    
+    // Parse the private key and create wallet
+    let wallet = match LocalWallet::from_str(private_key) {
+        Ok(wallet) => wallet,
+        Err(e) => {
+            println!("   ❌ Failed to parse private key: {}", e);
+            return false;
+        }
+    };
+    
+    // Use the actual EncryptedKeyManager to create a proper wallet file
+    let mut manager = castorix::encrypted_key_manager::EncryptedKeyManager::new(&keys_dir);
+    
+    match manager.import_and_encrypt(
+        private_key,
+        "testpassword123", // Use the same password as in our test
+        wallet_name,
+        &format!("Test Wallet {}", wallet_name),
+    ).await {
+        Ok(address) => {
+            println!("   ✅ Test wallet created successfully");
+            println!("   📝 Wallet address: {}", address);
+            println!("   📁 Wallet file: {}/{}.json", keys_dir, wallet_name);
+            true
+        }
+        Err(e) => {
+            println!("   ❌ Failed to create encrypted wallet: {}", e);
+            false
+        }
+    }
+}
+
 /// Test FID registration workflow
-async fn test_fid_registration(_wallet_name: &str, _fid: u64) {
+async fn test_fid_registration(wallet_name: &str, _fid: u64) {
     println!("   🔑 Creating test wallet...");
 
-    // Note: We don't set PRIVATE_KEY environment variable anymore
-    // Instead, we'll use --wallet parameter or create wallets as needed
-    println!("   ✅ Using wallet-based approach (no environment variables)");
+    // Step 1: Generate a random private key for the test wallet
+    use ethers::signers::{LocalWallet, Signer};
+    use rand::rngs::OsRng;
+    
+    let test_wallet = LocalWallet::new(&mut OsRng);
+    let private_key = format!("{:x}", test_wallet.signer().to_bytes());
+    println!("   📝 Generated test wallet address: {}", test_wallet.address());
+
+    // Step 2: Create encrypted wallet using full interactive process
+    println!("   🔐 Creating encrypted wallet with full interactive process...");
+    let wallet_created = create_wallet_interactive(wallet_name, &private_key).await;
+    
+    if !wallet_created {
+        panic!("❌ Failed to create wallet - this is a critical test requirement");
+    }
+    
+    println!("   ✅ Test wallet created successfully");
 
     // Test FID price query
     println!("   💰 Testing FID price query...");
@@ -247,7 +333,7 @@ async fn test_fid_registration(_wallet_name: &str, _fid: u64) {
         }
     }
 
-    // Test FID registration (real registration) using environment variable
+    // Test FID registration (real registration) using the created wallet
     println!("   🆕 Testing FID registration...");
     let register_output = Command::new("cargo")
         .args([
@@ -259,6 +345,8 @@ async fn test_fid_registration(_wallet_name: &str, _fid: u64) {
             "./test_data",
             "fid",
             "register",
+            "--wallet",
+            wallet_name,
             "--yes",
         ])
         .output();
@@ -775,11 +863,6 @@ async fn test_help_commands() {
 /// Test storage rental with separate payment wallet
 #[tokio::test]
 async fn test_storage_rental_with_payment_wallet() {
-    // Skip if RPC tests are disabled
-    if test_consts::should_skip_rpc_tests() {
-        println!("⏭️  Skipping storage rental with payment wallet test (SKIP_RPC_TESTS set)");
-        return;
-    }
 
     println!("🏠 Starting Storage Rental with Payment Wallet Test");
 

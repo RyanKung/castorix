@@ -12,11 +12,6 @@ use rand::rngs::OsRng;
 /// Test separate payment wallet functionality
 #[tokio::test]
 async fn test_separate_payment_wallet_functionality() -> Result<()> {
-    // Skip test if not in test environment
-    if std::env::var("RUNNING_TESTS").is_err() {
-        println!("⏭️  Skipping test (not in test environment)");
-        return Ok(());
-    }
 
     println!("💳 Testing separate payment wallet functionality...");
 
@@ -72,11 +67,6 @@ async fn test_separate_payment_wallet_functionality() -> Result<()> {
 /// Test payment wallet API with mock scenario
 #[tokio::test]
 async fn test_payment_wallet_api_interface() -> Result<()> {
-    // Skip test if not in test environment
-    if std::env::var("RUNNING_TESTS").is_err() {
-        println!("⏭️  Skipping test (not in test environment)");
-        return Ok(());
-    }
 
     println!("🔌 Testing payment wallet API interface...");
 
@@ -168,11 +158,6 @@ async fn test_wallet_address_validation() -> Result<()> {
 /// Test storage price calculations
 #[tokio::test]
 async fn test_storage_price_calculations() -> Result<()> {
-    // Skip test if not in test environment
-    if std::env::var("RUNNING_TESTS").is_err() {
-        println!("⏭️  Skipping test (not in test environment)");
-        return Ok(());
-    }
 
     println!("💰 Testing storage price calculations...");
 

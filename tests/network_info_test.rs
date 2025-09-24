@@ -7,10 +7,6 @@ use ethers::providers::Provider;
 /// Test network info retrieval specifically
 #[tokio::test]
 async fn test_network_info_retrieval() -> Result<()> {
-    if std::env::var("RUNNING_TESTS").is_err() {
-        println!("⏭️  Skipping test (not in test environment)");
-        return Ok(());
-    }
 
     println!("🌐 Testing network info retrieval...");
 
@@ -84,10 +80,6 @@ async fn test_network_info_retrieval() -> Result<()> {
 /// Test network info with retry logic
 #[tokio::test]
 async fn test_network_info_with_retry() -> Result<()> {
-    if std::env::var("RUNNING_TESTS").is_err() {
-        println!("⏭️  Skipping test (not in test environment)");
-        return Ok(());
-    }
 
     println!("🔄 Testing network info with retry logic...");
 
@@ -154,10 +146,6 @@ async fn test_network_info_with_retry() -> Result<()> {
 /// Test basic RPC connectivity
 #[tokio::test]
 async fn test_basic_rpc_connectivity() -> Result<()> {
-    if std::env::var("RUNNING_TESTS").is_err() {
-        println!("⏭️  Skipping test (not in test environment)");
-        return Ok(());
-    }
 
     println!("🔗 Testing basic RPC connectivity...");
 
@@ -199,10 +187,6 @@ async fn test_basic_rpc_connectivity() -> Result<()> {
 /// Test network info with custom timeout
 #[tokio::test]
 async fn test_network_info_with_timeout() -> Result<()> {
-    if std::env::var("RUNNING_TESTS").is_err() {
-        println!("⏭️  Skipping test (not in test environment)");
-        return Ok(());
-    }
 
     println!("⏱️  Testing network info with custom timeout...");
 

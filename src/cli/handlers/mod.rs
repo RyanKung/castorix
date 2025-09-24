@@ -70,8 +70,8 @@ impl CliHandler {
     }
 
     /// Handle FID registration and management commands
-    pub async fn handle_fid_command(command: FidCommands) -> Result<()> {
-        fid_handlers::handle_fid_command(command).await
+    pub async fn handle_fid_command(command: FidCommands, storage_path: Option<&str>) -> Result<()> {
+        fid_handlers::handle_fid_command(command, storage_path).await
     }
 
     /// Handle storage rental and management commands

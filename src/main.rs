@@ -110,7 +110,7 @@ async fn main() -> Result<()> {
             }
         }
         Commands::Fid { action } => {
-            CliHandler::handle_fid_command(action).await?;
+            CliHandler::handle_fid_command(action, cli.path.as_deref()).await?;
         }
         Commands::Storage { action } => {
             CliHandler::handle_storage_command(action, cli.path.as_deref()).await?;

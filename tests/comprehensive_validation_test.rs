@@ -19,11 +19,6 @@ use test_consts::setup_local_test_env;
 /// 7. Validates cleanup operations
 #[tokio::test]
 async fn test_comprehensive_cli_validation() {
-    // Skip if no RPC tests should run
-    if test_consts::should_skip_rpc_tests() {
-        println!("Skipping RPC tests");
-        return;
-    }
 
     println!("🔬 Starting Comprehensive CLI Validation Test");
 

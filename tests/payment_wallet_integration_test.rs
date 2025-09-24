@@ -33,11 +33,6 @@ fn get_castorix_binary() -> String {
 /// Integration test for separate payment wallet functionality
 #[tokio::test]
 async fn test_payment_wallet_cli_integration() -> Result<()> {
-    // Skip test if not in test environment
-    if std::env::var("RUNNING_TESTS").is_err() {
-        println!("⏭️  Skipping test (not in test environment)");
-        return Ok(());
-    }
 
     println!("🔗 Testing payment wallet CLI integration...");
 
@@ -194,11 +189,6 @@ async fn test_payment_wallet_cli_integration() -> Result<()> {
 /// Test payment wallet error scenarios
 #[tokio::test]
 async fn test_payment_wallet_error_scenarios() -> Result<()> {
-    // Skip test if not in test environment
-    if std::env::var("RUNNING_TESTS").is_err() {
-        println!("⏭️  Skipping test (not in test environment)");
-        return Ok(());
-    }
 
     println!("⚠️  Testing payment wallet error scenarios...");
 
@@ -309,11 +299,6 @@ async fn test_payment_wallet_error_scenarios() -> Result<()> {
 /// Test payment wallet with different FID scenarios
 #[tokio::test]
 async fn test_payment_wallet_different_fid_scenarios() -> Result<()> {
-    // Skip test if not in test environment
-    if std::env::var("RUNNING_TESTS").is_err() {
-        println!("⏭️  Skipping test (not in test environment)");
-        return Ok(());
-    }
 
     println!("🎯 Testing payment wallet with different FID scenarios...");
 

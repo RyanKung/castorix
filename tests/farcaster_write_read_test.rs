@@ -177,10 +177,6 @@ impl WriteReadTestClient {
 
     /// Test basic transaction sending and verification
     pub async fn test_basic_transaction_write_read(&self) -> Result<()> {
-        if std::env::var("RUNNING_TESTS").is_err() {
-            println!("⏭️  Skipping test (not in test environment)");
-            return Ok(());
-        }
 
         println!("💸 Testing Basic Transaction Write-Read Flow...");
 
@@ -265,10 +261,6 @@ impl WriteReadTestClient {
 
     /// Test contract call with write-read verification
     pub async fn test_contract_call_write_read(&self) -> Result<()> {
-        if std::env::var("RUNNING_TESTS").is_err() {
-            println!("⏭️  Skipping test (not in test environment)");
-            return Ok(());
-        }
 
         println!("📋 Testing Contract Call Write-Read Flow...");
 
@@ -334,10 +326,6 @@ impl WriteReadTestClient {
 
     /// Test network state changes
     pub async fn test_network_state_write_read(&self) -> Result<()> {
-        if std::env::var("RUNNING_TESTS").is_err() {
-            println!("⏭️  Skipping test (not in test environment)");
-            return Ok(());
-        }
 
         println!("🌐 Testing Network State Write-Read Flow...");
 
@@ -398,10 +386,6 @@ impl WriteReadTestClient {
 
     /// Test complete write-read flow
     pub async fn test_complete_write_read_flow(&self) -> Result<()> {
-        if std::env::var("RUNNING_TESTS").is_err() {
-            println!("⏭️  Skipping test (not in test environment)");
-            return Ok(());
-        }
 
         println!("🌟 Testing Complete Write-Read Flow...");
 

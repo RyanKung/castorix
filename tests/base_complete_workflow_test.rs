@@ -5,7 +5,6 @@ use std::time::Duration;
 
 mod test_consts;
 use test_consts::setup_local_base_test_env;
-use test_consts::should_skip_rpc_tests;
 
 /// Generate a random hash string of specified length
 fn generate_random_hash(length: usize) -> String {
@@ -40,11 +39,6 @@ fn generate_random_hash(length: usize) -> String {
 /// 9. Clean up
 #[tokio::test]
 async fn test_complete_base_workflow() {
-    // Skip if no RPC tests should run
-    if should_skip_rpc_tests() {
-        println!("Skipping RPC tests");
-        return;
-    }
 
     println!("🔵 Starting Complete Base Workflow Test");
 
@@ -214,17 +208,26 @@ async fn test_generate_encrypted_key(test_data_dir: &str, wallet_name: &str) {
 
     match output {
         Ok(mut child) => {
-            // Send predefined inputs
-            let inputs = format!("{}\n{}\n{}\n", wallet_name, "test123", "test123");
+            // Send predefined inputs: key_name, password, confirm_password, confirm_save
+            let inputs = format!("{}\n{}\n{}\ny\n", wallet_name, "test123", "test123");
             if let Some(stdin) = child.stdin.as_mut() {
                 use std::io::Write;
                 let _ = stdin.write_all(inputs.as_bytes());
                 let _ = stdin.flush();
             }
 
-            let output = child.wait_with_output();
-            match output {
-                Ok(output) => {
+            // Use tokio::time::timeout to prevent hanging
+            let timeout_duration = Duration::from_secs(10); // 10 second timeout
+            println!(
+                "   ⏱️  Waiting for process completion (timeout: {}s)...",
+                timeout_duration.as_secs()
+            );
+
+            let result =
+                tokio::time::timeout(timeout_duration, async { child.wait_with_output() }).await;
+
+            match result {
+                Ok(Ok(output)) => {
                     if output.status.success() {
                         let stdout = String::from_utf8_lossy(&output.stdout);
                         println!("   ✅ Encrypted key generated successfully");
@@ -242,11 +245,31 @@ async fn test_generate_encrypted_key(test_data_dir: &str, wallet_name: &str) {
                         );
                     } else {
                         let stderr = String::from_utf8_lossy(&output.stderr);
+                        println!(
+                            "   ❌ Process failed with exit code: {:?}",
+                            output.status.code()
+                        );
+                        println!("   📝 Stderr: {}", stderr);
                         panic!("Key generation failed with stderr: {}", stderr);
                     }
                 }
-                Err(e) => {
-                    panic!("Failed to run key generation command: {}", e);
+                Ok(Err(e)) => {
+                    panic!("❌ Failed to wait for encrypted key generation: {}", e);
+                }
+                Err(_timeout) => {
+                    println!(
+                        "   ⏰ Process timed out after {} seconds",
+                        timeout_duration.as_secs()
+                    );
+                    println!("   🔍 This usually indicates the process is waiting for user input");
+                    println!("   💡 Check if the command requires interactive input that wasn't provided");
+
+                    // Note: child is already consumed by the async block, so we can't kill it here
+                    // The process will be cleaned up when the async block completes
+
+                    panic!(
+                        "❌ Encrypted key generation timed out - process may be waiting for input"
+                    );
                 }
             }
         }
@@ -427,7 +450,32 @@ async fn test_base_proof_generation(
                 let _ = stdin.flush();
             }
 
-            let output = child.wait_with_output();
+            // Use tokio::time::timeout to prevent hanging
+            let timeout_duration = Duration::from_secs(10); // 10 second timeout
+            println!(
+                "   ⏱️  Waiting for proof generation (timeout: {}s)...",
+                timeout_duration.as_secs()
+            );
+
+            let result =
+                tokio::time::timeout(timeout_duration, async { child.wait_with_output() }).await;
+
+            let output = match result {
+                Ok(output_result) => output_result,
+                Err(_timeout) => {
+                    println!(
+                        "   ⏰ Process timed out after {} seconds",
+                        timeout_duration.as_secs()
+                    );
+                    println!("   🔍 This usually indicates the process is waiting for user input");
+                    println!("   💡 Check if the command requires interactive input that wasn't provided");
+
+                    // Note: child is already consumed by the async block, so we can't kill it here
+                    // The process will be cleaned up when the async block completes
+
+                    panic!("❌ Base proof generation timed out - process may be waiting for input");
+                }
+            };
             match output {
                 Ok(output) => {
                     if output.status.success() {
@@ -590,30 +638,29 @@ async fn test_base_ens_domains_query(test_data_dir: &str) {
 /// Test Base configuration validation
 #[tokio::test]
 async fn test_base_configuration_validation() {
-    // Skip if no RPC tests should run
-    if should_skip_rpc_tests() {
-        println!("Skipping RPC tests");
-        return;
-    }
 
     println!("🔧 Testing Base Configuration Validation...");
 
     // Test that anvil command works for Base configuration
     let output = Command::new("anvil")
         .args([
-            "--host", "127.0.0.1",
-            "--port", "8547", // Use different port to avoid conflicts
-            "--chain-id", "8453", // Base mainnet chain ID
-            "--fork-url", "https://mainnet.base.org",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "8547", // Use different port to avoid conflicts
+            "--chain-id",
+            "8453", // Base mainnet chain ID
+            "--fork-url",
+            "https://mainnet.base.org",
             "--silent",
-            "--help" // Just test that anvil is available and Base config is valid
+            "--help", // Just test that anvil is available and Base config is valid
         ])
         .output();
 
     match output {
         Ok(output) => {
             let stdout = String::from_utf8_lossy(&output.stdout);
-            
+
             if output.status.success() && stdout.contains("--chain-id") {
                 println!("   ✅ Base node configuration working correctly");
             } else {
@@ -629,11 +676,6 @@ async fn test_base_configuration_validation() {
 /// Test Base subdomain checking
 #[tokio::test]
 async fn test_base_subdomain_checking() {
-    // Skip if no RPC tests should run
-    if should_skip_rpc_tests() {
-        println!("Skipping RPC tests");
-        return;
-    }
 
     println!("🔍 Testing Base Subdomain Checking...");
 

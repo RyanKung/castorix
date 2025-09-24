@@ -1,0 +1,2 @@
+# Python dependencies for integration tests
+pexpect>=4.8.0

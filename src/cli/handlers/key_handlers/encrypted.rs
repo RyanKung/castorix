@@ -29,7 +29,9 @@ pub async fn handle_generate_encrypted(storage_path: Option<&str>) -> Result<()>
     // Generate private key and show address
     println!("\n🔑 Generating new private key...");
     let mut manager = if let Some(path) = storage_path {
-        EncryptedKeyManager::new(path)
+        // Construct the keys directory path
+        let keys_path = format!("{}/keys", path);
+        EncryptedKeyManager::new(&keys_path)
     } else {
         EncryptedKeyManager::default_config()
     };
@@ -75,7 +77,12 @@ pub async fn handle_generate_encrypted(storage_path: Option<&str>) -> Result<()>
             println!("✅ Encrypted key saved successfully!");
             println!("   Key Name: {key_name}");
             println!("   Address: {address}");
-            println!("   Storage: ~/.castorix/keys/{key_name}.json");
+            let storage_path = if let Some(path) = storage_path {
+                format!("{}/keys/{key_name}.json", path)
+            } else {
+                format!("~/.castorix/keys/{key_name}.json")
+            };
+            println!("   Storage: {storage_path}");
         }
         Err(e) => println!("❌ Failed to save encrypted key: {e}"),
     }
@@ -89,7 +96,9 @@ pub async fn handle_load_key(key_name: String, storage_path: Option<&str>) -> Re
 
     println!("🔓 Loading encrypted key: {key_name}");
     let mut manager = if let Some(path) = storage_path {
-        EncryptedKeyManager::new(path)
+        // Construct the keys directory path
+        let keys_path = format!("{}/keys", path);
+        EncryptedKeyManager::new(&keys_path)
     } else {
         EncryptedKeyManager::default_config()
     };
@@ -116,7 +125,9 @@ pub async fn handle_list_keys(storage_path: Option<&str>) -> Result<()> {
     use crate::encrypted_key_manager::EncryptedKeyManager;
 
     let manager = if let Some(path) = storage_path {
-        EncryptedKeyManager::new(path)
+        // Construct the keys directory path
+        let keys_path = format!("{}/keys", path);
+        EncryptedKeyManager::new(&keys_path)
     } else {
         EncryptedKeyManager::default_config()
     };

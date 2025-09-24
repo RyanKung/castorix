@@ -5,7 +5,6 @@ use std::time::Duration;
 
 mod test_consts;
 use test_consts::setup_local_test_env;
-use test_consts::should_skip_rpc_tests;
 
 /// Complete ENS workflow integration test
 ///
@@ -19,11 +18,6 @@ use test_consts::should_skip_rpc_tests;
 /// 7. Clean up
 #[tokio::test]
 async fn test_complete_ens_workflow() {
-    // Skip if no RPC tests should run
-    if should_skip_rpc_tests() {
-        println!("Skipping RPC tests");
-        return;
-    }
 
     println!("🌐 Starting Complete ENS Workflow Test");
 
@@ -179,15 +173,42 @@ async fn test_generate_encrypted_key(test_data_dir: &str, wallet_name: &str) {
 
     match output {
         Ok(mut child) => {
-            // Send predefined inputs
-            let inputs = format!("{}\n{}\n{}\n", wallet_name, "test123", "test123");
+            // Send predefined inputs: key_name, password, confirm_password, confirm_save
+            let inputs = format!("{}\n{}\n{}\ny\n", wallet_name, "test123", "test123");
             if let Some(stdin) = child.stdin.as_mut() {
                 use std::io::Write;
                 let _ = stdin.write_all(inputs.as_bytes());
                 let _ = stdin.flush();
             }
 
-            let output = child.wait_with_output();
+            // Use tokio::time::timeout to prevent hanging
+            let timeout_duration = Duration::from_secs(10); // 10 second timeout
+            println!(
+                "   ⏱️  Waiting for process completion (timeout: {}s)...",
+                timeout_duration.as_secs()
+            );
+
+            let result =
+                tokio::time::timeout(timeout_duration, async { child.wait_with_output() }).await;
+
+            let output = match result {
+                Ok(output_result) => output_result,
+                Err(_timeout) => {
+                    println!(
+                        "   ⏰ Process timed out after {} seconds",
+                        timeout_duration.as_secs()
+                    );
+                    println!("   🔍 This usually indicates the process is waiting for user input");
+                    println!("   💡 Check if the command requires interactive input that wasn't provided");
+
+                    // Note: child is already consumed by the async block, so we can't kill it here
+                    // The process will be cleaned up when the async block completes
+
+                    panic!(
+                        "❌ Encrypted key generation timed out - process may be waiting for input"
+                    );
+                }
+            };
             match output {
                 Ok(output) => {
                     if output.status.success() {
@@ -353,7 +374,34 @@ async fn test_proof_generation(test_data_dir: &str, domain: &str, fid: u64, wall
                 let _ = stdin.flush();
             }
 
-            let output = child.wait_with_output();
+            // Use tokio::time::timeout to prevent hanging
+            let timeout_duration = Duration::from_secs(10); // 10 second timeout
+            println!(
+                "   ⏱️  Waiting for proof generation (timeout: {}s)...",
+                timeout_duration.as_secs()
+            );
+
+            let result =
+                tokio::time::timeout(timeout_duration, async { child.wait_with_output() }).await;
+
+            let output = match result {
+                Ok(output_result) => output_result,
+                Err(_timeout) => {
+                    println!(
+                        "   ⏰ Process timed out after {} seconds",
+                        timeout_duration.as_secs()
+                    );
+                    println!("   🔍 This usually indicates the process is waiting for user input");
+                    println!("   💡 Check if the command requires interactive input that wasn't provided");
+
+                    // Note: child is already consumed by the async block, so we can't kill it here
+                    // The process will be cleaned up when the async block completes
+
+                    panic!(
+                        "❌ Username proof generation timed out - process may be waiting for input"
+                    );
+                }
+            };
             match output {
                 Ok(output) => {
                     if output.status.success() {
@@ -513,11 +561,6 @@ async fn test_ens_domains_query(test_data_dir: &str) {
 /// Test ENS configuration validation
 #[tokio::test]
 async fn test_ens_configuration_validation() {
-    // Skip if no RPC tests should run
-    if should_skip_rpc_tests() {
-        println!("Skipping RPC tests");
-        return;
-    }
 
     println!("🔧 Testing ENS Configuration Validation...");
 
@@ -548,11 +591,6 @@ async fn test_ens_configuration_validation() {
 /// Test ENS help commands
 #[tokio::test]
 async fn test_ens_help_commands() {
-    // Skip if no RPC tests should run
-    if should_skip_rpc_tests() {
-        println!("Skipping RPC tests");
-        return;
-    }
 
     println!("📖 Testing ENS Help Commands...");
 

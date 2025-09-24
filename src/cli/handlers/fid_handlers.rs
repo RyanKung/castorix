@@ -14,7 +14,7 @@ use crate::farcaster::contracts::types::ContractAddresses;
 use crate::farcaster::contracts::types::ContractResult;
 
 /// Handle FID registration and management commands
-pub async fn handle_fid_command(command: FidCommands) -> Result<()> {
+pub async fn handle_fid_command(command: FidCommands, storage_path: Option<&str>) -> Result<()> {
     match command {
         FidCommands::Register {
             wallet,
@@ -23,13 +23,13 @@ pub async fn handle_fid_command(command: FidCommands) -> Result<()> {
             dry_run,
             yes,
         } => {
-            handle_fid_register(wallet, extra_storage, recovery, dry_run, yes).await?;
+            handle_fid_register(wallet, extra_storage, recovery, dry_run, yes, storage_path).await?;
         }
         FidCommands::Price { extra_storage } => {
             handle_fid_price(extra_storage).await?;
         }
         FidCommands::List { wallet } => {
-            handle_fid_list(wallet).await?;
+            handle_fid_list(wallet, storage_path).await?;
         }
     }
     Ok(())
@@ -41,6 +41,7 @@ async fn handle_fid_register(
     recovery: Option<String>,
     dry_run: bool,
     yes: bool,
+    storage_path: Option<&str>,
 ) -> Result<()> {
     println!("🆕 Register New FID");
     println!("{}", "=".repeat(40));
@@ -67,7 +68,13 @@ async fn handle_fid_register(
         use crate::encrypted_key_manager::prompt_password;
         use crate::encrypted_key_manager::EncryptedKeyManager;
 
-        let mut manager = EncryptedKeyManager::default_config();
+        let mut manager = if let Some(path) = storage_path {
+            // Construct the keys directory path
+            let keys_path = format!("{}/keys", path);
+            EncryptedKeyManager::new(&keys_path)
+        } else {
+            EncryptedKeyManager::default_config()
+        };
         if !manager.key_exists(&name) {
             println!("❌ Wallet '{name}' not found!");
             println!("💡 Use 'castorix key list' to see available wallets");
@@ -267,7 +274,7 @@ async fn handle_fid_price(extra_storage: u64) -> Result<()> {
     Ok(())
 }
 
-async fn handle_fid_list(wallet_name: Option<String>) -> Result<()> {
+async fn handle_fid_list(wallet_name: Option<String>, storage_path: Option<&str>) -> Result<()> {
     println!("📋 FIDs Owned by Wallet");
     println!("{}", "=".repeat(40));
 
@@ -280,7 +287,13 @@ async fn handle_fid_list(wallet_name: Option<String>) -> Result<()> {
         use crate::encrypted_key_manager::prompt_password;
         use crate::encrypted_key_manager::EncryptedKeyManager;
 
-        let mut manager = EncryptedKeyManager::default_config();
+        let mut manager = if let Some(path) = storage_path {
+            // Construct the keys directory path
+            let keys_path = format!("{}/keys", path);
+            EncryptedKeyManager::new(&keys_path)
+        } else {
+            EncryptedKeyManager::default_config()
+        };
         if !manager.key_exists(&name) {
             println!("❌ Wallet '{name}' not found!");
             println!("💡 Use 'castorix key list' to see available wallets");

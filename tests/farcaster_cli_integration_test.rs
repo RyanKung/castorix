@@ -42,11 +42,6 @@ fn get_castorix_binary() -> String {
 /// 6. Clean up
 #[tokio::test]
 async fn test_cli_integration_workflow() {
-    // Skip if no RPC tests should run
-    if test_consts::should_skip_rpc_tests() {
-        println!("Skipping RPC tests");
-        return;
-    }
 
     println!("🚀 Starting CLI Integration Test");
 

@@ -144,10 +144,6 @@ impl SimpleWalletClient {
 
 #[tokio::test]
 async fn test_simple_local_transaction() -> Result<()> {
-    if std::env::var("RUNNING_TESTS").is_err() {
-        println!("⏭️  Skipping test (not in test environment)");
-        return Ok(());
-    }
 
     println!("🚀 Testing simple local transaction...");
 
@@ -172,10 +168,6 @@ async fn test_simple_local_transaction() -> Result<()> {
 
 #[tokio::test]
 async fn test_network_connectivity() -> Result<()> {
-    if std::env::var("RUNNING_TESTS").is_err() {
-        println!("⏭️  Skipping test (not in test environment)");
-        return Ok(());
-    }
 
     println!("🌐 Testing network connectivity...");
 

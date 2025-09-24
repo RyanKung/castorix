@@ -437,7 +437,7 @@ pub enum EnsCommands {
         domain: String,
         /// Farcaster ID (your FID)
         fid: u64,
-        /// Wallet name for encrypted key (optional, uses PRIVATE_KEY if not specified)
+        /// Wallet name for encrypted key (required)
         #[arg(long)]
         wallet_name: Option<String>,
     },
@@ -482,7 +482,7 @@ pub enum HubCommands {
         proof_file: String,
         /// FID (Farcaster ID) for Ed25519 key signing
         fid: u64,
-        /// Wallet name for encrypted key (optional, uses PRIVATE_KEY if not specified)
+        /// Wallet name for encrypted key (required)
         #[arg(long)]
         wallet_name: Option<String>,
     },
@@ -628,7 +628,7 @@ pub enum FidCommands {
     /// Example: castorix fid register --wallet my-wallet
     /// Example: castorix fid register --extra-storage 5 --dry-run
     Register {
-        /// Wallet name for registration (optional, uses PRIVATE_KEY if not specified)
+        /// Wallet name for registration (required)
         #[arg(long)]
         wallet: Option<String>,
         /// Number of extra storage units to rent (default: 0)
@@ -666,7 +666,7 @@ pub enum FidCommands {
     /// Example: castorix fid list
     /// Example: castorix fid list --wallet my-wallet
     List {
-        /// Wallet name to check FIDs for (optional, uses PRIVATE_KEY if not specified)
+        /// Wallet name to check FIDs for (required)
         #[arg(long)]
         wallet: Option<String>,
     },

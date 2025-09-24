@@ -56,8 +56,3 @@ pub fn reset_test_env() {
     env::remove_var("FARCASTER_HUB_URL");
 }
 
-/// Check if we should skip RPC tests
-#[allow(dead_code)]
-pub fn should_skip_rpc_tests() -> bool {
-    env::var("SKIP_RPC_TESTS").is_ok()
-}

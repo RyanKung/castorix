@@ -18,11 +18,6 @@ use rand::rngs::OsRng;
 /// Simple Farcaster test that can be run directly with cargo test
 #[tokio::test]
 async fn test_farcaster_contracts_connectivity() -> Result<()> {
-    // Skip test if not in test environment
-    if std::env::var("RUNNING_TESTS").is_err() {
-        println!("⏭️  Skipping test (not in test environment)");
-        return Ok(());
-    }
 
     println!("🌟 Testing Farcaster contracts connectivity...");
 
