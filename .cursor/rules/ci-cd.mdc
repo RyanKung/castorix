@@ -1,12 +1,11 @@
 ---
-name: ci-cd
 description: CI/CD and deployment rules for Castorix
 globs:
   - '.github/workflows/**/*.yml'
   - '.github/workflows/**/*.yaml'
   - 'Dockerfile*'
   - 'docker-compose*.yml'
-priority: 3
+alwaysApply: false
 ---
 
 # CI/CD Rules

@@ -1,11 +1,10 @@
 ---
-name: rust-standards
 description: Rust coding standards and best practices for Castorix
 globs:
   - 'src/**/*.rs'
   - 'tests/**/*.rs'
   - 'benches/**/*.rs'
-priority: 2
+alwaysApply: false
 ---
 
 # Rust Standards

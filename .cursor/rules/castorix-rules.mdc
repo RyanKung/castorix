@@ -1,12 +1,11 @@
 ---
-name: castorix-rules
 description: Castorix project development rules and best practices
 globs:
   - 'src/**/*.rs'
   - 'tests/**/*.rs'
   - '**/*.toml'
   - '**/*.md'
-priority: 1
+alwaysApply: true
 ---
 
 # Castorix Project Rules
