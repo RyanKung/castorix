@@ -40,7 +40,9 @@ async fn test_complete_ens_workflow() {
 
     // Verify Anvil is running
     if !verify_anvil_running().await {
-        panic!("❌ Anvil failed to start - integration test cannot proceed without blockchain node");
+        panic!(
+            "❌ Anvil failed to start - integration test cannot proceed without blockchain node"
+        );
     }
     println!("✅ Anvil is running");
 
