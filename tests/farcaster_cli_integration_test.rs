@@ -265,14 +265,15 @@ async fn test_environment_configuration() {
         Ok(output) => {
             let stdout = String::from_utf8_lossy(&output.stdout);
             let stderr = String::from_utf8_lossy(&output.stderr);
-            
+
             // Test passes if the command succeeds (even with placeholder config)
             // or if it shows configuration warnings
-            if output.status.success() || 
-               stdout.contains("Configuration Warning") || 
-               stdout.contains("placeholder") ||
-               stderr.contains("Configuration Warning") ||
-               stderr.contains("placeholder") {
+            if output.status.success()
+                || stdout.contains("Configuration Warning")
+                || stdout.contains("placeholder")
+                || stderr.contains("Configuration Warning")
+                || stderr.contains("placeholder")
+            {
                 println!("   ✅ Configuration validation working correctly");
             } else {
                 panic!(
