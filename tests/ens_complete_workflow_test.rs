@@ -26,10 +26,10 @@ async fn test_complete_ens_workflow() {
 
     // Step 1: Verify Anvil node is running (started by CI workflow or Makefile)
     println!("📡 Checking for running Anvil node...");
-    
+
     // Check if we should use pre-started nodes (CI environment)
     let use_pre_started = std::env::var("RUNNING_TESTS").is_ok();
-    
+
     if use_pre_started {
         println!("🔧 Using pre-started Anvil nodes (CI environment)");
         // Verify Anvil is running on expected ports
@@ -53,7 +53,7 @@ async fn test_complete_ens_workflow() {
             );
         }
         println!("✅ Local Anvil node is running");
-        
+
         // Store handle for cleanup
         std::env::set_var("ANVIL_HANDLE", format!("{:?}", anvil_handle));
     }

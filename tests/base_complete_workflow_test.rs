@@ -47,10 +47,10 @@ async fn test_complete_base_workflow() {
 
     // Step 1: Verify Base Anvil node is running (started by CI workflow or Makefile)
     println!("📡 Checking for running Base Anvil node...");
-    
+
     // Check if we should use pre-started nodes (CI environment)
     let use_pre_started = std::env::var("RUNNING_TESTS").is_ok();
-    
+
     if use_pre_started {
         println!("🔧 Using pre-started Base Anvil node (CI environment)");
         // Verify Base Anvil is running on expected port
@@ -70,7 +70,7 @@ async fn test_complete_base_workflow() {
             panic!("❌ Base Anvil failed to start - integration test cannot proceed without blockchain node");
         }
         println!("✅ Local Base Anvil node is running");
-        
+
         // Store handle for cleanup
         std::env::set_var("BASE_ANVIL_HANDLE", format!("{:?}", anvil_handle));
     }
