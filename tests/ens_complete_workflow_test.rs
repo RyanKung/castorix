@@ -48,12 +48,20 @@ async fn test_complete_ens_workflow() {
 
         // Verify Anvil is running - FAIL if not available
         if !verify_anvil_running().await {
+            println!("❌ Anvil failed to start - trying to start manually...");
+            println!("💡 Use 'make start-nodes' to start Anvil nodes, then run 'make test-ci'");
+            println!("💡 Or use 'make test-local' to start nodes and run tests automatically");
             panic!(
-                "❌ Anvil failed to start - integration test cannot proceed without blockchain node. This test requires a local Anvil node to function properly."
+                "❌ Anvil failed to start - integration test cannot proceed without blockchain node.\n\
+                \n\
+                To fix this:\n\
+                1. Use 'make test-local' to start nodes and run tests automatically\n\
+                2. Or manually start nodes with 'make start-nodes' then run 'make test-ci'\n\
+                3. Or run tests in CI environment where nodes are pre-started"
             );
         }
         println!("✅ Local Anvil node is running");
-
+        
         // Store handle for cleanup
         std::env::set_var("ANVIL_HANDLE", format!("{:?}", anvil_handle));
     }
