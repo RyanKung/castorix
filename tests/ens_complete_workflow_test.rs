@@ -123,7 +123,10 @@ async fn start_local_anvil() -> Option<std::process::Child> {
             Some(child)
         }
         Err(e) => {
-            panic!("❌ Failed to start Anvil: {} - this test requires Anvil to start successfully", e);
+            panic!(
+                "❌ Failed to start Anvil: {} - this test requires Anvil to start successfully",
+                e
+            );
         }
     }
 }
