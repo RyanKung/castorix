@@ -400,13 +400,21 @@ impl FarcasterContractClient {
 
         // Get chain ID and create signer middleware for payment wallet
         let chain_id = self.provider.get_chainid().await?;
-        let payment_wallet_with_chain_id = payment_wallet.as_ref().clone().with_chain_id(chain_id.as_u64());
+        let payment_wallet_with_chain_id = payment_wallet
+            .as_ref()
+            .clone()
+            .with_chain_id(chain_id.as_u64());
 
         // Get current nonce to avoid nonce conflicts
         let nonce = self.get_next_nonce(payment_wallet.address()).await?;
-        println!("   📝 Using nonce: {} for payment wallet {}", nonce, payment_wallet.address());
+        println!(
+            "   📝 Using nonce: {} for payment wallet {}",
+            nonce,
+            payment_wallet.address()
+        );
 
-        let signer_middleware = SignerMiddleware::new(self.provider.clone(), payment_wallet_with_chain_id);
+        let signer_middleware =
+            SignerMiddleware::new(self.provider.clone(), payment_wallet_with_chain_id);
 
         // Create the contract instance with payment wallet signer middleware
         let contract = self.storage_registry.contract().clone();
@@ -716,9 +724,9 @@ impl FarcasterContractClient {
         &self,
         fid_owner_address: ethers::types::Address,
         fid: u64,
-        key_type: u32,
-        key: Vec<u8>,
-        metadata_type: u8,
+        _key_type: u32,
+        _key: Vec<u8>,
+        _metadata_type: u8,
         _metadata: Vec<u8>,
     ) -> Result<ContractResult<()>> {
         println!(
@@ -748,8 +756,8 @@ impl FarcasterContractClient {
             )));
         }
 
-        // Create deadline (1 hour from now)
-        let deadline = std::time::SystemTime::now()
+        // Create deadline (1 hour from now) - not used since we return early
+        let _deadline = std::time::SystemTime::now()
             .duration_since(std::time::SystemTime::UNIX_EPOCH)?
             .as_secs()
             + 3600;
@@ -758,69 +766,11 @@ impl FarcasterContractClient {
         println!("   Current wallet (gas payer): {}", wallet.address());
         println!("   ✅ Third-party registration authorized - current wallet will pay gas");
 
-        // Create EIP-712 signature for SignedKeyRequest using SignedKeyRequestValidator
-        // Note: We need to create a temporary client with the FID owner's wallet to sign
-        // For this test, we'll assume the FID owner has pre-signed the request
-        // In a real implementation, this would be done off-chain by the FID owner
-
-        // For now, let's create a mock signature (in real implementation, this would come from FID owner)
-        let signature = vec![0u8; 65]; // Mock signature - in real implementation, this would be from FID owner
-
-        // Create SignedKeyRequestMetadata using the signature
-        let signed_key_request_metadata = self
-            .create_signed_key_request_metadata(fid, fid_owner_address, &key, deadline, signature)
-            .await?;
-
-        // Use addFor method to pass fidOwner correctly
-        println!("   Calling key_gateway.addFor with:");
-        println!("     fid_owner: {}", fid_owner_address);
-        println!("     key_type: {}", key_type);
-        println!("     key: {}", hex::encode(&key));
-        println!("     metadata_type: {}", metadata_type);
-        println!(
-            "     metadata length: {}",
-            signed_key_request_metadata.len()
-        );
-        println!("     deadline: {}", deadline);
-
-        // Create EIP-712 signature for KeyGateway.addFor using current wallet (gas payer)
-        let add_for_signature = self
-            .create_add_for_signature(
-                fid_owner_address,
-                key_type,
-                &key,
-                metadata_type,
-                &signed_key_request_metadata,
-                deadline,
-            )
-            .await?;
-
-        let result = self
-            .key_gateway
-            .add_for(
-                fid_owner_address,
-                key_type,
-                key,
-                metadata_type,
-                signed_key_request_metadata,
-                deadline.into(),
-                add_for_signature,
-            )
-            .await?;
-
-        match result {
-            ContractResult::Success(_receipt) => {
-                println!("   ✅ Third-party signer key registered successfully!");
-                Ok(ContractResult::Success(()))
-            }
-            ContractResult::Error(e) => {
-                println!("   ❌ Third-party signer registration failed: {}", e);
-                Ok(ContractResult::Error(format!(
-                    "Third-party signer registration failed: {}",
-                    e
-                )))
-            }
-        }
+        // This method requires the FID owner to provide a real signature
+        // The signature must be created by the FID owner's wallet off-chain
+        return Ok(ContractResult::Error(
+            "Third-party signer registration requires a real signature from the FID owner. This feature is not implemented.".to_string()
+        ));
     }
 
     /// Register a signer key with pre-generated metadata (for third-party registration)

@@ -176,7 +176,7 @@ async fn handle_add_signer(
 
     // Load FID-specific custody key file
     let custody_key_file =
-        crate::encrypted_eth_key_manager::EncryptedEthKeyManager::custody_key_file(fid)?;
+        crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::custody_key_file(fid)?;
 
     if !std::path::Path::new(&custody_key_file).exists() {
         return Err(anyhow::anyhow!(
@@ -186,12 +186,12 @@ async fn handle_add_signer(
 
     // Load encrypted ETH key manager
     let encrypted_manager =
-        crate::encrypted_eth_key_manager::EncryptedEthKeyManager::load_from_file(
+        crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::load_from_file(
             &custody_key_file,
         )?;
 
     // Prompt for password
-    let password = crate::encrypted_eth_key_manager::prompt_password(&format!(
+    let password = crate::core::crypto::encrypted_storage::prompt_password(&format!(
         "Enter password for custody wallet (FID {fid}): "
     ))?;
 
@@ -336,14 +336,14 @@ async fn handle_add_signer(
 
         // Create a new encrypted manager for the Ed25519 key
         let mut ed25519_manager =
-            crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::new();
+            crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::new();
 
         // Prompt for Ed25519 key password (twice for confirmation)
-        let ed25519_password = crate::encrypted_ed25519_key_manager::prompt_password(&format!(
+        let ed25519_password = crate::core::crypto::encrypted_storage::prompt_password(&format!(
             "Enter password to encrypt Ed25519 key for FID {fid}: "
         ))?;
 
-        let ed25519_password_confirm = crate::encrypted_ed25519_key_manager::prompt_password(
+        let ed25519_password_confirm = crate::core::crypto::encrypted_storage::prompt_password(
             &format!("Confirm password for Ed25519 key for FID {fid}: "),
         )?;
 
@@ -358,7 +358,8 @@ async fn handle_add_signer(
 
         // Save to the correct file
         let ed25519_keys_file =
-            crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::default_keys_file()?;
+            crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::default_keys_file(
+            )?;
         ed25519_manager.save_to_file(&ed25519_keys_file)?;
 
         println!("✅ Ed25519 private key stored encrypted for FID: {fid}");
@@ -630,14 +631,14 @@ async fn handle_add_signer(
 
     // Create a new encrypted Ed25519 manager
     let mut ed25519_manager =
-        crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::new();
+        crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::new();
 
     // Load existing keys if any
     let ed25519_keys_file =
-        crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::default_keys_file()?;
-    if ed25519_keys_file.exists() {
+        crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::default_keys_file()?;
+    if std::path::Path::new(&ed25519_keys_file).exists() {
         ed25519_manager =
-            crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::load_from_file(
+            crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::load_from_file(
                 &ed25519_keys_file,
             )?;
     }
@@ -703,7 +704,7 @@ async fn handle_del_signer(
 
     // Load FID-specific custody key file
     let custody_key_file =
-        crate::encrypted_eth_key_manager::EncryptedEthKeyManager::custody_key_file(fid)?;
+        crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::custody_key_file(fid)?;
 
     if !std::path::Path::new(&custody_key_file).exists() {
         return Err(anyhow::anyhow!(
@@ -713,12 +714,12 @@ async fn handle_del_signer(
 
     // Load encrypted ETH key manager
     let encrypted_manager =
-        crate::encrypted_eth_key_manager::EncryptedEthKeyManager::load_from_file(
+        crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::load_from_file(
             &custody_key_file,
         )?;
 
     // Prompt for password
-    let password = crate::encrypted_eth_key_manager::prompt_password(&format!(
+    let password = crate::core::crypto::encrypted_storage::prompt_password(&format!(
         "Enter password for custody wallet (FID {fid}): "
     ))?;
 
@@ -1220,13 +1221,14 @@ async fn create_signer_remove_signature(
 async fn find_custody_wallet_for_fid(fid: u64) -> Result<Option<String>> {
     // Check for FID-specific custody key file
     let custody_key_file =
-        crate::encrypted_eth_key_manager::EncryptedEthKeyManager::custody_key_file(fid)?;
+        crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::custody_key_file(fid)?;
 
     if std::path::Path::new(&custody_key_file).exists() {
         // Load the FID-specific custody key file
-        let eth_manager = crate::encrypted_eth_key_manager::EncryptedEthKeyManager::load_from_file(
-            &custody_key_file,
-        )?;
+        let eth_manager =
+            crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::load_from_file(
+                &custody_key_file,
+            )?;
 
         // Check if this FID has a key in the file
         if eth_manager.has_key(fid) {
@@ -1238,10 +1240,10 @@ async fn find_custody_wallet_for_fid(fid: u64) -> Result<Option<String>> {
     } else {
         // Fallback: check the old default keys file for backward compatibility
         let eth_keys_file =
-            crate::encrypted_eth_key_manager::EncryptedEthKeyManager::default_keys_file()?;
+            crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::default_keys_file()?;
         if std::path::Path::new(&eth_keys_file).exists() {
             let eth_manager =
-                crate::encrypted_eth_key_manager::EncryptedEthKeyManager::load_from_file(
+                crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::load_from_file(
                     &eth_keys_file,
                 )?;
 
@@ -1278,9 +1280,9 @@ async fn get_local_ed25519_keys_for_fid(fid: u64) -> Result<Vec<LocalEd25519Key>
 
     // Load the Ed25519 key manager
     let ed25519_keys_file =
-        crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::default_keys_file()?;
+        crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::default_keys_file()?;
     let ed25519_manager =
-        crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::load_from_file(
+        crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::load_from_file(
             &ed25519_keys_file,
         )?;
 
@@ -1395,14 +1397,14 @@ async fn handle_signers_import(fid: u64) -> Result<()> {
 
     // Create the encrypted Ed25519 key manager
     let mut encrypted_manager =
-        crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::new();
+        crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::new();
 
     // Load existing keys
     let ed25519_keys_file =
-        crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::default_keys_file()?;
+        crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::default_keys_file()?;
     if std::path::Path::new(&ed25519_keys_file).exists() {
         encrypted_manager =
-            crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::load_from_file(
+            crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::load_from_file(
                 &ed25519_keys_file,
             )?;
     }
@@ -1465,9 +1467,9 @@ async fn handle_signers_list() -> Result<()> {
 
     // Load the Ed25519 key manager
     let ed25519_keys_file =
-        crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::default_keys_file()?;
+        crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::default_keys_file()?;
     let ed25519_manager =
-        crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::load_from_file(
+        crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::load_from_file(
             &ed25519_keys_file,
         )?;
 
@@ -1607,11 +1609,12 @@ async fn handle_signers_list() -> Result<()> {
             Err(e) => {
                 println!("❌ Failed to get detailed key info: {}", e);
                 // Fallback to basic info
-                for (fid, _created_at_str, created_at) in ed25519_keys {
-                    let created_date = chrono::DateTime::from_timestamp(created_at as i64, 0)
-                        .map(|dt| dt.format("%Y-%m-%d %H:%M").to_string())
-                        .unwrap_or_else(|| "Unknown".to_string());
-                    println!("FID: {}, Created: {}", fid, created_date);
+                for key_info in ed25519_keys {
+                    let created_date =
+                        chrono::DateTime::from_timestamp(key_info.created_at as i64, 0)
+                            .map(|dt| dt.format("%Y-%m-%d %H:%M").to_string())
+                            .unwrap_or_else(|| "Unknown".to_string());
+                    println!("FID: {}, Created: {}", key_info.fid, created_date);
                 }
             }
         }
@@ -1637,9 +1640,9 @@ async fn handle_signers_export(identifier: &str) -> Result<()> {
 
     // Load the Ed25519 key manager
     let ed25519_keys_file =
-        crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::default_keys_file()?;
+        crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::default_keys_file()?;
     let ed25519_manager =
-        crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::load_from_file(
+        crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::load_from_file(
             &ed25519_keys_file,
         )?;
 
@@ -1701,7 +1704,7 @@ async fn handle_signers_export(identifier: &str) -> Result<()> {
     println!("🔑 Public key: {}", public_key);
 
     // Prompt for password to decrypt the private key
-    let password = crate::encrypted_ed25519_key_manager::prompt_password(&format!(
+    let password = crate::core::crypto::encrypted_storage::prompt_password(&format!(
         "Enter password for FID {fid}: "
     ))?;
 
@@ -1741,9 +1744,9 @@ async fn handle_signers_delete(identifier: &str) -> Result<()> {
 
     // Load the Ed25519 key manager
     let ed25519_keys_file =
-        crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::default_keys_file()?;
+        crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::default_keys_file()?;
     let mut ed25519_manager =
-        crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::load_from_file(
+        crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::load_from_file(
             &ed25519_keys_file,
         )?;
 

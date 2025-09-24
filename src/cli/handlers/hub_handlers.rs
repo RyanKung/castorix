@@ -18,24 +18,12 @@ pub async fn handle_hub_command(
                 Err(e) => println!("❌ Failed to get user data: {e}"),
             }
         }
-        HubCommands::Cast {
-            text: _,
-            fid: _,
-            parent_cast_id: _,
-        } => {
-            println!("❌ Cast submission not yet implemented with new protobuf structure");
-            println!("💡 This feature will be re-implemented in a future update");
-        }
         HubCommands::SubmitProof {
             proof_file,
             fid,
             wallet_name,
         } => {
             handle_submit_proof(hub_client, proof_file, fid, wallet_name).await?;
-        }
-        HubCommands::VerifyEth { fid: _, address: _ } => {
-            println!("❌ Ethereum verification not yet implemented with new protobuf structure");
-            println!("💡 This feature will be re-implemented in a future update");
         }
         HubCommands::EthAddresses { fid } => {
             println!("🔍 Getting Ethereum addresses for FID: {fid}");

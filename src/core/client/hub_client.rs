@@ -223,9 +223,10 @@ impl FarcasterClient {
     ) -> Result<HubResponse> {
         // Load encrypted Ed25519 key manager
         let keys_file =
-            crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::default_keys_file()?;
+            crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::default_keys_file(
+            )?;
         let ed25519_manager =
-            crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::load_from_file(
+            crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::load_from_file(
                 &keys_file,
             )?;
 
@@ -235,7 +236,7 @@ impl FarcasterClient {
         }
 
         // Prompt for password
-        let password = crate::encrypted_ed25519_key_manager::prompt_password(&format!(
+        let password = crate::core::crypto::encrypted_storage::prompt_password(&format!(
             "Enter password for FID {fid}: "
         ))?;
 
@@ -694,9 +695,10 @@ impl FarcasterClient {
     async fn get_ed25519_private_key_for_fid(&self, fid: u64) -> Result<Vec<u8>> {
         // Load encrypted Ed25519 key manager
         let keys_file =
-            crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::default_keys_file()?;
+            crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::default_keys_file(
+            )?;
         let ed25519_manager =
-            crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::load_from_file(
+            crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::load_from_file(
                 &keys_file,
             )?;
 
@@ -706,7 +708,7 @@ impl FarcasterClient {
         }
 
         // Prompt for password
-        let password = crate::encrypted_ed25519_key_manager::prompt_password(&format!(
+        let password = crate::core::crypto::encrypted_storage::prompt_password(&format!(
             "Enter password for FID {fid}: "
         ))?;
 
@@ -1025,9 +1027,9 @@ impl FarcasterClient {
 pub async fn get_ed25519_public_key_for_fid(fid: u64) -> Result<String> {
     // Load encrypted Ed25519 key manager
     let keys_file =
-        crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::default_keys_file()?;
+        crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::default_keys_file()?;
     let ed25519_manager =
-        crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::load_from_file(
+        crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::load_from_file(
             &keys_file,
         )?;
 

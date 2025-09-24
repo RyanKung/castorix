@@ -469,21 +469,6 @@ pub enum HubCommands {
         fid: u64,
     },
 
-    /// 📝 Submit a cast
-    ///
-    /// Post a new cast to Farcaster. Can be a standalone cast or a reply.
-    /// Requires a loaded wallet for authentication.
-    ///
-    /// Example: castorix hub cast "Hello Farcaster!" 12345
-    Cast {
-        /// Cast text content
-        text: String,
-        /// Farcaster ID (your FID)
-        fid: u64,
-        /// Parent cast ID for replies (format: "fid:hash")
-        parent_cast_id: Option<String>,
-    },
-
     /// 📤 Submit username proof
     ///
     /// Submit a previously created username proof to Farcaster Hub.
@@ -502,19 +487,6 @@ pub enum HubCommands {
         /// Wallet name for encrypted key (optional, uses PRIVATE_KEY if not specified)
         #[arg(long)]
         wallet_name: Option<String>,
-    },
-
-    /// 🔗 Submit Ethereum address verification
-    ///
-    /// Submit a verification to link your Ethereum address to your Farcaster account.
-    /// This proves ownership of the address and enables ENS integration.
-    ///
-    /// Example: castorix hub verify-eth 12345 0x1234...
-    VerifyEth {
-        /// Farcaster ID (your FID)
-        fid: u64,
-        /// Ethereum address to verify
-        address: String,
     },
 
     /// 🔍 Get Ethereum addresses for a FID

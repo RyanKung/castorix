@@ -110,7 +110,10 @@ async fn test_payment_wallet_api_interface() -> Result<()> {
                     println!("✅ Payment wallet API call succeeded (unexpected but valid)");
                 }
                 ContractResult::Error(error_msg) => {
-                    println!("⚠️  Payment wallet API call failed as expected: {}", error_msg);
+                    println!(
+                        "⚠️  Payment wallet API call failed as expected: {}",
+                        error_msg
+                    );
                     // This is expected due to insufficient funds or other test environment issues
                 }
             }
@@ -135,9 +138,19 @@ async fn test_wallet_address_validation() -> Result<()> {
     let wallet2 = LocalWallet::new(&mut OsRng);
 
     // Test that generated wallets have valid addresses
-    assert!(!wallet1.address().is_zero(), "Wallet 1 should have valid address");
-    assert!(!wallet2.address().is_zero(), "Wallet 2 should have valid address");
-    assert_ne!(wallet1.address(), wallet2.address(), "Wallets should be different");
+    assert!(
+        !wallet1.address().is_zero(),
+        "Wallet 1 should have valid address"
+    );
+    assert!(
+        !wallet2.address().is_zero(),
+        "Wallet 2 should have valid address"
+    );
+    assert_ne!(
+        wallet1.address(),
+        wallet2.address(),
+        "Wallets should be different"
+    );
 
     // Test address formatting
     let addr1_str = format!("{:?}", wallet1.address());
@@ -176,8 +189,12 @@ async fn test_storage_price_calculations() -> Result<()> {
         match client.get_storage_price(units).await {
             Ok(price) => {
                 println!("   {} units: {} ETH", units, price);
-                assert!(!price.is_zero(), "Price for {} units should not be zero", units);
-                
+                assert!(
+                    !price.is_zero(),
+                    "Price for {} units should not be zero",
+                    units
+                );
+
                 // Price should generally increase with more units
                 // (though this might not always be true due to rounding)
                 if units > 1 {
@@ -214,16 +231,14 @@ async fn test_error_handling_invalid_parameters() -> Result<()> {
         .rent_storage_with_payment_wallet(0u64, 1u64, payment_wallet.clone())
         .await
     {
-        Ok(result) => {
-            match result {
-                ContractResult::Success(_) => {
-                    println!("⚠️  Zero FID accepted (unexpected)");
-                }
-                ContractResult::Error(error_msg) => {
-                    println!("✅ Zero FID rejected as expected: {}", error_msg);
-                }
+        Ok(result) => match result {
+            ContractResult::Success(_) => {
+                println!("⚠️  Zero FID accepted (unexpected)");
             }
-        }
+            ContractResult::Error(error_msg) => {
+                println!("✅ Zero FID rejected as expected: {}", error_msg);
+            }
+        },
         Err(e) => {
             println!("✅ Zero FID rejected as expected: {}", e);
         }
@@ -234,16 +249,14 @@ async fn test_error_handling_invalid_parameters() -> Result<()> {
         .rent_storage_with_payment_wallet(999999u64, 0u64, payment_wallet.clone())
         .await
     {
-        Ok(result) => {
-            match result {
-                ContractResult::Success(_) => {
-                    println!("⚠️  Zero units accepted (unexpected)");
-                }
-                ContractResult::Error(error_msg) => {
-                    println!("✅ Zero units rejected as expected: {}", error_msg);
-                }
+        Ok(result) => match result {
+            ContractResult::Success(_) => {
+                println!("⚠️  Zero units accepted (unexpected)");
             }
-        }
+            ContractResult::Error(error_msg) => {
+                println!("✅ Zero units rejected as expected: {}", error_msg);
+            }
+        },
         Err(e) => {
             println!("✅ Zero units rejected as expected: {}", e);
         }

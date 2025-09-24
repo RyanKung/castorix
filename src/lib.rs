@@ -18,8 +18,6 @@ pub mod cli;
 pub mod consts;
 pub mod core;
 pub mod ed25519_key_manager;
-pub mod encrypted_ed25519_key_manager;
-pub mod encrypted_eth_key_manager;
 pub mod encrypted_key_manager;
 pub mod ens_proof;
 pub mod farcaster;

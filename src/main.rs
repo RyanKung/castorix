@@ -87,10 +87,6 @@ async fn main() -> Result<()> {
                     let hub_client = FarcasterClient::read_only(hub_url);
                     CliHandler::handle_hub_command(action, &hub_client).await?;
                 }
-                _ => {
-                    println!("❌ Hub command requires a wallet.");
-                    println!("💡 Please use 'castorix key load <key-name>' to load an encrypted key first");
-                }
             }
         }
         Commands::Custody { action } => {

@@ -263,7 +263,9 @@ async fn handle_storage_rent(
             payment_wallet.address(),
             custody_wallet.address()
         );
-        contract_client.rent_storage_with_payment_wallet(fid, units as u64, Arc::new(payment_wallet)).await?
+        contract_client
+            .rent_storage_with_payment_wallet(fid, units as u64, Arc::new(payment_wallet))
+            .await?
     } else {
         println!("💳 Using custody wallet for both authorization and payment");
         contract_client.rent_storage(fid, units as u64).await?

@@ -2,7 +2,6 @@ use std::str::FromStr;
 
 use anyhow::Context;
 use anyhow::Result;
-use ethers::prelude::*;
 use ethers::types::Address;
 
 use crate::core::crypto::key_manager::KeyManager;
@@ -49,15 +48,14 @@ impl EnsProof {
     ///
     /// # Returns
     /// * `Result<Address>` - The resolved address or an error
-    pub async fn resolve_ens(&self, _domain: &str) -> Result<Address> {
-        let _provider = Provider::<Http>::try_from(&self.rpc_url)
-            .with_context(|| "Failed to create provider")?;
-
-        // Simple ENS resolution using the standard ENS resolver
-        // In a real implementation, you would use the ENS contract
-        // For now, we'll return a placeholder
-        Address::from_str("0x0000000000000000000000000000000000000000")
-            .with_context(|| "Failed to parse address")
+    pub async fn resolve_ens(&self, domain: &str) -> Result<Address> {
+        // Use the Base ENS implementation for resolution
+        match self.query_base_ens_contract(domain).await? {
+            Some(address_str) => {
+                Address::from_str(&address_str).with_context(|| "Failed to parse resolved address")
+            }
+            None => Err(anyhow::anyhow!("Domain not found: {}", domain)),
+        }
     }
 
     /// Create a username proof for an ENS domain

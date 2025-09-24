@@ -34,8 +34,8 @@ async fn handle_hub_key_list() -> Result<()> {
     println!("\n🔐 Ed25519 Keys (Signer Keys)");
     println!("{}", "-".repeat(30));
     
-    let ed25519_keys_file = crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::default_keys_file()?;
-    let ed25519_manager = crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::load_from_file(&ed25519_keys_file)?;
+    let ed25519_keys_file = crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::default_keys_file()?;
+    let ed25519_manager = crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::load_from_file(&ed25519_keys_file)?;
     
     let ed25519_keys = ed25519_manager.list_keys();
     if ed25519_keys.is_empty() {
@@ -77,8 +77,8 @@ async fn handle_hub_key_list() -> Result<()> {
     println!("\n🔐 Ethereum Keys (Custody Keys)");
     println!("{}", "-".repeat(30));
     
-    let eth_keys_file = crate::encrypted_eth_key_manager::EncryptedEthKeyManager::default_keys_file()?;
-    let eth_manager = crate::encrypted_eth_key_manager::EncryptedEthKeyManager::load_from_file(&eth_keys_file)?;
+    let eth_keys_file = crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::default_keys_file()?;
+    let eth_manager = crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::load_from_file(&eth_keys_file)?;
     
     let eth_keys = eth_manager.list_keys();
     if eth_keys.is_empty() {
@@ -150,8 +150,8 @@ async fn handle_hub_key_generate(fid: u64) -> Result<()> {
         return Ok(());
     }
     
-    let keys_file = crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::default_keys_file()?;
-    let mut manager = crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::load_from_file(&keys_file)?;
+    let keys_file = crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::default_keys_file()?;
+    let mut manager = crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::load_from_file(&keys_file)?;
     
     match manager.generate_and_encrypt(fid, &password).await {
         Ok(_) => {
@@ -189,8 +189,8 @@ async fn handle_hub_key_import(fid: u64) -> Result<()> {
         return Ok(());
     }
     
-    let keys_file = crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::default_keys_file()?;
-    let mut manager = crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::load_from_file(&keys_file)?;
+    let keys_file = crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::default_keys_file()?;
+    let mut manager = crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::load_from_file(&keys_file)?;
     
     match manager.import_and_encrypt(fid, &private_key, &password).await {
         Ok(_) => {
@@ -219,8 +219,8 @@ async fn handle_hub_key_delete(fid: u64) -> Result<()> {
     let mut deleted_any = false;
     
     // Delete Ed25519 key
-    let ed25519_keys_file = crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::default_keys_file()?;
-    let mut ed25519_manager = crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::load_from_file(&ed25519_keys_file)?;
+    let ed25519_keys_file = crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::default_keys_file()?;
+    let mut ed25519_manager = crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::load_from_file(&ed25519_keys_file)?;
     
     match ed25519_manager.remove_key(fid) {
         Ok(_) => {
@@ -237,8 +237,8 @@ async fn handle_hub_key_delete(fid: u64) -> Result<()> {
     }
     
     // Delete Ethereum key
-    let eth_keys_file = crate::encrypted_eth_key_manager::EncryptedEthKeyManager::default_keys_file()?;
-    let mut eth_manager = crate::encrypted_eth_key_manager::EncryptedEthKeyManager::load_from_file(&eth_keys_file)?;
+    let eth_keys_file = crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::default_keys_file()?;
+    let mut eth_manager = crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::load_from_file(&eth_keys_file)?;
     
     match eth_manager.remove_key(fid) {
         Ok(_) => {
@@ -270,8 +270,8 @@ async fn handle_hub_key_info(fid: u64) -> Result<()> {
     // Prompt for password
     let password = crate::encrypted_ed25519_key_manager::prompt_password(&format!("Enter password for FID {}: ", fid))?;
     
-    let keys_file = crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::default_keys_file()?;
-    let manager = crate::encrypted_ed25519_key_manager::EncryptedEd25519KeyManager::load_from_file(&keys_file)?;
+    let keys_file = crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::default_keys_file()?;
+    let manager = crate::core::crypto::encrypted_storage::EncryptedEd25519KeyManager::load_from_file(&keys_file)?;
     
     match manager.get_verifying_key(fid, &password) {
         Ok(public_key) => {
@@ -291,8 +291,8 @@ async fn handle_hub_key_from_mnemonic(fid: u64) -> Result<()> {
     println!("{}", "=".repeat(60));
     
     // Check if key already exists
-    let eth_keys_file = crate::encrypted_eth_key_manager::EncryptedEthKeyManager::default_keys_file()?;
-    let mut eth_manager = crate::encrypted_eth_key_manager::EncryptedEthKeyManager::load_from_file(&eth_keys_file)?;
+    let eth_keys_file = crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::default_keys_file()?;
+    let mut eth_manager = crate::core::crypto::encrypted_storage::EncryptedEthKeyManager::load_from_file(&eth_keys_file)?;
     
     let eth_exists = eth_manager.has_key(fid);
     

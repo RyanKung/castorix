@@ -21,7 +21,7 @@ async fn test_payment_wallet_cli_integration() -> Result<()> {
 
     // Setup test environment
     let test_dir = "./test_payment_wallet_integration";
-    
+
     // Clean up any existing test directory
     let _ = std::fs::remove_dir_all(test_dir);
     std::fs::create_dir_all(test_dir)?;
@@ -29,20 +29,23 @@ async fn test_payment_wallet_cli_integration() -> Result<()> {
     // Generate test wallets
     let custody_wallet = LocalWallet::new(&mut OsRng);
     let payment_wallet = LocalWallet::new(&mut OsRng);
-    
+
     println!("   Custody wallet: {}", custody_wallet.address());
     println!("   Payment wallet: {}", payment_wallet.address());
 
     // Test 1: Generate encrypted custody wallet
     println!("🔐 Testing custody wallet generation...");
     let custody_private_key = format!("{:x}", custody_wallet.signer().to_bytes());
-    
+
     let mut cmd = Command::new("./target/aarch64-apple-darwin/debug/castorix");
     let output = cmd
         .args([
-            "--path", test_dir,
-            "key", "generate-encrypted",
-            "--wallet", "custody_wallet"
+            "--path",
+            test_dir,
+            "key",
+            "generate-encrypted",
+            "--wallet",
+            "custody_wallet",
         ])
         .env("PRIVATE_KEY", &custody_private_key)
         .output()?;
@@ -58,13 +61,16 @@ async fn test_payment_wallet_cli_integration() -> Result<()> {
     // Test 2: Generate encrypted payment wallet
     println!("💳 Testing payment wallet generation...");
     let payment_private_key = format!("{:x}", payment_wallet.signer().to_bytes());
-    
+
     let mut cmd = Command::new("./target/aarch64-apple-darwin/debug/castorix");
     let output = cmd
         .args([
-            "--path", test_dir,
-            "key", "generate-encrypted",
-            "--wallet", "payment_wallet"
+            "--path",
+            test_dir,
+            "key",
+            "generate-encrypted",
+            "--wallet",
+            "payment_wallet",
         ])
         .env("PRIVATE_KEY", &payment_private_key)
         .output()?;
@@ -80,9 +86,7 @@ async fn test_payment_wallet_cli_integration() -> Result<()> {
     // Test 3: List wallets to verify both exist
     println!("📋 Testing wallet listing...");
     let mut cmd = Command::new("./target/aarch64-apple-darwin/debug/castorix");
-    let output = cmd
-        .args(["--path", test_dir, "key", "list"])
-        .output()?;
+    let output = cmd.args(["--path", test_dir, "key", "list"]).output()?;
 
     if !output.status.success() {
         panic!(
@@ -107,10 +111,8 @@ async fn test_payment_wallet_cli_integration() -> Result<()> {
     let mut cmd = Command::new("./target/aarch64-apple-darwin/debug/castorix");
     let output = cmd
         .args([
-            "--path", test_dir,
-            "storage", "price",
-            "999999", // Test FID
-            "--units", "3"
+            "--path", test_dir, "storage", "price", "999999", // Test FID
+            "--units", "3",
         ])
         .output()?;
 
@@ -133,12 +135,16 @@ async fn test_payment_wallet_cli_integration() -> Result<()> {
     let mut cmd = Command::new("./target/aarch64-apple-darwin/debug/castorix");
     let output = cmd
         .args([
-            "--path", test_dir,
-            "storage", "rent",
+            "--path",
+            test_dir,
+            "storage",
+            "rent",
             "999999", // Test FID
-            "--units", "1",
-            "--payment-wallet", "payment_wallet",
-            "--dry-run"
+            "--units",
+            "1",
+            "--payment-wallet",
+            "payment_wallet",
+            "--dry-run",
         ])
         .output()?;
 
@@ -176,7 +182,7 @@ async fn test_payment_wallet_error_scenarios() -> Result<()> {
 
     // Setup test environment
     let test_dir = "./test_payment_wallet_errors";
-    
+
     // Clean up any existing test directory
     let _ = std::fs::remove_dir_all(test_dir);
     std::fs::create_dir_all(test_dir)?;
@@ -184,14 +190,17 @@ async fn test_payment_wallet_error_scenarios() -> Result<()> {
     // Generate test wallet
     let custody_wallet = LocalWallet::new(&mut OsRng);
     let custody_private_key = format!("{:x}", custody_wallet.signer().to_bytes());
-    
+
     // Create only custody wallet
     let mut cmd = Command::new("./target/aarch64-apple-darwin/debug/castorix");
     let output = cmd
         .args([
-            "--path", test_dir,
-            "key", "generate-encrypted",
-            "--wallet", "custody_wallet"
+            "--path",
+            test_dir,
+            "key",
+            "generate-encrypted",
+            "--wallet",
+            "custody_wallet",
         ])
         .env("PRIVATE_KEY", &custody_private_key)
         .output()?;
@@ -208,12 +217,16 @@ async fn test_payment_wallet_error_scenarios() -> Result<()> {
     let mut cmd = Command::new("./target/aarch64-apple-darwin/debug/castorix");
     let output = cmd
         .args([
-            "--path", test_dir,
-            "storage", "rent",
+            "--path",
+            test_dir,
+            "storage",
+            "rent",
             "999999",
-            "--units", "1",
-            "--payment-wallet", "non_existent_wallet",
-            "--dry-run"
+            "--units",
+            "1",
+            "--payment-wallet",
+            "non_existent_wallet",
+            "--dry-run",
         ])
         .output()?;
 
@@ -224,9 +237,9 @@ async fn test_payment_wallet_error_scenarios() -> Result<()> {
 
     let error_output = String::from_utf8_lossy(&output.stderr);
     assert!(
-        error_output.contains("not found") || 
-        error_output.contains("error") || 
-        error_output.contains("failed"),
+        error_output.contains("not found")
+            || error_output.contains("error")
+            || error_output.contains("failed"),
         "Should show error for non-existent payment wallet"
     );
     println!("✅ Non-existent payment wallet correctly rejected");
@@ -236,12 +249,16 @@ async fn test_payment_wallet_error_scenarios() -> Result<()> {
     let mut cmd = Command::new("./target/aarch64-apple-darwin/debug/castorix");
     let output = cmd
         .args([
-            "--path", test_dir,
-            "storage", "rent",
+            "--path",
+            test_dir,
+            "storage",
+            "rent",
             "999999",
-            "--units", "1",
-            "--payment-wallet", "custody_wallet",
-            "--dry-run"
+            "--units",
+            "1",
+            "--payment-wallet",
+            "custody_wallet",
+            "--dry-run",
         ])
         .output()?;
 
@@ -280,7 +297,7 @@ async fn test_payment_wallet_different_fid_scenarios() -> Result<()> {
 
     // Setup test environment
     let test_dir = "./test_payment_wallet_fid";
-    
+
     // Clean up any existing test directory
     let _ = std::fs::remove_dir_all(test_dir);
     std::fs::create_dir_all(test_dir)?;
@@ -288,17 +305,20 @@ async fn test_payment_wallet_different_fid_scenarios() -> Result<()> {
     // Generate test wallets
     let custody_wallet = LocalWallet::new(&mut OsRng);
     let payment_wallet = LocalWallet::new(&mut OsRng);
-    
+
     let custody_private_key = format!("{:x}", custody_wallet.signer().to_bytes());
     let payment_private_key = format!("{:x}", payment_wallet.signer().to_bytes());
-    
+
     // Create both wallets
     let mut cmd = Command::new("./target/aarch64-apple-darwin/debug/castorix");
     let output = cmd
         .args([
-            "--path", test_dir,
-            "key", "generate-encrypted",
-            "--wallet", "custody_wallet"
+            "--path",
+            test_dir,
+            "key",
+            "generate-encrypted",
+            "--wallet",
+            "custody_wallet",
         ])
         .env("PRIVATE_KEY", &custody_private_key)
         .output()?;
@@ -310,9 +330,12 @@ async fn test_payment_wallet_different_fid_scenarios() -> Result<()> {
     let mut cmd = Command::new("./target/aarch64-apple-darwin/debug/castorix");
     let output = cmd
         .args([
-            "--path", test_dir,
-            "key", "generate-encrypted",
-            "--wallet", "payment_wallet"
+            "--path",
+            test_dir,
+            "key",
+            "generate-encrypted",
+            "--wallet",
+            "payment_wallet",
         ])
         .env("PRIVATE_KEY", &payment_private_key)
         .output()?;
@@ -326,16 +349,11 @@ async fn test_payment_wallet_different_fid_scenarios() -> Result<()> {
 
     for fid in test_fids {
         println!("🔍 Testing FID: {}", fid);
-        
+
         // Test storage price query for this FID
         let mut cmd = Command::new("./target/aarch64-apple-darwin/debug/castorix");
         let output = cmd
-            .args([
-                "--path", test_dir,
-                "storage", "price",
-                fid,
-                "--units", "1"
-            ])
+            .args(["--path", test_dir, "storage", "price", fid, "--units", "1"])
             .output()?;
 
         if !output.status.success() {
@@ -349,19 +367,24 @@ async fn test_payment_wallet_different_fid_scenarios() -> Result<()> {
         let output_str = String::from_utf8_lossy(&output.stdout);
         assert!(
             output_str.contains("Price") || output_str.contains("price"),
-            "Price information should be displayed for FID {}", fid
+            "Price information should be displayed for FID {}",
+            fid
         );
 
         // Test storage rental dry run for this FID
         let mut cmd = Command::new("./target/aarch64-apple-darwin/debug/castorix");
         let output = cmd
             .args([
-                "--path", test_dir,
-                "storage", "rent",
+                "--path",
+                test_dir,
+                "storage",
+                "rent",
                 fid,
-                "--units", "1",
-                "--payment-wallet", "payment_wallet",
-                "--dry-run"
+                "--units",
+                "1",
+                "--payment-wallet",
+                "payment_wallet",
+                "--dry-run",
             ])
             .output()?;
 
@@ -376,7 +399,8 @@ async fn test_payment_wallet_different_fid_scenarios() -> Result<()> {
         let output_str = String::from_utf8_lossy(&output.stdout);
         assert!(
             output_str.contains("payment wallet") || output_str.contains("Payment wallet"),
-            "Payment wallet should be mentioned for FID {}", fid
+            "Payment wallet should be mentioned for FID {}",
+            fid
         );
 
         println!("✅ FID {} tests passed", fid);
