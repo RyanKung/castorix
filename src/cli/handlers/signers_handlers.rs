@@ -644,7 +644,7 @@ async fn handle_add_signer(
     }
 
     // Prompt for Ed25519 key password
-    let ed25519_password = crate::encrypted_key_manager::prompt_password(&format!(
+    let ed25519_password = crate::core::crypto::encrypted_storage::prompt_password(&format!(
         "Enter password to encrypt Ed25519 key for FID {fid}: "
     ))?;
 
@@ -1392,8 +1392,9 @@ async fn handle_signers_import(fid: u64) -> Result<()> {
     };
 
     // Prompt for password
-    let password =
-        crate::encrypted_key_manager::prompt_password("Enter password to encrypt the key: ")?;
+    let password = crate::core::crypto::encrypted_storage::prompt_password(
+        "Enter password to encrypt the key: ",
+    )?;
 
     // Create the encrypted Ed25519 key manager
     let mut encrypted_manager =
