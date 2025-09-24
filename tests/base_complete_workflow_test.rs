@@ -93,18 +93,29 @@ async fn start_local_base_anvil() -> Option<std::process::Child> {
     // Start anvil directly instead of through cargo to avoid blocking
     let anvil_process = Command::new("anvil")
         .args([
-            "--host", "127.0.0.1",
-            "--port", "8546",
-            "--accounts", "10",
-            "--balance", "10000",
-            "--gas-limit", "30000000",
-            "--gas-price", "1000000000",
-            "--chain-id", "8453", // Base mainnet chain ID
-            "--fork-url", "https://mainnet.base.org",
-            "--retries", "3",
-            "--timeout", "10000",
-            "--block-time", "1", // Fast mode
-            "--silent"
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "8546",
+            "--accounts",
+            "10",
+            "--balance",
+            "10000",
+            "--gas-limit",
+            "30000000",
+            "--gas-price",
+            "1000000000",
+            "--chain-id",
+            "8453", // Base mainnet chain ID
+            "--fork-url",
+            "https://mainnet.base.org",
+            "--retries",
+            "3",
+            "--timeout",
+            "10000",
+            "--block-time",
+            "1", // Fast mode
+            "--silent",
         ])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
@@ -525,7 +536,9 @@ async fn test_base_configuration_validation() {
     println!("🔧 Testing Base Configuration Validation...");
 
     // Test that start-node base command works
-    let output = Command::new("cargo").args(["run", "--bin", "start-node", "base"]).output();
+    let output = Command::new("cargo")
+        .args(["run", "--bin", "start-node", "base"])
+        .output();
 
     match output {
         Ok(output) => {
