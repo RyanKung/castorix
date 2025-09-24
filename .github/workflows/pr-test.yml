@@ -245,25 +245,69 @@ jobs:
           
           # Start Optimism Anvil node
           echo "Starting Optimism Anvil node on port 8545..."
-          anvil --fork-url "https://mainnet.optimism.io" --port 8545 --host 0.0.0.0 --block-time 1 --retries 3 --timeout 10000 &
+          nohup anvil --fork-url "https://mainnet.optimism.io" --port 8545 --host 0.0.0.0 --block-time 1 --retries 3 --timeout 10000 > anvil_optimism.log 2>&1 &
           OPTIMISM_PID=$!
           echo "OPTIMISM_PID=$OPTIMISM_PID" >> $GITHUB_ENV
           
           # Start Base Anvil node  
           echo "Starting Base Anvil node on port 8546..."
-          anvil --fork-url "https://base-rpc.publicnode.com" --port 8546 --host 0.0.0.0 --block-time 1 --retries 3 --timeout 10000 &
+          nohup anvil --fork-url "https://base-rpc.publicnode.com" --port 8546 --host 0.0.0.0 --block-time 1 --retries 3 --timeout 10000 > anvil_base.log 2>&1 &
           BASE_PID=$!
           echo "BASE_PID=$BASE_PID" >> $GITHUB_ENV
           
-          # Wait for nodes to start
-          sleep 10
+          # Wait for nodes to start and verify they're ready
+          echo "Waiting for Anvil nodes to be ready..."
+          sleep 15
           
-          # Verify nodes are running
+          # Retry verification with multiple attempts
           echo "Verifying Anvil nodes are running..."
-          curl -s -X POST -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}' http://127.0.0.1:8545 > /dev/null && echo "✅ Optimism Anvil is running" || echo "❌ Optimism Anvil failed to start"
-          curl -s -X POST -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}' http://127.0.0.1:8546 > /dev/null && echo "✅ Base Anvil is running" || echo "❌ Base Anvil failed to start"
+          for i in {1..5}; do
+            echo "Verification attempt $i/5..."
+            
+            OPTIMISM_RUNNING=false
+            BASE_RUNNING=false
+            
+            if curl -s -X POST -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}' http://127.0.0.1:8545 | grep -q "result"; then
+              echo "✅ Optimism Anvil is running"
+              OPTIMISM_RUNNING=true
+            else
+              echo "❌ Optimism Anvil not ready yet (attempt $i)"
+            fi
+            
+            if curl -s -X POST -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}' http://127.0.0.1:8546 | grep -q "result"; then
+              echo "✅ Base Anvil is running"
+              BASE_RUNNING=true
+            else
+              echo "❌ Base Anvil not ready yet (attempt $i)"
+            fi
+            
+            if [ "$OPTIMISM_RUNNING" = true ] && [ "$BASE_RUNNING" = true ]; then
+              echo "✅ Both Anvil nodes are running and ready!"
+              break
+            fi
+            
+            if [ $i -lt 5 ]; then
+              echo "Waiting 5 more seconds before retry..."
+              sleep 5
+            fi
+          done
           
-          echo "✅ Anvil nodes started successfully"
+          # Final check - fail if nodes are not ready
+          if ! curl -s -X POST -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}' http://127.0.0.1:8545 | grep -q "result"; then
+            echo "❌ Optimism Anvil failed to start after all attempts"
+            echo "Optimism Anvil log:"
+            cat anvil_optimism.log || echo "No log file found"
+            exit 1
+          fi
+          
+          if ! curl -s -X POST -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}' http://127.0.0.1:8546 | grep -q "result"; then
+            echo "❌ Base Anvil failed to start after all attempts"
+            echo "Base Anvil log:"
+            cat anvil_base.log || echo "No log file found"
+            exit 1
+          fi
+          
+          echo "✅ Anvil nodes started successfully and verified"
 
       - name: Run comprehensive integration tests
         run: |

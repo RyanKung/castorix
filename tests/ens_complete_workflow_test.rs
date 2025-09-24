@@ -32,10 +32,57 @@ async fn test_complete_ens_workflow() {
 
     if use_pre_started {
         println!("🔧 Using pre-started Anvil nodes (CI environment)");
+        println!(
+            "🔍 Checking for RUNNING_TESTS environment variable: {}",
+            std::env::var("RUNNING_TESTS").unwrap_or_else(|_| "not set".to_string())
+        );
+
         // Verify Anvil is running on expected ports
         if !verify_anvil_running().await {
+            println!("❌ Pre-started Anvil node verification failed");
+            println!("🔍 Debugging information:");
+            println!("  - Checking port 8545...");
+
+            // Try to get more detailed error information
+            let curl_output = Command::new("curl")
+                .args([
+                    "-v",
+                    "-s",
+                    "-X",
+                    "POST",
+                    "-H",
+                    "Content-Type: application/json",
+                    "-d",
+                    r#"{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}"#,
+                    "http://127.0.0.1:8545",
+                ])
+                .output();
+
+            match curl_output {
+                Ok(output) => {
+                    println!("  - Curl exit status: {}", output.status);
+                    println!(
+                        "  - Curl stdout: {}",
+                        String::from_utf8_lossy(&output.stdout)
+                    );
+                    println!(
+                        "  - Curl stderr: {}",
+                        String::from_utf8_lossy(&output.stderr)
+                    );
+                }
+                Err(e) => {
+                    println!("  - Curl failed to execute: {}", e);
+                }
+            }
+
             panic!(
-                "❌ Pre-started Anvil node not available - integration test cannot proceed without blockchain node."
+                "❌ Pre-started Anvil node not available - integration test cannot proceed without blockchain node.\n\
+                \n\
+                Debug info:\n\
+                - RUNNING_TESTS env var: {}\n\
+                - Expected Anvil on port 8545\n\
+                - Check workflow logs for Anvil startup errors",
+                std::env::var("RUNNING_TESTS").unwrap_or_else(|_| "not set".to_string())
             );
         }
         println!("✅ Pre-started Anvil node is running");
