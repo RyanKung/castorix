@@ -47,8 +47,7 @@ async fn test_farcaster_contracts_connectivity() -> Result<()> {
             );
         }
         Err(e) => {
-            println!("❌ Contract verification failed: {}", e);
-            return Err(e);
+            panic!("❌ Contract verification failed: {}. This is a critical test failure - contract connectivity is required for testing.", e);
         }
     }
 
@@ -181,8 +180,7 @@ async fn test_complete_farcaster_flow() -> Result<()> {
             println!("   Block Number: {}", result.block_number);
         }
         Err(e) => {
-            println!("❌ Contract verification failed: {}", e);
-            return Err(e);
+            panic!("❌ Contract verification failed: {}. This is a critical test failure - contract connectivity is required for testing.", e);
         }
     }
 
@@ -456,8 +454,7 @@ async fn test_complete_farcaster_contracts() -> Result<()> {
             );
         }
         Err(e) => {
-            println!("❌ Contract verification failed: {}", e);
-            return Err(e);
+            panic!("❌ Contract verification failed: {}. This is a critical test failure - contract connectivity is required for testing.", e);
         }
     }
 

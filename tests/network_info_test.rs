@@ -27,8 +27,7 @@ async fn test_network_info_retrieval() -> Result<()> {
             println!("   ✅ Chain ID: {}", chain_id);
         }
         Err(e) => {
-            println!("   ❌ Chain ID failed: {}", e);
-            return Err(e.into());
+            panic!("❌ Chain ID failed: {}. This is a critical test failure - basic RPC connectivity is required.", e);
         }
     }
 
@@ -39,8 +38,7 @@ async fn test_network_info_retrieval() -> Result<()> {
             println!("   ✅ Block Number: {}", block_number);
         }
         Err(e) => {
-            println!("   ❌ Block Number failed: {}", e);
-            return Err(e.into());
+            panic!("❌ Block Number failed: {}. This is a critical test failure - basic RPC connectivity is required.", e);
         }
     }
 
@@ -51,8 +49,7 @@ async fn test_network_info_retrieval() -> Result<()> {
             println!("   ✅ Gas Price: {} wei", gas_price);
         }
         Err(e) => {
-            println!("   ❌ Gas Price failed: {}", e);
-            return Err(e.into());
+            panic!("❌ Gas Price failed: {}. This is a critical test failure - basic RPC connectivity is required.", e);
         }
     }
 
@@ -75,8 +72,7 @@ async fn test_network_info_retrieval() -> Result<()> {
             );
         }
         Err(e) => {
-            println!("   ❌ Combined method failed: {}", e);
-            return Err(e);
+            panic!("❌ Combined method failed: {}. This is a critical test failure - network status retrieval is required for testing.", e);
         }
     }
 
@@ -149,7 +145,7 @@ async fn test_network_info_with_retry() -> Result<()> {
 
     println!("❌ All retry attempts failed");
     if let Some(error) = last_error {
-        return Err(error.into());
+        panic!("❌ All retry attempts failed: {}. This is a critical test failure - network connectivity is required.", error);
     }
 
     Ok(())
@@ -180,8 +176,7 @@ async fn test_basic_rpc_connectivity() -> Result<()> {
             }
         }
         Err(e) => {
-            println!("   ❌ HTTP connection failed: {}", e);
-            return Err(e.into());
+            panic!("❌ HTTP connection failed: {}. This is a critical test failure - basic HTTP connectivity is required.", e);
         }
     }
 
@@ -192,8 +187,7 @@ async fn test_basic_rpc_connectivity() -> Result<()> {
             println!("   ✅ Provider created successfully");
         }
         Err(e) => {
-            println!("   ❌ Provider creation failed: {}", e);
-            return Err(e.into());
+            panic!("❌ Provider creation failed: {}. This is a critical test failure - provider creation is required.", e);
         }
     }
 

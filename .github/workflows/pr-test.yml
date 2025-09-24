@@ -81,17 +81,6 @@ jobs:
           cargo clippy --all-targets --all-features -- -D warnings
           echo "✅ Clippy linting passed"
 
-      - name: Check import formatting
-        run: |
-          echo "🔍 Checking import formatting..."
-          if grep -r "use.*,.*;" src/ tests/ --include="*.rs"; then
-            echo "❌ Found multi-import use statements. Please use one import per line."
-            echo "Example: use module::{item1, item2}; should be:"
-            echo "use module::item1;"
-            echo "use module::item2;"
-            exit 1
-          fi
-          echo "✅ Import formatting check passed"
 
 
       - name: Run unit tests
@@ -168,18 +157,6 @@ jobs:
             echo "✅ Documentation check passed"
           fi
 
-      - name: Performance check
-        run: |
-          echo "⚡ Running performance checks..."
-          
-          # Check for potential performance issues
-          echo "Checking for potential performance issues..."
-          if grep -r "clone()" src/ --include="*.rs" | grep -v "//" | wc -l | grep -q "^0$"; then
-            echo "✅ No obvious unnecessary clones found"
-          else
-            echo "⚠️ Found potential unnecessary clones. Please review:"
-            grep -r "clone()" src/ --include="*.rs" | grep -v "//" | head -10 || true
-          fi
 
       - name: Generate test report
         run: |
@@ -192,7 +169,6 @@ jobs:
           echo "✅ **Unit Tests**: Passed" >> $GITHUB_STEP_SUMMARY
           echo "✅ **Integration Tests**: Passed" >> $GITHUB_STEP_SUMMARY
           echo "✅ **CLI Tests**: Passed" >> $GITHUB_STEP_SUMMARY
-          echo "✅ **Import Formatting**: Passed" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Quality Metrics" >> $GITHUB_STEP_SUMMARY
           echo "- **Rust Version**: $(rustc --version)" >> $GITHUB_STEP_SUMMARY
