@@ -96,9 +96,22 @@ async fn test_complete_farcaster_workflow() {
 
 /// Start local Anvil node
 async fn start_local_anvil() -> Option<std::process::Child> {
-    // First try to start using our start-node binary
-    let output = Command::new("cargo")
-        .args(["run", "--bin", "start-node", "op", "--fast"])
+    // Start anvil directly with Optimism fork configuration
+    let output = Command::new("anvil")
+        .args([
+            "--host", "127.0.0.1",
+            "--port", "8545",
+            "--accounts", "10",
+            "--balance", "10000",
+            "--gas-limit", "30000000",
+            "--gas-price", "1000000000",
+            "--chain-id", "10",
+            "--fork-url", "https://mainnet.optimism.io",
+            "--retries", "3",
+            "--timeout", "10000",
+            "--block-time", "1",
+            "--silent",
+        ])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn();
@@ -109,7 +122,7 @@ async fn start_local_anvil() -> Option<std::process::Child> {
             Some(child)
         }
         Err(e) => {
-            println!("❌ Failed to start Anvil via start-node: {}", e);
+            println!("❌ Failed to start Anvil: {}", e);
 
             // Fallback: try to start anvil directly
             println!("🔄 Trying direct anvil startup...");
