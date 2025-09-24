@@ -90,29 +90,33 @@ async fn test_complete_base_workflow() {
 
 /// Start local Base Anvil node for testing
 async fn start_local_base_anvil() -> Option<std::process::Child> {
-    let output = Command::new("cargo")
-        .args(["start-node", "base", "--fast"])
-        .output();
+    // Start anvil directly instead of through cargo to avoid blocking
+    let anvil_process = Command::new("anvil")
+        .args([
+            "--host", "127.0.0.1",
+            "--port", "8546",
+            "--accounts", "10",
+            "--balance", "10000",
+            "--gas-limit", "30000000",
+            "--gas-price", "1000000000",
+            "--chain-id", "8453", // Base mainnet chain ID
+            "--fork-url", "https://mainnet.base.org",
+            "--retries", "3",
+            "--timeout", "10000",
+            "--block-time", "1", // Fast mode
+            "--silent"
+        ])
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn();
 
-    match output {
-        Ok(output) => {
-            if output.status.success() {
-                println!("✅ Base Anvil process started");
-                // Return a dummy child process since cargo start-base-node is a one-shot command
-                Some(
-                    std::process::Command::new("sleep")
-                        .arg("1")
-                        .spawn()
-                        .expect("Failed to spawn dummy process"),
-                )
-            } else {
-                let stderr = String::from_utf8_lossy(&output.stderr);
-                println!("❌ Failed to start Base Anvil: {}", stderr);
-                None
-            }
+    match anvil_process {
+        Ok(child) => {
+            println!("✅ Base Anvil process started with PID: {}", child.id());
+            Some(child)
         }
         Err(e) => {
-            println!("❌ Failed to execute start-base-node command: {}", e);
+            println!("❌ Failed to start Base Anvil: {}", e);
             None
         }
     }
@@ -244,12 +248,10 @@ async fn test_base_ens_resolution(test_data_dir: &str, domain: &str) {
                         .find(|l| l.contains("Address:") || l.contains("0x"))
                         .unwrap_or("N/A")
                 );
-                // Note: Resolution might fail on local Anvil, but the command should still work
+                // Since we're forking mainnet, ENS resolution should succeed
                 assert!(
-                    stdout.contains("Address:")
-                        || stdout.contains("Error:")
-                        || stdout.contains("Failed"),
-                    "Base ENS resolution should show address or error: {}",
+                    stdout.contains("Address:") || stdout.contains("Resolved to:"),
+                    "Base ENS resolution should succeed with fork - got: {}",
                     stdout
                 );
             } else {
@@ -523,7 +525,7 @@ async fn test_base_configuration_validation() {
     println!("🔧 Testing Base Configuration Validation...");
 
     // Test that start-node base command works
-    let output = Command::new("cargo").args(["start-node", "base"]).output();
+    let output = Command::new("cargo").args(["run", "--bin", "start-node", "base"]).output();
 
     match output {
         Ok(output) => {
