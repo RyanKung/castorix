@@ -23,7 +23,8 @@ pub async fn handle_fid_command(command: FidCommands, storage_path: Option<&str>
             dry_run,
             yes,
         } => {
-            handle_fid_register(wallet, extra_storage, recovery, dry_run, yes, storage_path).await?;
+            handle_fid_register(wallet, extra_storage, recovery, dry_run, yes, storage_path)
+                .await?;
         }
         FidCommands::Price { extra_storage } => {
             handle_fid_price(extra_storage).await?;

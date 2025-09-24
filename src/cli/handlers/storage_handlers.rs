@@ -85,7 +85,9 @@ async fn handle_storage_rent(
         use crate::encrypted_key_manager::EncryptedKeyManager;
 
         let mut manager = if let Some(path) = storage_path {
-            EncryptedKeyManager::new(path)
+            // Construct the keys directory path
+            let keys_path = std::path::Path::new(path).join("keys");
+            EncryptedKeyManager::new(&keys_path.to_string_lossy())
         } else {
             EncryptedKeyManager::default_config()
         };
@@ -140,7 +142,9 @@ async fn handle_storage_rent(
     let payment_wallet = if let Some(payment_wallet_name) = payment_wallet_name {
         // Use specified payment wallet
         let mut manager = if let Some(path) = storage_path {
-            EncryptedKeyManager::new(path)
+            // Construct the keys directory path
+            let keys_path = std::path::Path::new(path).join("keys");
+            EncryptedKeyManager::new(&keys_path.to_string_lossy())
         } else {
             EncryptedKeyManager::default_config()
         };
