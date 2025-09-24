@@ -18,7 +18,6 @@ use rand::rngs::OsRng;
 /// Simple Farcaster test that can be run directly with cargo test
 #[tokio::test]
 async fn test_farcaster_contracts_connectivity() -> Result<()> {
-
     println!("🌟 Testing Farcaster contracts connectivity...");
 
     // Use local Anvil configuration

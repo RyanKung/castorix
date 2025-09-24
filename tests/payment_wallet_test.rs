@@ -12,7 +12,6 @@ use rand::rngs::OsRng;
 /// Test separate payment wallet functionality
 #[tokio::test]
 async fn test_separate_payment_wallet_functionality() -> Result<()> {
-
     println!("💳 Testing separate payment wallet functionality...");
 
     // Use local Anvil configuration
@@ -67,7 +66,6 @@ async fn test_separate_payment_wallet_functionality() -> Result<()> {
 /// Test payment wallet API with mock scenario
 #[tokio::test]
 async fn test_payment_wallet_api_interface() -> Result<()> {
-
     println!("🔌 Testing payment wallet API interface...");
 
     // Use local Anvil configuration
@@ -158,7 +156,6 @@ async fn test_wallet_address_validation() -> Result<()> {
 /// Test storage price calculations
 #[tokio::test]
 async fn test_storage_price_calculations() -> Result<()> {
-
     println!("💰 Testing storage price calculations...");
 
     // Use local Anvil configuration

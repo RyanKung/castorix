@@ -144,7 +144,6 @@ impl SimpleWalletClient {
 
 #[tokio::test]
 async fn test_simple_local_transaction() -> Result<()> {
-
     println!("🚀 Testing simple local transaction...");
 
     let config = SimpleTestConfig::for_local_test();
@@ -168,7 +167,6 @@ async fn test_simple_local_transaction() -> Result<()> {
 
 #[tokio::test]
 async fn test_network_connectivity() -> Result<()> {
-
     println!("🌐 Testing network connectivity...");
 
     let config = SimpleTestConfig::for_local_test();

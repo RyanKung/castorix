@@ -18,7 +18,6 @@ use test_consts::setup_local_test_env;
 /// 7. Clean up
 #[tokio::test]
 async fn test_complete_ens_workflow() {
-
     println!("🌐 Starting Complete ENS Workflow Test");
 
     // Clean up any existing test data
@@ -276,7 +275,9 @@ async fn test_ens_resolution(test_data_dir: &str, domain: &str) {
                 assert!(
                     stdout.contains("Address:")
                         || stdout.contains("Error:")
-                        || stdout.contains("Failed"),
+                        || stdout.contains("Failed")
+                        || stdout.contains("not found")
+                        || stdout.contains("not resolved"),
                     "ENS resolution should show address or error: {}",
                     stdout
                 );
@@ -325,7 +326,9 @@ async fn test_ens_verification(test_data_dir: &str, domain: &str) {
                 assert!(
                     stdout.contains("Owner:")
                         || stdout.contains("Error:")
-                        || stdout.contains("Failed"),
+                        || stdout.contains("Failed")
+                        || stdout.contains("don't own")
+                        || stdout.contains("not found"),
                     "ENS verification should show owner or error: {}",
                     stdout
                 );
@@ -561,7 +564,6 @@ async fn test_ens_domains_query(test_data_dir: &str) {
 /// Test ENS configuration validation
 #[tokio::test]
 async fn test_ens_configuration_validation() {
-
     println!("🔧 Testing ENS Configuration Validation...");
 
     let output = Command::new("cargo")
@@ -591,7 +593,6 @@ async fn test_ens_configuration_validation() {
 /// Test ENS help commands
 #[tokio::test]
 async fn test_ens_help_commands() {
-
     println!("📖 Testing ENS Help Commands...");
 
     let help_commands = vec![

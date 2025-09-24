@@ -8,7 +8,6 @@ use test_consts::setup_placeholder_test_env;
 /// Tests the CLI functionality using cargo run
 #[tokio::test]
 async fn test_simple_cli_functionality() {
-
     println!("🚀 Starting Simple CLI Test");
 
     // Set up demo test environment

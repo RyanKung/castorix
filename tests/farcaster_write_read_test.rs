@@ -177,7 +177,6 @@ impl WriteReadTestClient {
 
     /// Test basic transaction sending and verification
     pub async fn test_basic_transaction_write_read(&self) -> Result<()> {
-
         println!("💸 Testing Basic Transaction Write-Read Flow...");
 
         // 1. Read initial state
@@ -261,7 +260,6 @@ impl WriteReadTestClient {
 
     /// Test contract call with write-read verification
     pub async fn test_contract_call_write_read(&self) -> Result<()> {
-
         println!("📋 Testing Contract Call Write-Read Flow...");
 
         // 1. Read initial contract state
@@ -326,7 +324,6 @@ impl WriteReadTestClient {
 
     /// Test network state changes
     pub async fn test_network_state_write_read(&self) -> Result<()> {
-
         println!("🌐 Testing Network State Write-Read Flow...");
 
         // 1. Read initial network state
@@ -386,7 +383,6 @@ impl WriteReadTestClient {
 
     /// Test complete write-read flow
     pub async fn test_complete_write_read_flow(&self) -> Result<()> {
-
         println!("🌟 Testing Complete Write-Read Flow...");
 
         // Test all write-read operations (in order to avoid nonce conflicts)

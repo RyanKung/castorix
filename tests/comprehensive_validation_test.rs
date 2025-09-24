@@ -19,7 +19,6 @@ use test_consts::setup_local_test_env;
 /// 7. Validates cleanup operations
 #[tokio::test]
 async fn test_comprehensive_cli_validation() {
-
     println!("🔬 Starting Comprehensive CLI Validation Test");
 
     let test_data_dir = "./test_validation_data";

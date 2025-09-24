@@ -55,4 +55,3 @@ pub fn reset_test_env() {
     env::remove_var("ETH_BASE_RPC_URL");
     env::remove_var("FARCASTER_HUB_URL");
 }
-

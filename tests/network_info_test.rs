@@ -7,7 +7,6 @@ use ethers::providers::Provider;
 /// Test network info retrieval specifically
 #[tokio::test]
 async fn test_network_info_retrieval() -> Result<()> {
-
     println!("🌐 Testing network info retrieval...");
 
     let rpc_url = "http://127.0.0.1:8545";
@@ -80,7 +79,6 @@ async fn test_network_info_retrieval() -> Result<()> {
 /// Test network info with retry logic
 #[tokio::test]
 async fn test_network_info_with_retry() -> Result<()> {
-
     println!("🔄 Testing network info with retry logic...");
 
     let rpc_url = "http://127.0.0.1:8545";
@@ -146,7 +144,6 @@ async fn test_network_info_with_retry() -> Result<()> {
 /// Test basic RPC connectivity
 #[tokio::test]
 async fn test_basic_rpc_connectivity() -> Result<()> {
-
     println!("🔗 Testing basic RPC connectivity...");
 
     let rpc_url = "http://127.0.0.1:8545";
@@ -187,7 +184,6 @@ async fn test_basic_rpc_connectivity() -> Result<()> {
 /// Test network info with custom timeout
 #[tokio::test]
 async fn test_network_info_with_timeout() -> Result<()> {
-
     println!("⏱️  Testing network info with custom timeout...");
 
     let rpc_url = "http://127.0.0.1:8545";

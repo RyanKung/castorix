@@ -42,7 +42,6 @@ fn get_castorix_binary() -> String {
 /// 6. Clean up
 #[tokio::test]
 async fn test_cli_integration_workflow() {
-
     println!("🚀 Starting CLI Integration Test");
 
     // Step 1: Start local Anvil node
