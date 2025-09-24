@@ -68,8 +68,6 @@ fn start_op_node(fast: bool) {
         "10", // Optimism mainnet chain ID
         "--fork-url",
         &fork_url,
-        "--fork-block-number",
-        "latest", // Always start from latest block
         "--retries",
         "3",
         "--timeout",
@@ -129,8 +127,6 @@ fn start_base_node(fast: bool) {
         "8453", // Base mainnet chain ID
         "--fork-url",
         &fork_url,
-        "--fork-block-number",
-        "latest", // Always start from latest block
         "--retries",
         "3",
         "--timeout",
