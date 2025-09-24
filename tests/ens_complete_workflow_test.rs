@@ -9,7 +9,7 @@ use test_consts::setup_local_test_env;
 /// Complete ENS workflow integration test
 ///
 /// This test covers the full ENS workflow:
-/// 1. Start local Anvil node (if available)
+/// 1. Start local Anvil node (REQUIRED - no downgrade)
 /// 2. Generate encrypted private key
 /// 3. Test ENS domain resolution
 /// 4. Test ENS domain verification
@@ -24,26 +24,20 @@ async fn test_complete_ens_workflow() {
     let test_data_dir = "./test_ens_data";
     let _ = std::fs::remove_dir_all(test_data_dir);
 
-    // Step 1: Try to start local Anvil node (skip if not available in CI)
-    println!("📡 Attempting to start local Anvil node...");
+    // Step 1: Start local Anvil node (REQUIRED - no downgrade allowed)
+    println!("📡 Starting local Anvil node...");
     let anvil_handle = start_local_anvil().await;
 
-    let _use_local_node = if let Some(_) = anvil_handle {
-        // Give Anvil time to start
-        thread::sleep(Duration::from_secs(3));
-        
-        // Verify Anvil is running
-        if verify_anvil_running().await {
-            println!("✅ Anvil is running");
-            true
-        } else {
-            println!("⚠️ Anvil started but not responding, using mainnet RPC");
-            false
-        }
-    } else {
-        println!("⚠️ Anvil not available, using mainnet RPC");
-        false
-    };
+    // Give Anvil time to start
+    thread::sleep(Duration::from_secs(3));
+
+    // Verify Anvil is running - FAIL if not available
+    if !verify_anvil_running().await {
+        panic!(
+            "❌ Anvil failed to start - integration test cannot proceed without blockchain node. This test requires a local Anvil node to function properly."
+        );
+    }
+    println!("✅ Anvil is running");
 
     // Set up local test environment
     setup_local_test_env();
@@ -80,7 +74,7 @@ async fn test_complete_ens_workflow() {
     let _ = std::fs::remove_dir_all(test_data_dir);
     println!("🗑️ Cleaned up test data directory");
 
-    // Stop Anvil if we started it
+    // Stop Anvil
     if let Some(mut handle) = anvil_handle {
         let _ = handle.kill();
         println!("🛑 Stopped local Anvil node");
@@ -91,19 +85,15 @@ async fn test_complete_ens_workflow() {
 
 /// Start local Anvil node for testing
 async fn start_local_anvil() -> Option<std::process::Child> {
-    // Check if Anvil is available
-    let check_output = Command::new("which")
-        .arg("anvil")
-        .output();
-    
+    // Check if Anvil is available - FAIL if not found
+    let check_output = Command::new("which").arg("anvil").output();
+
     if let Ok(output) = check_output {
         if !output.status.success() {
-            println!("⚠️ Anvil not found in PATH, skipping local node setup");
-            return None;
+            panic!("❌ Anvil not found in PATH - this test requires Anvil to be installed and available");
         }
     } else {
-        println!("⚠️ Cannot check for Anvil availability, skipping local node setup");
-        return None;
+        panic!("❌ Cannot check for Anvil availability - this test requires Anvil to be installed and available");
     }
 
     let output = Command::new("anvil")
@@ -133,8 +123,7 @@ async fn start_local_anvil() -> Option<std::process::Child> {
             Some(child)
         }
         Err(e) => {
-            println!("⚠️ Failed to start Anvil: {} (this is expected in some CI environments)", e);
-            None
+            panic!("❌ Failed to start Anvil: {} - this test requires Anvil to start successfully", e);
         }
     }
 }
