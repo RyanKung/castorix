@@ -1,0 +1,34 @@
+---
+name: rust-standards
+description: Rust coding standards and best practices for Castorix
+globs:
+  - 'src/**/*.rs'
+  - 'tests/**/*.rs'
+  - 'benches/**/*.rs'
+priority: 2
+---
+
+# Rust Standards
+
+## Code Formatting
+- Always run `cargo fmt` before committing
+- Use `cargo clippy` with `-D warnings` flag
+- Follow standard Rust naming conventions (snake_case for functions/variables, PascalCase for types)
+
+## Testing
+- Write comprehensive unit tests for all public functions
+- Use `get_castorix_binary()` helper for integration tests
+- Ensure cross-platform compatibility in tests
+- Run `cargo test --all-features` before committing
+
+## Error Handling
+- Use `anyhow::Result<T>` for error handling
+- Provide meaningful error messages
+- Log errors appropriately using the `log` crate
+- Handle network errors gracefully
+
+## Performance
+- Avoid unnecessary allocations
+- Use `&str` instead of `String` when possible
+- Consider using `Cow<str>` for string handling
+- Profile performance-critical code
