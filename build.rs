@@ -27,6 +27,7 @@ fn main() {
     codegen.out_dir(out_dir);
     codegen.include("proto/snapchain");
 
+    // Add all proto files at once to ensure proper dependency resolution
     for proto_file in &proto_files {
         if Path::new(proto_file).exists() {
             println!("cargo:info=Adding proto file: {}", proto_file);
