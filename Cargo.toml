@@ -39,6 +39,11 @@ exclude = [
 name = "castorix"
 path = "src/lib.rs"
 
+# Binary configuration
+[[bin]]
+name = "castorix"
+path = "src/main.rs"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
@@ -71,6 +76,11 @@ bip39 = "2.0"
 lazy_static = "1.4.0"
 image = "0.24"
 viuer = "0.6"
+# MCP (Model Context Protocol) dependencies
+async-trait = "0.1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+thiserror = "1.0"
 
 [dev-dependencies]
 ethers = { version = "2.0", features = ["rustls", "abigen", "ws", "dev-rpc"] }

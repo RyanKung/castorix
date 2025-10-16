@@ -6,6 +6,7 @@ use crate::cli::types::EnsCommands;
 use crate::cli::types::FidCommands;
 use crate::cli::types::HubCommands;
 use crate::cli::types::KeyCommands;
+use crate::cli::types::McpCommands;
 use crate::cli::types::SignersCommands;
 use crate::cli::types::StorageCommands;
 
@@ -121,6 +122,14 @@ pub enum Commands {
     Storage {
         #[command(subcommand)]
         action: StorageCommands,
+    },
+    /// 🔌 MCP (Model Context Protocol) server
+    ///
+    /// Run MCP server to expose Farcaster query capabilities to AI assistants.
+    /// This allows tools like Claude Desktop to query Farcaster data through natural language.
+    Mcp {
+        #[command(subcommand)]
+        action: McpCommands,
     },
 }
 

@@ -615,6 +615,86 @@ impl FarcasterClient {
         self.key_manager.as_ref()
     }
 
+    /// Get casts by FID
+    ///
+    /// # Arguments
+    /// * `fid` - The Farcaster ID
+    /// * `limit` - Maximum number of casts to retrieve (0 for all, default: 100)
+    ///
+    /// # Returns
+    /// * `Result<Vec<serde_json::Value>>` - List of casts or an error
+    pub async fn get_casts_by_fid(&self, fid: u64, limit: u32) -> Result<Vec<serde_json::Value>> {
+        let mut all_casts = Vec::new();
+        let mut page_token: Option<String> = None;
+        let page_size = if limit > 0 && limit < 100 { limit } else { 100 };
+        let mut total_retrieved = 0;
+
+        loop {
+            let mut url = format!(
+                "{}/v1/castsByFid?fid={}&pageSize={}&reverse=true",
+                self.hub_url, fid, page_size
+            );
+
+            if let Some(ref token) = page_token {
+                url.push_str(&format!("&pageToken={}", token));
+            }
+
+            let response = self
+                .client
+                .get(&url)
+                .send()
+                .await
+                .with_context(|| "Failed to get casts from Farcaster Hub")?;
+
+            let status = response.status();
+            let response_text = response.text().await?;
+
+            if status.is_success() {
+                let data: serde_json::Value = serde_json::from_str(&response_text)
+                    .with_context(|| "Failed to parse casts response")?;
+
+                if let Some(messages) = data.get("messages").and_then(|m| m.as_array()) {
+                    let page_casts = messages.clone();
+                    let page_count = page_casts.len();
+
+                    // Check if we would exceed the limit
+                    if limit > 0 && total_retrieved + page_count as u32 > limit {
+                        let remaining = limit - total_retrieved;
+                        let mut truncated = page_casts;
+                        truncated.truncate(remaining as usize);
+                        all_casts.extend(truncated);
+                        break;
+                    }
+
+                    all_casts.extend(page_casts);
+                    total_retrieved = all_casts.len() as u32;
+
+                    // Check for next page
+                    if let Some(next_token) = data.get("nextPageToken").and_then(|t| t.as_str()) {
+                        if !next_token.is_empty() && (limit == 0 || total_retrieved < limit) {
+                            page_token = Some(next_token.to_string());
+                        } else {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                } else {
+                    break;
+                }
+            } else {
+                return Err(anyhow::anyhow!(
+                    "Farcaster Hub returned error {}: {}",
+                    status,
+                    response_text
+                ));
+            }
+        }
+
+        // No need to reverse since API returns in reverse order when reverse=true
+        Ok(all_casts)
+    }
+
     /// Get signers for a FID
     ///
     /// # Arguments

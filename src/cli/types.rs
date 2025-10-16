@@ -1,5 +1,17 @@
 use clap::Subcommand;
 
+/// MCP server commands
+#[derive(Subcommand)]
+pub enum McpCommands {
+    /// Start MCP server in stdio mode
+    ///
+    /// Run the MCP server to expose Farcaster query tools to AI assistants.
+    /// The server communicates via JSON-RPC 2.0 over stdin/stdout.
+    ///
+    /// Example: castorix mcp serve
+    Serve,
+}
+
 #[derive(Subcommand)]
 pub enum KeyCommands {
     /// 📋 Show wallet information
@@ -610,6 +622,28 @@ pub enum HubCommands {
     ///
     /// Example: castorix hub spam-stat
     SpamStat,
+
+    /// 📝 Get casts (posts) for a FID
+    ///
+    /// Retrieve recent casts posted by a specific Farcaster ID.
+    /// This returns the most recent casts with their content, timestamps, and metadata.
+    /// Use --limit to control how many casts to retrieve (0 for all available).
+    /// This is a read-only operation that doesn't require authentication.
+    ///
+    /// Example: castorix hub casts 12345
+    /// Example: castorix hub casts 12345 --limit 10
+    /// Example: castorix hub casts 12345 --limit 0  # Get all casts
+    /// Example: castorix hub casts 12345 --json     # Show full JSON data
+    Casts {
+        /// Farcaster ID (FID) to get casts for
+        fid: u64,
+        /// Maximum number of casts to retrieve (0 for all, default: 20)
+        #[arg(long, default_value = "20")]
+        limit: u32,
+        /// Show full JSON data structure instead of formatted output
+        #[arg(long)]
+        json: bool,
+    },
 }
 
 /// FID (Farcaster ID) registration and management commands

@@ -22,4 +22,5 @@ pub mod encrypted_key_manager;
 pub mod ens_proof;
 pub mod farcaster;
 pub mod image_display;
+pub mod mcp;
 pub mod username_proofs;

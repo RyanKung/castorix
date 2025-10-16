@@ -324,6 +324,7 @@ impl EncryptedKeyManager {
 
         let hash = password_hash.hash.unwrap();
         let key_bytes = hash.as_bytes();
+        #[allow(deprecated)]
         let key = Key::<Aes256Gcm>::from_slice(&key_bytes[..32]);
 
         // Generate nonce
@@ -366,12 +367,14 @@ impl EncryptedKeyManager {
 
         let hash = password_hash.hash.unwrap();
         let key_bytes = hash.as_bytes();
+        #[allow(deprecated)]
         let key = Key::<Aes256Gcm>::from_slice(&key_bytes[..32]);
 
         // Decode nonce and encrypted data
         let nonce_bytes = general_purpose::STANDARD
             .decode(&encrypted_data.nonce)
             .with_context(|| "Failed to decode nonce")?;
+        #[allow(deprecated)]
         let nonce = Nonce::from_slice(&nonce_bytes);
 
         let encrypted_key = general_purpose::STANDARD

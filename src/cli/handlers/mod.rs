@@ -3,6 +3,7 @@ pub mod ens_handlers;
 pub mod fid_handlers;
 pub mod hub_handlers;
 pub mod key_handlers;
+pub mod mcp_handlers;
 pub mod signers_handlers;
 pub mod storage_handlers;
 
@@ -14,6 +15,7 @@ use crate::cli::types::FidCommands;
 use crate::cli::types::HubCommands;
 use crate::cli::types::HubKeyCommands;
 use crate::cli::types::KeyCommands;
+use crate::cli::types::McpCommands;
 use crate::cli::types::SignersCommands;
 use crate::cli::types::StorageCommands;
 
@@ -83,5 +85,10 @@ impl CliHandler {
         storage_path: Option<&str>,
     ) -> Result<()> {
         storage_handlers::handle_storage_command(command, storage_path).await
+    }
+
+    /// Handle MCP server commands
+    pub async fn handle_mcp_command(command: McpCommands, hub_url: String) -> Result<()> {
+        mcp_handlers::handle_mcp_command(command, hub_url).await
     }
 }

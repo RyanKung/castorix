@@ -78,7 +78,8 @@ async fn main() -> Result<()> {
                 | HubCommands::Profile { .. }
                 | HubCommands::Stats { .. }
                 | HubCommands::Spam { .. }
-                | HubCommands::SpamStat => {
+                | HubCommands::SpamStat
+                | HubCommands::Casts { .. } => {
                     let hub_client = FarcasterClient::read_only(hub_url);
                     CliHandler::handle_hub_command(action, &hub_client).await?;
                 }
@@ -114,6 +115,10 @@ async fn main() -> Result<()> {
         }
         Commands::Storage { action } => {
             CliHandler::handle_storage_command(action, cli.path.as_deref()).await?;
+        }
+        Commands::Mcp { action } => {
+            let hub_url = consts::get_config().farcaster_hub_url().to_string();
+            CliHandler::handle_mcp_command(action, hub_url).await?;
         }
     }
 

@@ -10,5 +10,6 @@ pub use types::EnsCommands;
 pub use types::FidCommands;
 pub use types::HubCommands;
 pub use types::KeyCommands;
+pub use types::McpCommands;
 pub use types::SignersCommands;
 pub use types::StorageCommands;

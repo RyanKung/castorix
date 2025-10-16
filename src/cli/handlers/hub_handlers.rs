@@ -105,6 +105,9 @@ pub async fn handle_hub_command(
         HubCommands::SpamStat => {
             handle_spam_stat(hub_client).await?;
         }
+        HubCommands::Casts { fid, limit, json } => {
+            handle_casts(hub_client, fid, limit, json).await?;
+        }
     }
     Ok(())
 }
@@ -791,6 +794,136 @@ async fn handle_spam_stat(
     }
 
     println!("\n✅ Spam statistics retrieved successfully!");
+
+    Ok(())
+}
+
+async fn handle_casts(
+    hub_client: &crate::core::client::hub_client::FarcasterClient,
+    fid: u64,
+    limit: u32,
+    show_json: bool,
+) -> Result<()> {
+    let limit_text = if limit == 0 {
+        "all".to_string()
+    } else {
+        limit.to_string()
+    };
+    println!("📝 Getting casts for FID: {fid} (limit: {limit_text})");
+
+    match hub_client.get_casts_by_fid(fid, limit).await {
+        Ok(casts) => {
+            if casts.is_empty() {
+                println!("❌ No casts found for FID: {fid}");
+            } else if show_json {
+                // Show full JSON structure
+                println!("✅ Found {} cast(s) - showing full JSON:", casts.len());
+                println!("{}", serde_json::to_string_pretty(&casts)?);
+            } else {
+                println!("✅ Found {} cast(s):", casts.len());
+                println!("{}", "─".repeat(80));
+
+                for (i, cast) in casts.iter().enumerate() {
+                    // Extract cast data
+                    let timestamp = cast
+                        .get("data")
+                        .and_then(|d| d.get("timestamp"))
+                        .and_then(|t| t.as_u64())
+                        .unwrap_or(0);
+
+                    let cast_body = cast
+                        .get("data")
+                        .and_then(|d| d.get("castAddBody"))
+                        .or_else(|| cast.get("data").and_then(|d| d.get("castBody")));
+
+                    let text = cast_body
+                        .and_then(|cb| cb.get("text"))
+                        .and_then(|t| t.as_str())
+                        .unwrap_or("");
+
+                    let hash = cast
+                        .get("hash")
+                        .and_then(|h| h.as_str())
+                        .unwrap_or("unknown");
+
+                    let signer = cast
+                        .get("signer")
+                        .and_then(|s| s.as_str())
+                        .unwrap_or("unknown");
+
+                    // Format timestamp (convert Farcaster epoch to Unix timestamp)
+                    // Farcaster epoch starts at 2021-01-01 00:00:00 UTC
+                    const FARCASTER_EPOCH: u64 = 1609459200; // January 1, 2021 UTC in seconds
+                    let unix_timestamp = timestamp + FARCASTER_EPOCH;
+                    let date_time = chrono::DateTime::from_timestamp(unix_timestamp as i64, 0)
+                        .map(|dt| dt.format("%Y-%m-%d %H:%M:%S").to_string())
+                        .unwrap_or_else(|| "Unknown".to_string());
+
+                    // Extract embeds if available
+                    let embeds = cast_body
+                        .and_then(|cb| cb.get("embeds"))
+                        .and_then(|e| e.as_array());
+
+                    let embed_count = embeds.map(|e| e.len()).unwrap_or(0);
+
+                    // Extract mentions if available
+                    let mentions = cast_body
+                        .and_then(|cb| cb.get("mentions"))
+                        .and_then(|m| m.as_array());
+
+                    let mention_count = mentions.map(|m| m.len()).unwrap_or(0);
+
+                    // Extract client info if available (some Hubs/APIs may include this)
+                    let client_info =
+                        cast.get("via")
+                            .or_else(|| cast.get("client"))
+                            .and_then(|c| c.as_str())
+                            .or_else(|| {
+                                // Check for client info in embeds
+                                embeds.and_then(|e| {
+                                    e.iter().find_map(|embed| {
+                                        embed.get("url").and_then(|u| u.as_str()).filter(|url| {
+                                            url.contains("client") || url.contains("via")
+                                        })
+                                    })
+                                })
+                            });
+
+                    // Display cast
+                    println!("\n{}. Cast at {}", i + 1, date_time);
+                    println!("   Hash: {}", hash);
+                    println!("   Signer: {}", signer);
+                    if let Some(client) = client_info {
+                        println!("   📱 Client: {}", client);
+                    }
+
+                    if !text.is_empty() {
+                        // Truncate long texts for readability
+                        let display_text = if text.len() > 200 {
+                            format!("{}...", &text[..200])
+                        } else {
+                            text.to_string()
+                        };
+                        println!("   Text: {}", display_text);
+                    } else {
+                        println!("   Text: (empty)");
+                    }
+
+                    if embed_count > 0 {
+                        println!("   📎 Embeds: {}", embed_count);
+                    }
+
+                    if mention_count > 0 {
+                        println!("   👥 Mentions: {}", mention_count);
+                    }
+                }
+
+                println!("{}", "─".repeat(80));
+                println!("📊 Total: {} cast(s)", casts.len());
+            }
+        }
+        Err(e) => println!("❌ Failed to get casts: {e}"),
+    }
 
     Ok(())
 }
