@@ -44,9 +44,10 @@ castorix hub submit-proof ./proof_yourname_eth_12345.json 12345 --wallet-name my
 ## 🌟 Feature Highlights
 - 🔐 **Encrypted key vault** — interactive flows keep ECDSA custody wallets under `~/.castorix/keys`
 - 🏷️ **Basename & ENS proofs** — resolve domains, audit Base subdomains, and mint Farcaster-ready username proofs
-- 📡 **Hub power tools** — fetch user graphs, storage stats, custody addresses, and push proof submissions
+- 📡 **Hub power tools** — fetch user graphs, storage stats, custody addresses, casts, and push proof submissions
 - ✍️ **Signer management** — generate Ed25519 keys, register/unregister with dry-run previews, and export safely
 - 🚨 **Spam intelligence** — optional labels from the `merkle-team/labels` dataset bundled as a submodule
+- 🤖 **MCP Server** — expose Farcaster query tools to AI assistants (22 tools for Claude Desktop and more)
 - 🧩 **All-in-one workspace** — Farcaster contract bindings, helper binaries, and a Snapchain node live in the repo
 
 ## 🗂️ Repository Layout
@@ -358,6 +359,29 @@ castorix hub spam 12345
 castorix hub spam-stat
 ```
 
+#### User Content (Casts)
+```bash
+# Get recent casts by FID
+castorix hub casts 12345
+
+# Get specific number of casts
+castorix hub casts 12345 --limit 10
+
+# Get all casts (may take time)
+castorix hub casts 12345 --limit 0
+
+# View full JSON structure
+castorix hub casts 12345 --limit 5 --json
+```
+
+**Displays:**
+- ⏰ Timestamp (formatted UTC)
+- 🔗 Cast hash (unique ID)
+- 🔑 Signer (Ed25519 public key)
+- 📝 Text content
+- 📎 Number of embeds
+- 👥 Number of mentions
+
 #### Proof Submission
 ```bash
 # Submit username proof to hub
@@ -406,6 +430,79 @@ castorix signers delete 0x1234...
 ```
 
 > **Dry Run**: Use `--dry-run` to preview transactions without executing them. Generated signers are encrypted and stored in `~/.castorix/ed25519/`.
+
+### 🤖 MCP Server (AI Assistant Integration)
+
+Castorix includes a Model Context Protocol server that exposes Farcaster query capabilities to AI assistants.
+
+#### Starting the MCP Server
+```bash
+# Start MCP server (communicates via stdio)
+castorix mcp serve
+```
+
+#### Available Tools (22 total)
+
+**Hub Queries (12)**
+- `hub_get_user` - Get user information by FID
+- `hub_get_profile` - Get detailed profile
+- `hub_get_stats` - Get user statistics
+- `hub_get_followers` - Get followers list
+- `hub_get_following` - Get following list
+- `hub_get_eth_addresses` - Get verified Ethereum addresses
+- `hub_get_custody_address` - Get custody address
+- `hub_get_info` - Get Hub sync status
+- `hub_get_ens_domains` - Get verified ENS domains
+- `hub_check_spam` - Check spam status
+- `hub_get_spam_stats` - Get spam statistics
+- `hub_get_casts` - Get user posts/casts
+
+**ENS Tools (3)**
+- `ens_resolve_domain` - Resolve ENS domain to address
+- `ens_check_base_subdomain` - Check Base subdomain
+- `ens_verify_ownership` - Verify domain ownership
+
+**Contract Queries (4)**
+- `fid_get_price` - Get FID registration cost
+- `storage_get_price` - Get storage rental price
+- `fid_check_address` - Check if address has FID
+- `storage_check_units` - Check storage units
+
+**Signer & Custody (3)**
+- `signers_list_local` - List local Ed25519 keys
+- `signers_get_info` - Get signer info
+- `custody_list_local` - List custody keys
+
+#### Claude Desktop Integration
+
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "castorix": {
+      "command": "/path/to/castorix",
+      "args": ["mcp", "serve"],
+      "env": {
+        "FARCASTER_HUB_URL": "https://hub-api.neynar.com",
+        "ETH_RPC_URL": "https://eth-mainnet.g.alchemy.com/v2/YOUR_KEY",
+        "ETH_BASE_RPC_URL": "https://mainnet.base.org",
+        "ETH_OP_RPC_URL": "https://mainnet.optimism.io"
+      }
+    }
+  }
+}
+```
+
+#### Example Queries (in Claude)
+- "Tell me about FID 3"
+- "Show me @dwr's latest 10 casts"
+- "What Ethereum addresses does FID 3 have?"
+- "Resolve vitalik.eth"
+- "Is FID 12345 spam?"
+- "How much does FID registration cost?"
+
+> **Note**: The MCP server communicates via JSON-RPC 2.0 over stdio and is compatible with any MCP-compatible AI assistant.
 
 ### 🧪 Development Helpers
 
