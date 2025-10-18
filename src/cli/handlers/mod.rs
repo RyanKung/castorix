@@ -1,3 +1,4 @@
+pub mod api_handlers;
 pub mod custody_handlers;
 pub mod ens_handlers;
 pub mod fid_handlers;
@@ -9,6 +10,7 @@ pub mod storage_handlers;
 
 use anyhow::Result;
 
+use crate::cli::types::ApiCommands;
 use crate::cli::types::CustodyCommands;
 use crate::cli::types::EnsCommands;
 use crate::cli::types::FidCommands;
@@ -90,5 +92,14 @@ impl CliHandler {
     /// Handle MCP server commands
     pub async fn handle_mcp_command(command: McpCommands, hub_url: String) -> Result<()> {
         mcp_handlers::handle_mcp_command(command, hub_url).await
+    }
+
+    /// Handle API server commands
+    pub async fn handle_api_command(command: ApiCommands) -> Result<()> {
+        match command {
+            ApiCommands::Serve { host, port } => {
+                api_handlers::handle_api_command(host, port).await
+            }
+        }
     }
 }

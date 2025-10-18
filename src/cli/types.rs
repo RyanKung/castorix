@@ -1,5 +1,25 @@
 use clap::Subcommand;
 
+/// API server commands
+#[derive(Subcommand)]
+pub enum ApiCommands {
+    /// Start REST API server
+    ///
+    /// Run the HTTP REST API server to expose Farcaster query capabilities via HTTP endpoints.
+    /// The server provides a traditional RESTful API with /api/* routes.
+    ///
+    /// Example: castorix api serve --port 3000
+    Serve {
+        /// Host to bind to (default: 0.0.0.0)
+        #[arg(long, default_value = "0.0.0.0")]
+        host: String,
+
+        /// Port to bind to (default: 3000)
+        #[arg(long, default_value = "3000")]
+        port: u16,
+    },
+}
+
 /// MCP server commands
 #[derive(Subcommand)]
 pub enum McpCommands {

@@ -1,6 +1,7 @@
 use clap::Parser;
 use clap::Subcommand;
 
+use crate::cli::types::ApiCommands;
 use crate::cli::types::CustodyCommands;
 use crate::cli::types::EnsCommands;
 use crate::cli::types::FidCommands;
@@ -130,6 +131,14 @@ pub enum Commands {
     Mcp {
         #[command(subcommand)]
         action: McpCommands,
+    },
+    /// 🌐 REST API server
+    ///
+    /// Run HTTP REST API server to expose Farcaster query capabilities via HTTP endpoints.
+    /// Provides a traditional RESTful API on /api/* routes.
+    Api {
+        #[command(subcommand)]
+        action: ApiCommands,
     },
 }
 

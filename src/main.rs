@@ -120,6 +120,9 @@ async fn main() -> Result<()> {
             let hub_url = consts::get_config().farcaster_hub_url().to_string();
             CliHandler::handle_mcp_command(action, hub_url).await?;
         }
+        Commands::Api { action } => {
+            CliHandler::handle_api_command(action).await?;
+        }
     }
 
     Ok(())

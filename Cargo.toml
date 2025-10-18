@@ -81,6 +81,10 @@ async-trait = "0.1"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 thiserror = "1.0"
+# REST API dependencies
+axum = "0.7"
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "trace"] }
 
 [dev-dependencies]
 ethers = { version = "2.0", features = ["rustls", "abigen", "ws", "dev-rpc"] }
