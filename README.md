@@ -431,6 +431,67 @@ castorix signers delete 0x1234...
 
 > **Dry Run**: Use `--dry-run` to preview transactions without executing them. Generated signers are encrypted and stored in `~/.castorix/ed25519/`.
 
+### 🌐 REST API Server (HTTP Integration)
+
+Castorix includes a traditional RESTful HTTP API server for web and application integrations.
+
+#### Starting the API Server
+```bash
+# Start on default port (3000)
+castorix api serve
+
+# Start on custom port
+castorix api serve --port 8080
+
+# Start on specific host
+castorix api serve --host 127.0.0.1 --port 3000
+```
+
+#### Available Endpoints
+
+**Health Check:**
+- `GET /health` - Server status
+
+**Hub Endpoints:**
+- `GET /api/hub/users/:fid` - Get user information ✅
+- `GET /api/hub/users/:fid/profile` - Get detailed profile
+- `GET /api/hub/users/:fid/stats` - Get user statistics
+- `GET /api/hub/users/:fid/followers` - Get followers list
+- `GET /api/hub/users/:fid/following` - Get following list
+- `GET /api/hub/users/:fid/addresses` - Get ETH addresses
+- `GET /api/hub/users/:fid/ens` - Get ENS domains
+- `GET /api/hub/users/:fid/custody` - Get custody address
+- `GET /api/hub/users/:fid/casts` - Get user casts
+- `GET /api/hub/spam/:fid` - Check spam status ✅
+- `GET /api/hub/info` - Get hub information
+
+**ENS Endpoints** (requires ETH_RPC_URL):
+- `GET /api/ens/resolve/:domain` - Resolve ENS domain
+- `GET /api/ens/verify/:domain/:address` - Verify ownership
+
+**Contract Endpoints** (requires ETH_OP_RPC_URL):
+- `GET /api/contract/fid/price` - Get FID registration price ✅
+- `GET /api/contract/storage/price/:units` - Get storage price ✅
+- `GET /api/contract/address/:address/fid` - Check address FID ✅
+
+#### Example Usage
+
+```bash
+# Check server health
+curl http://localhost:3000/health
+
+# Get user information
+curl http://localhost:3000/api/hub/users/3
+
+# Check spam status
+curl http://localhost:3000/api/hub/spam/12345
+
+# Get FID registration price
+curl http://localhost:3000/api/contract/fid/price
+```
+
+> **Documentation**: See [API_SERVER.md](API_SERVER.md) for complete API documentation with examples in JavaScript and Python.
+
 ### 🤖 MCP Server (AI Assistant Integration)
 
 Castorix includes a Model Context Protocol server that exposes Farcaster query capabilities to AI assistants.
