@@ -490,7 +490,17 @@ curl http://localhost:3000/api/hub/spam/12345
 curl http://localhost:3000/api/contract/fid/price
 ```
 
-> **Documentation**: See [API_SERVER.md](API_SERVER.md) for complete API documentation with examples in JavaScript and Python.
+#### Security Note
+
+**IMPORTANT**: The REST API is **READ-ONLY** and **NEVER** touches private keys:
+- ✅ Safe to expose to the internet
+- ✅ FarcasterClient initialized with `None` (no key manager)
+- ✅ All endpoints are GET requests (query-only)
+- ❌ No signing operations
+- ❌ No transaction broadcasting
+- ❌ No private key access
+
+All sensitive operations (signing, transactions) are CLI-only and require explicit user interaction.
 
 ### 🤖 MCP Server (AI Assistant Integration)
 

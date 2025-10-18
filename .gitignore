@@ -109,3 +109,7 @@ proof*.json
 fyi.md
 devlog.md
 
+# Documentation - only README.md is allowed
+*.md
+!README.md
+
