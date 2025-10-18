@@ -53,13 +53,22 @@ impl ApiServer {
     }
 
     /// Start the API server
+    ///
+    /// # Security
+    ///
+    /// This API server is designed as a READ-ONLY interface that NEVER touches private keys.
+    /// All clients are initialized without key managers to prevent any signing operations.
+    ///
+    /// The server can safely be exposed to the internet as it only performs query operations.
     pub async fn serve(self) -> Result<()> {
         info!("🚀 Starting Castorix REST API server");
         info!("   Host: {}", self.host);
         info!("   Port: {}", self.port);
         info!("   Hub URL: {}", self.hub_url);
+        info!("🔒 Security: READ-ONLY mode (no private key access)");
 
-        // Create Hub client
+        // SECURITY: Create Hub client WITHOUT key manager (read-only mode)
+        // This ensures the API server can NEVER sign messages or access private keys
         let hub_client = Arc::new(FarcasterClient::new(self.hub_url.clone(), None));
         let hub_state = hub::HubState {
             client: hub_client,
@@ -78,8 +87,9 @@ impl ApiServer {
         };
 
         // Create Contract state if Optimism RPC URL is available
+        // SECURITY: Contract client is for QUERY operations only (no signing)
         let contract_state = if let Some(op_rpc_url) = &self.eth_op_rpc_url {
-            info!("✅ Contract endpoints enabled");
+            info!("✅ Contract endpoints enabled (query-only)");
             let addresses = ContractAddresses::default();
             let client = FarcasterContractClient::new(op_rpc_url.to_string(), addresses)
                 .context("Failed to create contract client")?;

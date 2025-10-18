@@ -4,6 +4,20 @@
 
 The Castorix REST API Server provides a traditional HTTP RESTful API for querying Farcaster protocol data. This is an alternative to the MCP (Model Context Protocol) server, designed for standard web and application integrations.
 
+## 🔒 Security Notice
+
+**IMPORTANT**: This API server is designed as a **READ-ONLY** interface that **NEVER** touches private keys.
+
+- ✅ Safe to expose to the internet
+- ✅ Only performs query operations
+- ✅ No private key access
+- ✅ No signing operations
+- ✅ No transaction broadcasting
+
+All sensitive operations (key generation, signing, transactions) are ONLY available through the CLI tool.
+
+For detailed security information, see [SECURITY_API.md](SECURITY_API.md).
+
 ## Starting the Server
 
 ```bash
